@@ -56,15 +56,27 @@ class ProductAdmin(admin.ModelAdmin):
         "name_product__iexact",
         "name_product__icontains",
     ]
+    readonly_fields = [
+        "get_preview",
+    ]
 
     def get_image(self, obj):
-        try:
-            url_prod = obj.productimage_set.all()[0].image.url
-            return mark_safe(f'<img src={url_prod} width="75"')
-        except:
-            return None
+        return self.get_image_or_preview(obj, preview=False)
 
     get_image.short_description = "ФОТО"
+
+    def get_preview(self, obj):
+        return self.get_image_or_preview(obj, preview=True)
+
+    get_preview.short_description = "ФОТО"
+
+    def get_image_or_preview(self, obj, preview=False):
+        try:
+            url_prod = obj.productimage_set.all()[0].image.url
+            width = 75 if not preview else 300
+            return mark_safe(f'<img src={url_prod} width="{width}"')
+        except:
+            return None
 
 
 class ProductImageAdmin(admin.ModelAdmin):
