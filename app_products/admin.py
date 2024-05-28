@@ -6,7 +6,8 @@ from django.utils.html import format_html
 from django.contrib.admin.widgets import AdminFileWidget
 
 from app_products.models import Products, ProductImage
-from app_products.forms import ProductAdminForm
+
+# from app_products.forms import ProductAdminForm # форма для вывода древовидной структуры категорий
 
 
 class CustomAdminFileWidget(AdminFileWidget):
@@ -36,7 +37,7 @@ class ProductImageInline(admin.StackedInline):
 
 # @admin.register(Products)
 class ProductAdmin(admin.ModelAdmin):
-    form = ProductAdminForm
+    # form = ProductAdminForm   # форма для вывода древовидной структуры категорий
     inlines = [
         ProductImageInline,
     ]
@@ -47,6 +48,9 @@ class ProductAdmin(admin.ModelAdmin):
         "remaining_goods",
         "get_image",
     ]
+    autocomplete_fields = [
+        "category",
+    ]
 
     def get_image(self, obj):
         try:
@@ -54,7 +58,8 @@ class ProductAdmin(admin.ModelAdmin):
             return mark_safe(f'<img src={url_prod} width="75"')
         except:
             return None
-    get_image.short_description = 'ФОТО'
+
+    get_image.short_description = "ФОТО"
 
 
 # @admin.register(ProductImage)

@@ -11,3 +11,6 @@ class CategoryAdmin(DjangoMpttAdmin):
         "name_category",
         "desc_category",
     ]
+    search_fields = [
+        "name_category",
+    ]
