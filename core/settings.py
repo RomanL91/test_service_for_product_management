@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-=*k&zk_*f_9%k7+4z0(1eh1^1&!to*tonwj2cf%x1mf76jmd3w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # my adding apps
+    "rest_framework",
+    "corsheaders",
     "mptt",
     "django_mptt_admin",
     "app_products",
@@ -140,3 +142,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 TIME_ZONE = "Asia/Omsk"
 USE_TZ = True
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 4,
+}
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True

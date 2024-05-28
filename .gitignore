@@ -139,3 +139,4 @@ GitHub.sublime-settings
 migrations
 core/__pycache__/*
 db.sqlite3
+static
