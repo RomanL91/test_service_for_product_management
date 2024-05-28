@@ -3,6 +3,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from app_category.models import Category
+
 
 def valid(value):
     if value < 0:
@@ -14,9 +16,9 @@ def valid(value):
 
 class Products(models.Model):
     # ================= Категории
-    # category = models.ForeignKey(
-    #     Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Категория продукта'
-    # )
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Категория продукта'
+    )
     # ================= Имя, Описание
     name_product = models.CharField(
         verbose_name="Наименование продукта", max_length=150
