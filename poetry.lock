@@ -114,6 +114,57 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-js-asset"
+version = "2.2.0"
+description = "script tag with additional attributes for django.forms.Media"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "django_js_asset-2.2.0-py3-none-any.whl", hash = "sha256:7ef3e858e13d06f10799b56eea62b1e76706f42cf4e709be4e13356bc0ae30d8"},
+    {file = "django_js_asset-2.2.0.tar.gz", hash = "sha256:0c57a82cae2317e83951d956110ce847f58ff0cdc24e314dbc18b35033917e94"},
+]
+
+[package.dependencies]
+django = ">=3.2"
+
+[package.extras]
+tests = ["coverage"]
+
+[[package]]
+name = "django-mptt"
+version = "0.16.0"
+description = "Utilities for implementing Modified Preorder Tree Traversal with your Django Models and working with trees of Model instances."
+category = "main"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "django_mptt-0.16.0-py3-none-any.whl", hash = "sha256:8716849ba3318d94e2e100ed0923a05c1ffdf8195f8472b690dbaf737d2af3b5"},
+    {file = "django_mptt-0.16.0.tar.gz", hash = "sha256:56c9606bf0b329b5f5afd55dd8bfd073612ea1d5999b10903b09de62bee84c8e"},
+]
+
+[package.dependencies]
+django-js-asset = "*"
+
+[package.extras]
+tests = ["coverage[toml]", "mock-django"]
+
+[[package]]
+name = "django-mptt-admin"
+version = "2.6.2"
+description = "Django-mptt-admin provides a nice Django Admin interface for Mptt models"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "django-mptt-admin-2.6.2.tar.gz", hash = "sha256:1b500977fb81051147e1b819b8bfbc0c62316a576c6c016df46a59baa87c3c3f"},
+    {file = "django_mptt_admin-2.6.2-py2.py3-none-any.whl", hash = "sha256:67fc10577455c32ddf223f97485e95f8c35f8c391c772b0bbd47a03aff6593ad"},
+]
+
+[package.dependencies]
+django-mptt = "*"
+
+[[package]]
 name = "djangorestframework"
 version = "3.15.1"
 description = "Web APIs for Django, made easy."
@@ -236,4 +287,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "ef31bd479bd6c6b09cef3f4909320623204e75116fc6dee228ed5ad51b22ac89"
+content-hash = "cc2e6430da8c3fb17193d2e9b94ae2ca805ce9aaf7bfda9486d25678aafd45be"

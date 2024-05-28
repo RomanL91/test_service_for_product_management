@@ -17,7 +17,11 @@ def valid(value):
 class Products(models.Model):
     # ================= Категории
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Категория продукта'
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Категория продукта",
     )
     # ================= Имя, Описание
     name_product = models.CharField(
