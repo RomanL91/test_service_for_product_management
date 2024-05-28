@@ -31,3 +31,14 @@ class Category(MPTTModel):
 
     def __str__(self):
         return self.name_category
+
+
+class Brand(models.Model):
+    name_brand = models.CharField(max_length=100, verbose_name="Название бренда")
+
+    class Meta:
+        verbose_name = "Брэнд"
+        verbose_name_plural = "Брэнды"
+
+    def __str__(self):
+        return self.name_brand

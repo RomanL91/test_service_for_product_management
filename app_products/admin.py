@@ -8,7 +8,7 @@ from django.contrib.admin.widgets import AdminFileWidget
 from app_products.models import Products, ProductImage
 
 # форма для вывода древовидной структуры категорий
-# from app_products.forms import ProductAdminForm 
+# from app_products.forms import ProductAdminForm
 
 
 class CustomAdminFileWidget(AdminFileWidget):
