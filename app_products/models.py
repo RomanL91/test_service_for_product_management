@@ -55,15 +55,20 @@ class Products(models.Model):
         return self.name_product
 
 
-# class ProductImage(models.Model):
-#     image = models.ImageField(verbose_name='Изображение', blank=True, upload_to='product_images/%Y/%m/%d/%H/%M/%S/')
-#     desc = models.TextField(verbose_name='Описание', max_length=1500, blank=True)
-#     product = models.ForeignKey(Products, on_delete=models.CASCADE, verbose_name='Продукт')
+class ProductImage(models.Model):
+    image = models.ImageField(
+        verbose_name="Изображение",
+        blank=True,
+        upload_to="product_images/%Y/%m/%d/%H/%M/%S/",
+    )
+    desc = models.TextField(verbose_name="Описание", max_length=1500, blank=True)
+    product = models.ForeignKey(
+        Products, on_delete=models.CASCADE, verbose_name="Продукт"
+    )
 
-#     class Meta:
-#             verbose_name = 'Изображение'
-#             verbose_name_plural = 'Изображения'
+    class Meta:
+        verbose_name = "Изображение"
+        verbose_name_plural = "Изображения"
 
-
-#     def __str__(self) -> str:
-#         return self.product.name_product
+    def __str__(self) -> str:
+        return self.product.name_product
