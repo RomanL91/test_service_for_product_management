@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from app_category.models import Category
+from app_category.models import Category, Brand
 
 
 def valid(value):
@@ -15,13 +15,20 @@ def valid(value):
 
 
 class Products(models.Model):
-    # ================= Категории
+    # ================= Категории/Брэнд
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         verbose_name="Категория продукта",
+    )
+    brand = models.ForeignKey(
+        Brand,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Брэнд продукта",
     )
     # ================= Имя, Описание
     name_product = models.CharField(
