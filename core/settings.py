@@ -146,7 +146,7 @@ USE_TZ = True
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 4,
+    "PAGE_SIZE": 50,
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
