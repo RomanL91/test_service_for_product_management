@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "mptt",
     "django_mptt_admin",
+    "flat_json_widget",
     "app_products",
     "app_category",
 ]
@@ -75,7 +76,7 @@ TEMPLATES = [
 ]
 
 # WSGI_APPLICATION = "core.wsgi.application"
-ASGI_APPLICATION = 'core.asgi.application'
+ASGI_APPLICATION = "core.asgi.application"
 
 
 # Database

@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "test_service_for_product_management"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 django = "^5.0.6"
 djangorestframework = "^3.15.1"
 black = "^24.4.2"
@@ -16,6 +16,7 @@ django-mptt-admin = "^2.6.2"
 pillow = "^10.3.0"
 django-cors-headers = "^4.3.1"
 uvicorn = "^0.30.0"
+django-flat-json-widget = "^0.2"
 
 
 [build-system]

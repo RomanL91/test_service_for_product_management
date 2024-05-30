@@ -3,7 +3,23 @@ from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
 
 
-class Category(MPTTModel):
+class JSONFieldsMixin(models.Model):
+    def default_additional_data():
+        d = {"RU": "", "EN": "", "KZ": ""}
+        return d
+
+    additional_data = models.JSONField(
+        verbose_name="Дополнительные данные",
+        blank=True,
+        null=True,
+        default=default_additional_data(),
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Category(MPTTModel, JSONFieldsMixin):
     name_category = models.CharField(
         max_length=100,
         verbose_name="Имя категории",
