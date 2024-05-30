@@ -35,7 +35,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
             category["title"] = category["name_category"]  # копируем
             category["label"] = category["name_category"]  # копируем
             category["value"] = category["name_category"]  # копируем
-            category["key"] = category["tree_id"]  # копируем
+            category["key"] = f"{category['level']}-{category['tree_id']}-{category['id']}"  # копируем
             category["children"] = []
             category_map[category["id"]] = category
 
