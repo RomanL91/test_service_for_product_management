@@ -2,8 +2,10 @@ from django.db import models
 
 from mptt.models import MPTTModel, TreeForeignKey
 
+from core.mixins import JSONFieldsMixin
 
-class Category(MPTTModel):
+
+class Category(MPTTModel, JSONFieldsMixin):
     name_category = models.CharField(
         max_length=100,
         verbose_name="Имя категории",
