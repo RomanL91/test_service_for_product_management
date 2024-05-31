@@ -132,9 +132,11 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# ====================================================================
+# ==============================MY ADDING======================================
 import os
 
+LANG_EN = "EN"
+LANG_KZ = "KZ"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
@@ -147,7 +149,7 @@ USE_TZ = True
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 50,
+    "PAGE_SIZE": 1,
 }
 
 CORS_ORIGIN_ALLOW_ALL = True

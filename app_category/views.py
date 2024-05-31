@@ -1,8 +1,12 @@
+from collections import defaultdict
+
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.decorators import action
+
+from core import settings
 
 from app_category.models import Category
-
 from app_category.serializers import CategorySerializer
 
 
@@ -12,37 +16,61 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            tree_category = self.build_tree(serializer.data)
-            return self.get_paginated_response(tree_category)
-
         serializer = self.get_serializer(queryset, many=True)
         tree_category = self.build_tree(serializer.data)
-        return Response(serializer.data)
+        return Response(tree_category)
 
-    def build_tree(self, categories):
+    def build_tree(self, categories, lang=None):
+        # defaultdict для автоматического создания пустых списков для детей каждой категории
         # функция для фронта, которая надублирует ему записей (не понятно зачем)
         # и по полочкам разложит вложенность категорий
         # потому что он сам не может.
-
-        category_map = {}
+        category_map = defaultdict(list)
         roots = []
 
         for category in categories:
-            category["title"] = category["name_category"]  # копируем
-            category["label"] = category["name_category"]  # копируем
-            category["value"] = category["name_category"]  # копируем
-            category["key"] = f"{category['level']}-{category['tree_id']}-{category['id']}"  # копируем
-            category["children"] = []
+            lang_value = (
+                category.get("additional_data", {}).get(
+                    lang.upper(), category["name_category"]
+                )
+                if lang
+                else category["name_category"]
+            )
+            if lang_value == "":
+                lang_value = category["name_category"]
+            category.update(
+                {
+                    "title": lang_value,
+                    "label": lang_value,
+                    "value": lang_value,
+                    "key": f"{category['level']}-{category['tree_id']}-{category['id']}",
+                    "children": [],
+                }
+            )
+
+            # Добавление категории в соответствующий словарь
             category_map[category["id"]] = category
 
             if category["parent"] is None:
                 roots.append(category)
             else:
-                parent = category_map[category["parent"]]
-                parent["children"].append(category)
+                # Добавление категории как дочерней для ее родителя
+                category_map[category["parent"]]["children"].append(category)
 
         return roots
+
+    def _get_tree_category(self, lang):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        tree_category = self.build_tree(serializer.data, lang)
+        return tree_category
+
+    @action(detail=False, methods=["get"])
+    def en(self, request, pk=None, *args):
+        tree_category = self._get_tree_category(settings.LANG_EN)
+        return Response(tree_category)
+
+    @action(detail=False, methods=["get"])
+    def kz(self, request, pk=None, *args):
+        tree_category = self._get_tree_category(settings.LANG_KZ)
+        return Response(tree_category)
