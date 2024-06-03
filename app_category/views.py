@@ -3,11 +3,15 @@ from collections import defaultdict
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 
 from core import settings
 
 from app_category.models import Category
 from app_category.serializers import CategorySerializer
+
+from app_products.models import Products
+from app_products.serializers import ProductsSerializer
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -74,3 +78,20 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     def kz(self, request, pk=None, *args):
         tree_category = self._get_tree_category(settings.LANG_KZ)
         return Response(tree_category)
+
+    @action(detail=True, methods=["get"])
+    def products(self, request, pk=None):
+        # Получаем объект категории по её id (pk)
+        category = self.get_object()
+
+        # Получаем все товары, связанные с этой категорией
+        products = Products.objects.filter(category=category)
+
+        # Применяем пагинацию к результатам запроса
+        paginator = PageNumberPagination()
+        paginated_products = paginator.paginate_queryset(products, request)
+
+        # Сериализуем товары
+        serializer = ProductsSerializer(paginated_products, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
