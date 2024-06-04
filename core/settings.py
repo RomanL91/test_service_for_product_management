@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "flat_json_widget",
     "app_products",
     "app_category",
+    "app_manage_banners",
 ]
 
 MIDDLEWARE = [
