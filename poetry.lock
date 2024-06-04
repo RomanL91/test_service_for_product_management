@@ -4,13 +4,15 @@
 name = "asgiref"
 version = "3.8.1"
 description = "ASGI specs, helper code, and adapters"
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
     {file = "asgiref-3.8.1-py3-none-any.whl", hash = "sha256:3e1e3ecc849832fe52ccf2cb6686b7a55f82bb1d6aee72a58826471390335e47"},
     {file = "asgiref-3.8.1.tar.gz", hash = "sha256:c343bd80a0bec947a9860adb4c432ffa7db769836c64238fc34bdc3fec84d590"},
 ]
+
+[package.dependencies]
+typing-extensions = {version = ">=4", markers = "python_version < \"3.11\""}
 
 [package.extras]
 tests = ["mypy (>=0.800)", "pytest", "pytest-asyncio"]
@@ -19,7 +21,6 @@ tests = ["mypy (>=0.800)", "pytest", "pytest-asyncio"]
 name = "black"
 version = "24.4.2"
 description = "The uncompromising code formatter."
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -53,6 +54,8 @@ mypy-extensions = ">=0.4.3"
 packaging = ">=22.0"
 pathspec = ">=0.9.0"
 platformdirs = ">=2"
+tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
+typing-extensions = {version = ">=4.0.1", markers = "python_version < \"3.11\""}
 
 [package.extras]
 colorama = ["colorama (>=0.4.3)"]
@@ -64,7 +67,6 @@ uvloop = ["uvloop (>=0.15.2)"]
 name = "click"
 version = "8.1.7"
 description = "Composable command line interface toolkit"
-category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -79,7 +81,6 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
-category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
 files = [
@@ -91,7 +92,6 @@ files = [
 name = "django"
 version = "5.0.6"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
-category = "main"
 optional = false
 python-versions = ">=3.10"
 files = [
@@ -112,7 +112,6 @@ bcrypt = ["bcrypt"]
 name = "django-cors-headers"
 version = "4.3.1"
 description = "django-cors-headers is a Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)."
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -123,6 +122,16 @@ files = [
 [package.dependencies]
 asgiref = ">=3.6"
 Django = ">=3.2"
+
+[[package]]
+name = "django-cropper-image"
+version = "1.0.5"
+description = "django-cropper-image is an app for client side cropping and compressing uploaded images via Django 2.*"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "django-cropper-image-1.0.5.tar.gz", hash = "sha256:35273a2d661e1b32a16440fb80ece9bcc85effe54f5d17710bfd8e52af024b73"},
+]
 
 [[package]]
 name = "django-flat-json-widget"
@@ -142,7 +151,6 @@ test = ["django-extensions (>=3.1.0,<3.2.0)", "openwisp-utils[qa] (>=1.0.0,<1.1.
 name = "django-js-asset"
 version = "2.2.0"
 description = "script tag with additional attributes for django.forms.Media"
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -160,7 +168,6 @@ tests = ["coverage"]
 name = "django-mptt"
 version = "0.16.0"
 description = "Utilities for implementing Modified Preorder Tree Traversal with your Django Models and working with trees of Model instances."
-category = "main"
 optional = false
 python-versions = ">=3.9"
 files = [
@@ -178,7 +185,6 @@ tests = ["coverage[toml]", "mock-django"]
 name = "django-mptt-admin"
 version = "2.6.2"
 description = "Django-mptt-admin provides a nice Django Admin interface for Mptt models"
-category = "main"
 optional = false
 python-versions = "*"
 files = [
@@ -193,7 +199,6 @@ django-mptt = "*"
 name = "djangorestframework"
 version = "3.15.1"
 description = "Web APIs for Django, made easy."
-category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -205,10 +210,20 @@ files = [
 django = ">=3.0"
 
 [[package]]
+name = "h11"
+version = "0.14.0"
+description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "h11-0.14.0-py3-none-any.whl", hash = "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761"},
+    {file = "h11-0.14.0.tar.gz", hash = "sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d"},
+]
+
+[[package]]
 name = "mypy-extensions"
 version = "1.0.0"
 description = "Type system extensions for programs checked with the mypy type checker."
-category = "main"
 optional = false
 python-versions = ">=3.5"
 files = [
@@ -220,7 +235,6 @@ files = [
 name = "packaging"
 version = "24.0"
 description = "Core utilities for Python packages"
-category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -232,7 +246,6 @@ files = [
 name = "pathspec"
 version = "0.12.1"
 description = "Utility library for gitignore style pattern matching of file paths."
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -244,7 +257,6 @@ files = [
 name = "pillow"
 version = "10.3.0"
 description = "Python Imaging Library (Fork)"
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -331,7 +343,6 @@ xmp = ["defusedxml"]
 name = "platformdirs"
 version = "4.2.2"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -345,10 +356,20 @@ test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4.3)", "pytest-
 type = ["mypy (>=1.8)"]
 
 [[package]]
+name = "python-magic"
+version = "0.4.27"
+description = "File type identification using libmagic"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "python-magic-0.4.27.tar.gz", hash = "sha256:c1ba14b08e4a5f5c31a302b7721239695b2f0f058d125bd5ce1ee36b9d9d3c3b"},
+    {file = "python_magic-0.4.27-py2.py3-none-any.whl", hash = "sha256:c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3"},
+]
+
+[[package]]
 name = "sqlparse"
 version = "0.5.0"
 description = "A non-validating SQL parser."
-category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -386,7 +407,6 @@ files = [
 name = "tzdata"
 version = "2024.1"
 description = "Provider of IANA time zone data"
-category = "main"
 optional = false
 python-versions = ">=2"
 files = [
@@ -394,7 +414,26 @@ files = [
     {file = "tzdata-2024.1.tar.gz", hash = "sha256:2674120f8d891909751c38abcdfd386ac0a5a1127954fbc332af6b5ceae07efd"},
 ]
 
+[[package]]
+name = "uvicorn"
+version = "0.30.1"
+description = "The lightning-fast ASGI server."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "uvicorn-0.30.1-py3-none-any.whl", hash = "sha256:cd17daa7f3b9d7a24de3617820e634d0933b69eed8e33a516071174427238c81"},
+    {file = "uvicorn-0.30.1.tar.gz", hash = "sha256:d46cd8e0fd80240baffbcd9ec1012a712938754afcf81bce56c024c1656aece8"},
+]
+
+[package.dependencies]
+click = ">=7.0"
+h11 = ">=0.8"
+typing-extensions = {version = ">=4.0", markers = "python_version < \"3.11\""}
+
+[package.extras]
+standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.14.0,!=0.15.0,!=0.15.1)", "watchfiles (>=0.13)", "websockets (>=10.4)"]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "a3fd62cd41a86bea35d387915f405ddb45b525cda0484d84a34b0a503a47caa7"
+content-hash = "9f5806278501849512a8e4efa144cdc295f8bedfc7254de74be5cfd6d22e5278"
