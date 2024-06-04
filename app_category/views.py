@@ -98,8 +98,8 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
             for subcategory in subcategories:
                 # Добавляем к Q-объекту условие для каждой подкатегории
                 q_objects |= Q(category=subcategory)
-            
-            # Фильтруем продукты по Q-объекту    
+
+            # Фильтруем продукты по Q-объекту
             products = Products.objects.filter(q_objects)
 
         # Применяем пагинацию к результатам запроса
