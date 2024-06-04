@@ -5,6 +5,7 @@ from django.utils.html import mark_safe
 from django.utils.html import format_html
 from django.contrib.admin.widgets import AdminFileWidget
 
+from core.mixins import JsonDocumentForm
 from app_products.models import Products, ProductImage
 
 # форма для вывода древовидной структуры категорий
@@ -38,6 +39,7 @@ class ProductImageInline(admin.StackedInline):
 
 class ProductAdmin(admin.ModelAdmin):
     # form = ProductAdminForm   # форма для вывода древовидной структуры категорий
+    form = JsonDocumentForm
     inlines = [
         ProductImageInline,
     ]

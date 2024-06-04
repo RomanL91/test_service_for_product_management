@@ -3,6 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from core.mixins import JSONFieldsMixin
 from app_category.models import Category, Brand
 
 
@@ -14,7 +15,7 @@ def valid(value):
         )
 
 
-class Products(models.Model):
+class Products(JSONFieldsMixin, models.Model):
     # ================= Категории/Брэнд
     category = models.ForeignKey(
         Category,
