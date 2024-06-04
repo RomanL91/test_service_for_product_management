@@ -1,14 +1,56 @@
-from rest_framework import viewsets
+from typing import Dict, Any, Generator
+
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework import viewsets, pagination
+from rest_framework.decorators import action
+
+from core import settings
 
 from app_products.models import Products
-
 from app_products.serializers import ProductsSerializer
-
-from rest_framework.response import Response
-
-from rest_framework.decorators import action
 
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Products.objects.all()
     serializer_class = ProductsSerializer
+
+    @action(detail=False, methods=["get"])
+    def en(self, request: Request, *args, **kwargs) -> Response:
+        return self.paginate_and_translate(request, settings.LANG_EN)
+
+    @action(detail=False, methods=["get"])
+    def kz(self, request: Request, *args, **kwargs) -> Response:
+        return self.paginate_and_translate(request, settings.LANG_KZ)
+
+    def paginate_and_translate(self, request, lang: str) -> Response:
+        queryset = self.filter_queryset(self.get_queryset())
+        # paginator = pagination.PageNumberPagination() 
+        paginator = pagination.LimitOffsetPagination()
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+        serializer = self.get_serializer(paginated_queryset, many=True)
+        translated_data = self.translate_queryset(serializer.data, lang)
+        return paginator.get_paginated_response(translated_data)
+
+    def translate_queryset(
+        self, queryset: Dict[str, Any], lang: str
+    ) -> Generator[Dict[str, Any], None, None]:
+        for item in queryset:
+            translated_item = {}
+            for key, value in item.items():
+                if key == "category":
+                    translate_value = value["additional_data"].get(lang, "")
+                    if translate_value != "":
+                        value["name_category"] = translate_value
+                elif key == "brand":
+                    translate_value = value["additional_data"].get(lang, "")
+                    if translate_value != "":
+                        value["name_brand"] = translate_value
+                elif key == "name_product":
+                    translate_value = item["additional_data"].get(lang, "")
+                    if translate_value != "":
+                        value = translate_value
+                elif key == "related_products":
+                    value = self.translate_queryset(value, lang)
+                translated_item[key] = value
+            yield translated_item
