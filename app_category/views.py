@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+from django.db.models import Q
+
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -86,6 +88,19 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Получаем все товары, связанные с этой категорией
         products = Products.objects.filter(category=category)
+
+        # Если в категории нет продуктов, получаем продукты из всех подкатегорий
+        if not products.exists():
+            # Получаем все подкатегории данной категории
+            subcategories = category.children.all()
+            # Создаем Q-объект, который будет объединять все подкатегории
+            q_objects = Q()
+            for subcategory in subcategories:
+                # Добавляем к Q-объекту условие для каждой подкатегории
+                q_objects |= Q(category=subcategory)
+            
+            # Фильтруем продукты по Q-объекту    
+            products = Products.objects.filter(q_objects)
 
         # Применяем пагинацию к результатам запроса
         paginator = PageNumberPagination()
