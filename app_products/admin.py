@@ -59,6 +59,9 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = [
         "get_preview",
     ]
+    filter_horizontal = [
+        "related_products",
+    ]
 
     def get_image(self, obj):
         return self.get_image_or_preview(obj, preview=False)

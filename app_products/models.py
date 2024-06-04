@@ -30,6 +30,12 @@ class Products(models.Model):
         blank=True,
         verbose_name="Брэнд продукта",
     )
+    related_products = models.ManyToManyField(
+        "self",
+        blank=True,
+        related_name="related_to",
+        verbose_name="Дополнительные продукты",
+    )
     # ================= Имя, Описание
     name_product = models.CharField(
         verbose_name="Наименование продукта", max_length=150
