@@ -86,6 +86,10 @@ class ProductAdmin(admin.ModelAdmin):
             "Сопуствующие продукты",
             {"fields": (("related_products",),), "classes": ("collapse",)},
         ),
+        (
+            "Переводы на языки",
+            {"fields": (("additional_data",),), "classes": ("collapse",)},
+        ),
     )
 
     def get_image(self, obj):
