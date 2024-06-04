@@ -20,4 +20,4 @@ class CategoryAdmin(DjangoMpttAdmin):
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    pass
+    form = JsonDocumentForm

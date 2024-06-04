@@ -35,7 +35,7 @@ class Category(MPTTModel, JSONFieldsMixin):
         return self.name_category
 
 
-class Brand(models.Model):
+class Brand(JSONFieldsMixin, models.Model):
     name_brand = models.CharField(max_length=100, verbose_name="Название бренда")
 
     class Meta:
