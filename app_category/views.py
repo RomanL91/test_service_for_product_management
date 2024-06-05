@@ -1,7 +1,5 @@
 from collections import defaultdict
 
-from django.db.models import Q
-
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -19,7 +17,7 @@ from app_products.serializers import ProductsSerializer
 class BrandViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
-    
+
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
@@ -107,6 +105,11 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
         # Получаем объект категории по её id (pk)
         category = self.get_object()
 
+        # Получаем язык из запроса
+        lang = request.GET.get("lang")
+        if lang is not None:
+            lang = lang.upper()
+
         # Получаем все продукты для данной категории и ее подкатегорий
         products = self.get_products_by_category(category)
 
@@ -118,5 +121,35 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Сериализуем товары
         serializer = ProductsSerializer(paginated_products, many=True)
-
+        if lang == settings.LANG_EN or lang == settings.LANG_KZ:
+            sss = self.translate_data(serializer.data, lang)
+            return paginator.get_paginated_response(sss)
         return paginator.get_paginated_response(serializer.data)
+
+    def translate_data(self, data, lang=settings.LANG_EN):
+        def translate_item(item):
+            translated_item = {}
+            for key, value in item.items():
+                if isinstance(value, dict):
+                    translated_item[key] = translate_item(value)
+                elif isinstance(value, list):
+                    translated_item[key] = [
+                        translate_item(elem) if isinstance(elem, dict) else elem
+                        for elem in value
+                    ]
+                elif key.startswith("name_") and isinstance(value, str):
+                    translation = item["additional_data"].get(lang, None)
+                    translated_item[key] = (
+                        value
+                        if translation == "" or translation is None
+                        else translation
+                    )
+                else:
+                    translated_item[key] = value
+            return translated_item
+
+        translated_data = []
+        for item in data:
+            translated_data.append(translate_item(item))
+
+        return translated_data
