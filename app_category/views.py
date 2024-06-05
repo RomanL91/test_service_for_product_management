@@ -5,7 +5,7 @@ from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 
 from core import settings
 
@@ -81,29 +81,34 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
         tree_category = self._get_tree_category(settings.LANG_KZ)
         return Response(tree_category)
 
+    def get_products_by_category(self, category):
+        # Получаем все товары, связанные с этой категорией
+        products = Products.objects.filter(category=category)
+
+        # Если в категории нет продуктов, рекурсивно получаем продукты из всех подкатегорий
+        if not products.exists():
+            # Получаем все подкатегории данной категории
+            subcategories = category.children.all()
+
+            # Рекурсивно обходим каждую подкатегорию
+            for subcategory in subcategories:
+                products |= self.get_products_by_category(subcategory)
+
+        return products
+
+    # Метод представления для получения списка продуктов по категории
     @action(detail=True, methods=["get"])
     def products(self, request, pk=None):
         # Получаем объект категории по её id (pk)
         category = self.get_object()
 
-        # Получаем все товары, связанные с этой категорией
-        products = Products.objects.filter(category=category)
-
-        # Если в категории нет продуктов, получаем продукты из всех подкатегорий
-        if not products.exists():
-            # Получаем все подкатегории данной категории
-            subcategories = category.children.all()
-            # Создаем Q-объект, который будет объединять все подкатегории
-            q_objects = Q()
-            for subcategory in subcategories:
-                # Добавляем к Q-объекту условие для каждой подкатегории
-                q_objects |= Q(category=subcategory)
-
-            # Фильтруем продукты по Q-объекту
-            products = Products.objects.filter(q_objects)
+        # Получаем все продукты для данной категории и ее подкатегорий
+        products = self.get_products_by_category(category)
 
         # Применяем пагинацию к результатам запроса
-        paginator = PageNumberPagination()
+        # paginator = PageNumberPagination()
+        paginator = LimitOffsetPagination()
+
         paginated_products = paginator.paginate_queryset(products, request)
 
         # Сериализуем товары
