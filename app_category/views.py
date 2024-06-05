@@ -9,12 +9,17 @@ from rest_framework.pagination import PageNumberPagination, LimitOffsetPaginatio
 
 from core import settings
 
-from app_category.models import Category
-from app_category.serializers import CategorySerializer
+from app_category.models import Category, Brand
+from app_category.serializers import CategorySerializer, BrandSerializer
 
 from app_products.models import Products
 from app_products.serializers import ProductsSerializer
 
+
+class BrandViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+    
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
