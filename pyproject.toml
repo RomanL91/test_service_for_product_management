@@ -19,6 +19,8 @@ uvicorn = "^0.30.0"
 django-flat-json-widget = "^0.2"
 django-cropper-image = "^1.0.5"
 python-magic = "^0.4.27"
+django-image-cropping = "^1.7"
+easy-thumbnails = "^2.8.5"
 
 
 [build-system]

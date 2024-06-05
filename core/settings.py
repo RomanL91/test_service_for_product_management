@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     "app_products",
     "app_category",
     "app_manage_banners",
+        # для работы с изображениями
+    'easy_thumbnails',
+    'image_cropping',
 ]
 
 MIDDLEWARE = [
