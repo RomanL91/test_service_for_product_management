@@ -25,7 +25,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
     def paginate_and_translate(self, request, lang: str) -> Response:
         queryset = self.filter_queryset(self.get_queryset())
-        # paginator = pagination.PageNumberPagination() 
+        # paginator = pagination.PageNumberPagination()
         paginator = pagination.LimitOffsetPagination()
         paginated_queryset = paginator.paginate_queryset(queryset, request)
         serializer = self.get_serializer(paginated_queryset, many=True)
@@ -39,17 +39,20 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             translated_item = {}
             for key, value in item.items():
                 if key == "category":
-                    translate_value = value["additional_data"].get(lang, "")
-                    if translate_value != "":
-                        value["name_category"] = translate_value
+                    if value is not None:
+                        translate_value = value["additional_data"].get(lang, "")
+                        if translate_value != "":
+                            value["name_category"] = translate_value
                 elif key == "brand":
-                    translate_value = value["additional_data"].get(lang, "")
-                    if translate_value != "":
-                        value["name_brand"] = translate_value
+                    if value is not None:
+                        translate_value = value["additional_data"].get(lang, "")
+                        if translate_value != "":
+                            value["name_brand"] = translate_value
                 elif key == "name_product":
-                    translate_value = item["additional_data"].get(lang, "")
-                    if translate_value != "":
-                        value = translate_value
+                    if value is not None:
+                        translate_value = item["additional_data"].get(lang, "")
+                        if translate_value != "":
+                            value = translate_value
                 elif key == "related_products":
                     value = self.translate_queryset(value, lang)
                 translated_item[key] = value
