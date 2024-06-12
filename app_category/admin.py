@@ -3,7 +3,7 @@ from django.contrib import admin
 from django_mptt_admin.admin import DjangoMpttAdmin
 
 from core.mixins import JsonDocumentForm
-from app_category.models import Category, Brand
+from app_category.models import Category
 
 
 @admin.register(Category)
@@ -16,8 +16,3 @@ class CategoryAdmin(DjangoMpttAdmin):
     search_fields = [
         "name_category",
     ]
-
-
-@admin.register(Brand)
-class BrandAdmin(admin.ModelAdmin):
-    form = JsonDocumentForm

@@ -7,16 +7,11 @@ from rest_framework.pagination import PageNumberPagination, LimitOffsetPaginatio
 
 from core import settings
 
-from app_category.models import Category, Brand
-from app_category.serializers import CategorySerializer, BrandSerializer
+from app_category.models import Category
+from app_category.serializers import CategorySerializer
 
 from app_products.models import Products
 from app_products.serializers import ProductsSerializer
-
-
-class BrandViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Brand.objects.all()
-    serializer_class = BrandSerializer
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -84,72 +79,72 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
         tree_category = self._get_tree_category(settings.LANG_KZ)
         return Response(tree_category)
 
-    def get_products_by_category(self, category):
-        # Получаем все товары, связанные с этой категорией
-        products = Products.objects.filter(category=category)
+    # def get_products_by_category(self, category):
+    #     # Получаем все товары, связанные с этой категорией
+    #     products = Products.objects.filter(category=category)
 
-        # Если в категории нет продуктов, рекурсивно получаем продукты из всех подкатегорий
-        if not products.exists():
-            # Получаем все подкатегории данной категории
-            subcategories = category.children.all()
+    #     # Если в категории нет продуктов, рекурсивно получаем продукты из всех подкатегорий
+    #     if not products.exists():
+    #         # Получаем все подкатегории данной категории
+    #         subcategories = category.children.all()
 
-            # Рекурсивно обходим каждую подкатегорию
-            for subcategory in subcategories:
-                products |= self.get_products_by_category(subcategory)
+    #         # Рекурсивно обходим каждую подкатегорию
+    #         for subcategory in subcategories:
+    #             products |= self.get_products_by_category(subcategory)
 
-        return products
+    #     return products
 
-    # Метод представления для получения списка продуктов по категории
-    @action(detail=True, methods=["get"])
-    def products(self, request, pk=None):
-        # Получаем объект категории по её id (pk)
-        category = self.get_object()
+    # # Метод представления для получения списка продуктов по категории
+    # @action(detail=True, methods=["get"])
+    # def products(self, request, pk=None):
+    #     # Получаем объект категории по её id (pk)
+    #     category = self.get_object()
 
-        # Получаем язык из запроса
-        lang = request.GET.get("lang")
-        if lang is not None:
-            lang = lang.upper()
+    #     # Получаем язык из запроса
+    #     lang = request.GET.get("lang")
+    #     if lang is not None:
+    #         lang = lang.upper()
 
-        # Получаем все продукты для данной категории и ее подкатегорий
-        products = self.get_products_by_category(category)
+    #     # Получаем все продукты для данной категории и ее подкатегорий
+    #     products = self.get_products_by_category(category)
 
-        # Применяем пагинацию к результатам запроса
-        # paginator = PageNumberPagination()
-        paginator = LimitOffsetPagination()
+    #     # Применяем пагинацию к результатам запроса
+    #     # paginator = PageNumberPagination()
+    #     paginator = LimitOffsetPagination()
 
-        paginated_products = paginator.paginate_queryset(products, request)
+    #     paginated_products = paginator.paginate_queryset(products, request)
 
-        # Сериализуем товары
-        serializer = ProductsSerializer(paginated_products, many=True)
-        if lang == settings.LANG_EN or lang == settings.LANG_KZ:
-            sss = self.translate_data(serializer.data, lang)
-            return paginator.get_paginated_response(sss)
-        return paginator.get_paginated_response(serializer.data)
+    #     # Сериализуем товары
+    #     serializer = ProductsSerializer(paginated_products, many=True)
+    #     if lang == settings.LANG_EN or lang == settings.LANG_KZ:
+    #         sss = self.translate_data(serializer.data, lang)
+    #         return paginator.get_paginated_response(sss)
+    #     return paginator.get_paginated_response(serializer.data)
 
-    def translate_data(self, data, lang=settings.LANG_EN):
-        def translate_item(item):
-            translated_item = {}
-            for key, value in item.items():
-                if isinstance(value, dict):
-                    translated_item[key] = translate_item(value)
-                elif isinstance(value, list):
-                    translated_item[key] = [
-                        translate_item(elem) if isinstance(elem, dict) else elem
-                        for elem in value
-                    ]
-                elif key.startswith("name_") and isinstance(value, str):
-                    translation = item["additional_data"].get(lang, None)
-                    translated_item[key] = (
-                        value
-                        if translation == "" or translation is None
-                        else translation
-                    )
-                else:
-                    translated_item[key] = value
-            return translated_item
+    # def translate_data(self, data, lang=settings.LANG_EN):
+    #     def translate_item(item):
+    #         translated_item = {}
+    #         for key, value in item.items():
+    #             if isinstance(value, dict):
+    #                 translated_item[key] = translate_item(value)
+    #             elif isinstance(value, list):
+    #                 translated_item[key] = [
+    #                     translate_item(elem) if isinstance(elem, dict) else elem
+    #                     for elem in value
+    #                 ]
+    #             elif key.startswith("name_") and isinstance(value, str):
+    #                 translation = item["additional_data"].get(lang, None)
+    #                 translated_item[key] = (
+    #                     value
+    #                     if translation == "" or translation is None
+    #                     else translation
+    #                 )
+    #             else:
+    #                 translated_item[key] = value
+    #         return translated_item
 
-        translated_data = []
-        for item in data:
-            translated_data.append(translate_item(item))
+    #     translated_data = []
+    #     for item in data:
+    #         translated_data.append(translate_item(item))
 
-        return translated_data
+    #     return translated_data

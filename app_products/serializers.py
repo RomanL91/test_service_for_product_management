@@ -1,7 +1,7 @@
 from typing import List
 from rest_framework import serializers
 from app_products.models import Products, ProductImage
-from app_category.serializers import CategorySerializer, BrandSerializer
+from app_category.serializers import CategorySerializer
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -22,7 +22,6 @@ class BaseProductSerializer(serializers.ModelSerializer):
     """
 
     category = CategorySerializer()
-    brand = BrandSerializer()
 
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.

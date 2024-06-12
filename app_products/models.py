@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from core.mixins import JSONFieldsMixin
-from app_category.models import Category, Brand
+from app_category.models import Category
 
 
 def valid(value):
@@ -23,13 +23,6 @@ class Products(JSONFieldsMixin, models.Model):
         null=True,
         blank=True,
         verbose_name="Категория продукта",
-    )
-    brand = models.ForeignKey(
-        Brand,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name="Брэнд продукта",
     )
     related_products = models.ManyToManyField(
         "self",

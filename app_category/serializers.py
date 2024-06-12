@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from app_category.models import Category, Brand
+from app_category.models import Category
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -9,7 +9,3 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class BrandSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Brand
-        fields = "__all__"
