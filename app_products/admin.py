@@ -1,5 +1,5 @@
-from django.contrib import admin
 from django.db import models
+from django.contrib import admin
 
 from django.utils.html import mark_safe
 from django.utils.html import format_html
@@ -34,7 +34,7 @@ class ProductImageInline(admin.StackedInline):
     max_num = 10
     extra = 0
     formfield_overrides = {models.ImageField: {"widget": CustomAdminFileWidget}}
-    classes = ["collapse"]
+    # classes = ["collapse"] # свернуть (show/hide)
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -46,8 +46,8 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = [
         "name_product",
         "category",
-        "price",
-        "remaining_goods",
+        # "price",
+        # "remaining_goods",
         "get_image",
     ]
     autocomplete_fields = [
@@ -61,36 +61,38 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = [
         "get_preview",
     ]
-    filter_horizontal = [
-        "related_products",
-    ]
-    # fieldsets = (
-    #     ("О продукте", {"fields": (("name_product", "desc_product"),)}),
-    #     (
-    #         "Цена",
-    #         {
-    #             "fields": (("price",),),
-    #         },
-    #     ),
-    #     (
-    #         "Остаток продукта",
-    #         {
-    #             "fields": (("remaining_goods",),),
-    #         },
-    #     ),
-    #     (
-    #         "Категория/Брэнд",
-    #         {"fields": (("category", ),), "classes": ("collapse",)},
-    #     ),
-    #     (
-    #         "Сопуствующие продукты",
-    #         {"fields": (("related_products",),), "classes": ("collapse",)},
-    #     ),
-    #     (
-    #         "Переводы на языки",
-    #         {"fields": (("additional_data",),), "classes": ("collapse",)},
-    #     ),
-    # )
+    # filter_horizontal = [
+    #     "related_products",
+    # ]
+    fieldsets = (
+        ("О продукте", {"fields": ("name_product",)}),
+        # (
+        #     "Цена",
+        #     {
+        #         "fields": (("price",),),
+        #     },
+        # ),
+        # (
+        #     "Остаток продукта",
+        #     {
+        #         "fields": (("remaining_goods",),),
+        #     },
+        # ),
+        (
+            "Категория",
+            # {"fields": (("category", ),), "classes": ("collapse",)},
+            {"fields": ("category",)},
+        ),
+        # (
+        #     "Сопуствующие продукты",
+        #     {"fields": (("related_products",),), "classes": ("collapse",)},
+        # ),
+        (
+            "Переводы на языки",
+            # {"fields": (("additional_data",),), "classes": ("collapse",)},
+            {"fields": ("additional_data",)},
+        ),
+    )
 
     def get_image(self, obj):
         return self.get_image_or_preview(obj, preview=False)
@@ -113,7 +115,10 @@ class ProductAdmin(admin.ModelAdmin):
 
 class ProductImageAdmin(admin.ModelAdmin):
     readonly_fields = ["preview"]
-    list_display = ["get_image", "product", "desc"]
+    list_display = [
+        "get_image",
+        "product",
+    ]
 
     def preview(self, obj):
         return mark_safe(f'<img src={obj.image.url} width="600" ')
@@ -132,9 +137,3 @@ class ProductImageAdmin(admin.ModelAdmin):
 
 admin.site.register(ProductImage, ProductImageAdmin)
 admin.site.register(Products, ProductAdmin)
-
-admin.site.site_header = "Администрирование Магазина"
-admin.site.index_title = "Администрирование Магазина"  # default: "Site administration"
-admin.site.site_title = "Администрирование Магазина"  # default: "Django site admin"
-admin.site.site_url = None
-# admin.site.disable_action('delete_selected')
