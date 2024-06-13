@@ -23,3 +23,22 @@ class SpecificationAdmin(admin.ModelAdmin):
     search_fields = [
         "name_specification",
     ]
+    autocomplete_fields = [
+        "product",
+    ]
+    fieldsets = (
+        (
+            "Характеристика",
+            {
+                "fields": (
+                    "name_specification",
+                    "value_specification",
+                    "product",
+                )
+            },
+        ),
+        (
+            "Переводы на языки",
+            {"fields": ("additional_data",)},
+        ),
+    )
