@@ -43,9 +43,11 @@ INSTALLED_APPS = [
     "mptt",
     "django_mptt_admin",
     "flat_json_widget",
+    # приложения
     "app_products",
     "app_category",
     "app_manage_banners",
+    "app_brands",
     # для работы с изображениями
     "easy_thumbnails",
     "image_cropping",
