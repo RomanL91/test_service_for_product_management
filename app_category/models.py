@@ -37,7 +37,7 @@ class CategoryImage(models.Model):
         verbose_name="Изображение",
         blank=True,
         upload_to="product_images/%Y/%m/%d/%H/%M/%S/",
-        help_text="Это миниатюрное представление изображения категории."
+        help_text="Это миниатюрное представление изображения категории.",
     )
     category = models.ForeignKey(
         Category, on_delete=models.CASCADE, verbose_name="Категория"
