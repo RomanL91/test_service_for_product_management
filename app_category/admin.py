@@ -47,10 +47,10 @@ class CategoryAdmin(DjangoMpttAdmin):
         CategoryImageInline,
     ]
     fieldsets = (
-        ("О категории", {"fields": (("name_category",),)}),
+        ("О категории", {"fields": ("name_category",)}),
         (
             "Переводы на языки",
             # {"fields": (("additional_data",),), "classes": ("collapse",)},
-            {"fields": (("additional_data",),),},
+            {"fields": ("additional_data",)},
         ),
     )
