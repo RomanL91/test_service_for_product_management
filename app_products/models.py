@@ -2,6 +2,7 @@ from django.db import models
 
 from core.mixins import JSONFieldsMixin
 
+from app_brands.models import Brands
 from app_category.models import Category
 
 
@@ -15,6 +16,12 @@ class Products(JSONFieldsMixin, models.Model):
         on_delete=models.SET_NULL,
         null=True,
         verbose_name="Категория продукта",
+    )
+    brand = models.ForeignKey(
+        Brands,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="бренд продукта",
     )
 
     class Meta:

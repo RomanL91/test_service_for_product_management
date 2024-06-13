@@ -25,7 +25,10 @@ class CategoryAdmin(admin.ModelAdmin):
         LogoImageInline,
     ]
     fieldsets = (
-        ("О брэнде", {"fields": ("name_brand",)}),
+        (
+            "О бренде",
+            {"fields": ("name_brand",)},
+        ),
         (
             "Переводы на языки",
             # {"fields": (("additional_data",),), "classes": ("collapse",)},

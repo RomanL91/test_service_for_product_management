@@ -4,11 +4,11 @@ from core.mixins import JSONFieldsMixin
 
 
 class Brands(JSONFieldsMixin, models.Model):
-    name_brand = models.CharField(max_length=150, verbose_name="Наименование брэнда")
+    name_brand = models.CharField(max_length=150, verbose_name="Наименование бренда")
 
     class Meta:
-        verbose_name = "Брэнд"
-        verbose_name_plural = "Брэнды"
+        verbose_name = "бренд"
+        verbose_name_plural = "бренды"
 
     def __str__(self) -> str:
         return self.name_brand

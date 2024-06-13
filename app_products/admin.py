@@ -33,6 +33,7 @@ class ProductAdmin(admin.ModelAdmin):
     ]
     autocomplete_fields = [
         "category",
+        "brand",
     ]
     search_fields = [
         "name_product__istartswith",
@@ -46,32 +47,22 @@ class ProductAdmin(admin.ModelAdmin):
     #     "related_products",
     # ]
     fieldsets = (
-        ("О продукте", {"fields": ("name_product",)}),
-        # (
-        #     "Цена",
-        #     {
-        #         "fields": (("price",),),
-        #     },
-        # ),
-        # (
-        #     "Остаток продукта",
-        #     {
-        #         "fields": (("remaining_goods",),),
-        #     },
-        # ),
         (
-            "Категория",
-            # {"fields": (("category", ),), "classes": ("collapse",)},
-            {"fields": ("category",)},
+            "О продукте",
+            {"fields": ("name_product",)},
         ),
-        # (
-        #     "Сопуствующие продукты",
-        #     {"fields": (("related_products",),), "classes": ("collapse",)},
-        # ),
         (
             "Переводы на языки",
             # {"fields": (("additional_data",),), "classes": ("collapse",)},
             {"fields": ("additional_data",)},
+        ),
+        (
+            "Категория",
+            {"fields": ("category",)},
+        ),
+        (
+            "бренд",
+            {"fields": ("brand",)},
         ),
     )
 
