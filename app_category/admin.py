@@ -11,7 +11,6 @@ class CategoryAdmin(DjangoMpttAdmin):
     form = JsonDocumentForm
     list_display = [
         "name_category",
-        "desc_category",
     ]
     search_fields = [
         "name_category",

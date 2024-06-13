@@ -10,9 +10,6 @@ class Category(MPTTModel, JSONFieldsMixin):
         max_length=100,
         verbose_name="Имя категории",
     )
-    desc_category = models.TextField(
-        verbose_name="Описание категории", max_length=1000, blank=True
-    )
     parent = TreeForeignKey(
         "self",
         on_delete=models.PROTECT,
@@ -33,3 +30,22 @@ class Category(MPTTModel, JSONFieldsMixin):
 
     def __str__(self):
         return self.name_category
+
+
+class CategoryImage(models.Model):
+    image = models.ImageField(
+        verbose_name="Изображение",
+        blank=True,
+        upload_to="product_images/%Y/%m/%d/%H/%M/%S/",
+        help_text="Это миниатюрное представление изображения категории."
+    )
+    category = models.ForeignKey(
+        Category, on_delete=models.CASCADE, verbose_name="Категория"
+    )
+
+    class Meta:
+        verbose_name = "Изображение"
+        verbose_name_plural = "Изображения"
+
+    def __str__(self) -> str:
+        return self.category.name_category

@@ -23,11 +23,14 @@ from django.conf import settings
 
 from .router import router
 
+from app_category.urls import urlpatterns_category_suff
+
 urlpatterns = (
     [
         path("admin/", admin.site.urls),
         path("api/v1/", include(router.urls)),
     ]
+    + urlpatterns_category_suff
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 )
