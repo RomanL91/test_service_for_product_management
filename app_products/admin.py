@@ -64,33 +64,33 @@ class ProductAdmin(admin.ModelAdmin):
     filter_horizontal = [
         "related_products",
     ]
-    fieldsets = (
-        ("О продукте", {"fields": (("name_product", "desc_product"),)}),
-        (
-            "Цена",
-            {
-                "fields": (("price",),),
-            },
-        ),
-        (
-            "Остаток продукта",
-            {
-                "fields": (("remaining_goods",),),
-            },
-        ),
-        (
-            "Категория/Брэнд",
-            {"fields": (("category", "brand"),), "classes": ("collapse",)},
-        ),
-        (
-            "Сопуствующие продукты",
-            {"fields": (("related_products",),), "classes": ("collapse",)},
-        ),
-        (
-            "Переводы на языки",
-            {"fields": (("additional_data",),), "classes": ("collapse",)},
-        ),
-    )
+    # fieldsets = (
+    #     ("О продукте", {"fields": (("name_product", "desc_product"),)}),
+    #     (
+    #         "Цена",
+    #         {
+    #             "fields": (("price",),),
+    #         },
+    #     ),
+    #     (
+    #         "Остаток продукта",
+    #         {
+    #             "fields": (("remaining_goods",),),
+    #         },
+    #     ),
+    #     (
+    #         "Категория/Брэнд",
+    #         {"fields": (("category", ),), "classes": ("collapse",)},
+    #     ),
+    #     (
+    #         "Сопуствующие продукты",
+    #         {"fields": (("related_products",),), "classes": ("collapse",)},
+    #     ),
+    #     (
+    #         "Переводы на языки",
+    #         {"fields": (("additional_data",),), "classes": ("collapse",)},
+    #     ),
+    # )
 
     def get_image(self, obj):
         return self.get_image_or_preview(obj, preview=False)

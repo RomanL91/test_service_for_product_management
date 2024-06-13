@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "test-service-for-product-management"
+name = "test_service_for_product_management"
 version = "0.1.0"
 description = ""
 authors = ["RomanL91 <dev_roman91@mail.ru>"]
 readme = "README.md"
-packages = [{include = "test_service_for_product_management"}]
+# packages = [{include = "test_service_for_product_management"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
