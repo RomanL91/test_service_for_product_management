@@ -32,5 +32,3 @@ class CategoryAdmin(admin.ModelAdmin):
             {"fields": ("additional_data",)},
         ),
     )
-
-

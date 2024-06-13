@@ -4,10 +4,7 @@ from core.mixins import JSONFieldsMixin
 
 
 class Brands(JSONFieldsMixin, models.Model):
-    name_brand = models.CharField(
-        max_length=150,
-        verbose_name="Наименование брэнда"
-    )
+    name_brand = models.CharField(max_length=150, verbose_name="Наименование брэнда")
 
     class Meta:
         verbose_name = "Брэнд"
@@ -15,7 +12,7 @@ class Brands(JSONFieldsMixin, models.Model):
 
     def __str__(self) -> str:
         return self.name_brand
-    
+
 
 class LogoBrand(models.Model):
     image = models.ImageField(
@@ -23,9 +20,7 @@ class LogoBrand(models.Model):
         blank=True,
         upload_to="logo_images/%Y/%m/%d/%H/%M/%S/",
     )
-    brand = models.ForeignKey(
-        Brands, on_delete=models.CASCADE, verbose_name="Бренд"
-    )
+    brand = models.ForeignKey(Brands, on_delete=models.CASCADE, verbose_name="Бренд")
 
     class Meta:
         verbose_name = "Логотип"
