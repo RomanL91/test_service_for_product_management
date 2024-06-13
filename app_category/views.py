@@ -5,8 +5,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 
-from core import settings
-
 from app_category.models import Category
 from app_category.serializers import CategorySerializer
 
@@ -20,16 +18,18 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["get"])
     def lang(self, request, lang=None, *args):
+        # Вызываем отдельный метод для получения дерева с переводом
         tree_category = self._get_tree_category(lang)
         return Response(tree_category)
-    
+
     @action(detail=True, methods=["get"])
     def lang_(self, request, pk=None, lang=None, *args):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
-        data = self.build_tree([serializer.data], lang)
-        return Response(*data)
-    
+        # Вызываем отдельный метод для работы с переводом
+        response_data = self.process_translation(serializer.data, lang)
+        return Response(response_data)
+
     # Метод представления для получения списка продуктов по категории
     @action(detail=True, methods=["get"])
     def products(self, request, pk=None, lang=None, *args):
@@ -41,20 +41,11 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Применяем пагинацию к результатам запроса
         paginator = LimitOffsetPagination()
-
         paginated_products = paginator.paginate_queryset(products, request)
 
         # Сериализуем товары
         serializer = ProductsSerializer(paginated_products, many=True)
-
-        if lang is not None:
-            print(f'lang--->>> {lang}')
-            translate_data = self.translate_data(serializer.data, lang)
-            return paginator.get_paginated_response(translate_data)
-
         return paginator.get_paginated_response(serializer.data)
-
-    
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -82,6 +73,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
                 lang_value = category["name_category"]
             category.update(
                 {
+                    "name_category": lang_value,
                     "title": lang_value,
                     "label": lang_value,
                     "value": lang_value,
@@ -122,34 +114,31 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         return products
 
-    
-
-    def translate_data(self, data, lang=settings.LANG_EN):
-        def translate_item(item):
-            translated_item = {}
-            for key, value in item.items():
-                if isinstance(value, dict):
-                    translated_item[key] = translate_item(value)
-                elif isinstance(value, list):
-                    translated_item[key] = [
-                        translate_item(elem) if isinstance(elem, dict) else elem
-                        for elem in value
-                    ]
-                elif key.startswith("name_") and isinstance(value, str):
-                    translation = item["additional_data"].get(lang, None)
-                    translated_item[key] = (
-                        value
-                        if translation == "" or translation is None
-                        else translation
+    def process_translation(self, data, lang):
+        if lang is not None:
+            lang = lang.upper()
+            additional_data = data.get("additional_data", {})
+            if lang in additional_data:
+                value_translate = additional_data[lang]
+                data_translate = dict(data)
+                pass_value = data_translate["name_category"]
+                if value_translate:
+                    data_translate.update(
+                        {
+                            "name_category": value_translate,
+                            "title": value_translate,
+                            "label": value_translate,
+                            "value": value_translate,
+                        }
                     )
                 else:
-                    translated_item[key] = value
-            return translated_item
-
-        translated_data = []
-        for item in data:
-            translated_data.append(translate_item(item))
-
-        print(f'translated_data--->>> {translated_data}')
-
-        return translated_data
+                    data_translate.update(
+                        {
+                            "name_category": pass_value,
+                            "title": pass_value,
+                            "label": pass_value,
+                            "value": pass_value,
+                        }
+                    )
+                return data_translate
+        return data
