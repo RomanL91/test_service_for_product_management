@@ -39,7 +39,9 @@ class ProductImage(models.Model):
         upload_to="product_images/%Y/%m/%d/%H/%M/%S/",
     )
     product = models.ForeignKey(
-        Products, on_delete=models.CASCADE, verbose_name="Продукт"
+        Products,
+        on_delete=models.CASCADE,
+        verbose_name="Продукт",
     )
 
     class Meta:

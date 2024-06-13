@@ -13,7 +13,7 @@ class LogoImageInline(admin.StackedInline):
 
 
 @admin.register(Brands)
-class CategoryAdmin(admin.ModelAdmin):
+class BrandAdmin(admin.ModelAdmin):
     form = JsonDocumentForm
     list_display = [
         "name_brand",
