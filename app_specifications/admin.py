@@ -4,13 +4,14 @@ from django.contrib import admin
 from flat_json_widget.widgets import FlatJsonWidget
 
 from core.mixins import JsonDocumentForm
-from app_specifications.models import Specifications
+from app_specifications.models import Specifications, ValueSpecifications
 
 
 class SpecificationsInline(admin.StackedInline):
     model = Specifications
     max_num = 100
     extra = 0
+    autocomplete_fields = ['value_specification']
     formfield_overrides = {models.JSONField: {"widget": FlatJsonWidget}}
 
 
@@ -25,6 +26,7 @@ class SpecificationAdmin(admin.ModelAdmin):
     ]
     autocomplete_fields = [
         "product",
+        "value_specification",
     ]
     fieldsets = (
         (
@@ -34,6 +36,31 @@ class SpecificationAdmin(admin.ModelAdmin):
                     "name_specification",
                     "value_specification",
                     "product",
+                )
+            },
+        ),
+        (
+            "Переводы на языки",
+            {"fields": ("additional_data",)},
+        ),
+    )
+
+
+@admin.register(ValueSpecifications)
+class ValueSpecificationsAdmin(admin.ModelAdmin):
+    form = JsonDocumentForm
+    list_display = [
+        "value_specification",
+    ]
+    search_fields = [
+        "value_specification",
+    ]
+    fieldsets = (
+        (
+            "Значение Характеристики",
+            {
+                "fields": (
+                    "value_specification",
                 )
             },
         ),
