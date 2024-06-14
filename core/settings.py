@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "app_manage_banners",
     "app_brands",
     "app_specifications",
+    "app_descriptions",
     # для работы с изображениями
     "easy_thumbnails",
     "image_cropping",
