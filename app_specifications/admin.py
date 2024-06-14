@@ -11,7 +11,7 @@ class SpecificationsInline(admin.StackedInline):
     model = Specifications
     max_num = 100
     extra = 0
-    autocomplete_fields = ['value_specification']
+    autocomplete_fields = ["value_specification"]
     formfield_overrides = {models.JSONField: {"widget": FlatJsonWidget}}
 
 
@@ -58,11 +58,7 @@ class ValueSpecificationsAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "Значение Характеристики",
-            {
-                "fields": (
-                    "value_specification",
-                )
-            },
+            {"fields": ("value_specification",)},
         ),
         (
             "Переводы на языки",

@@ -30,7 +30,7 @@ class JSONFieldsMixin(DefaultAdditionalDataMixin, models.Model):
         blank=True,
         null=True,
         # Используем метод из базового миксина
-        default=DefaultAdditionalDataMixin.default_additional_data,  
+        default=DefaultAdditionalDataMixin.default_additional_data,
     )
 
     class Meta:
@@ -45,7 +45,7 @@ class JSONFieldsDescMixin(DefaultAdditionalDataMixin, models.Model):
         blank=True,
         null=True,
         # Используем метод из базового миксина
-        default=DefaultAdditionalDataMixin.default_additional_data,  
+        default=DefaultAdditionalDataMixin.default_additional_data,
     )
 
     class Meta:
