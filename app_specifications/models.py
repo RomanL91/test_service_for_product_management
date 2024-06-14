@@ -9,9 +9,12 @@ class Specifications(JSONFieldsMixin, models.Model):
         max_length=150,
         verbose_name="Название характеристики",
     )
-    value_specification = models.CharField(
-        max_length=150,
+    value_specification = models.ForeignKey(
+        "ValueSpecifications",
+        on_delete=models.SET_NULL,
+        null=True,
         verbose_name="Значение характеристики",
+        help_text="Выберите значение для характеристики или создайте новое"
     )
     product = models.ForeignKey(
         Products,
@@ -30,6 +33,20 @@ class Specifications(JSONFieldsMixin, models.Model):
 
     def __str__(self) -> str:
         return self.name_specification
+    
+
+class ValueSpecifications(JSONFieldsMixin, models.Model):
+    value_specification = models.CharField(
+        max_length=150,
+        verbose_name="Значение характеристики",
+    )
+
+    class Meta:
+        verbose_name = "Значение характеристики"
+        verbose_name_plural = "Значение характеристик"
+
+    def __str__(self) -> str:
+        return self.value_specification
 
 
 # TODO
