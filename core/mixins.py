@@ -10,20 +10,42 @@ from django.contrib.admin.widgets import AdminFileWidget
 
 class JsonDocumentForm(forms.ModelForm):
     class Meta:
-        widgets = {"additional_data": FlatJsonWidget}
+        widgets = {
+            "additional_data": FlatJsonWidget,
+            "additional_data_to_desc": FlatJsonWidget,
+        }
 
 
-class JSONFieldsMixin(models.Model):
+class DefaultAdditionalDataMixin:
+    @staticmethod
     def default_additional_data():
         return {"RU": "", "EN": "", "KZ": ""}
 
+
+class JSONFieldsMixin(DefaultAdditionalDataMixin, models.Model):
     additional_data = models.JSONField(
         verbose_name="Дополнительные данные",
         help_text="""Данные поля предназначены для перевода на другие языки.<br>
                         Можно добавить сколько угодно переводов.""",
         blank=True,
         null=True,
-        default=default_additional_data(),
+        # Используем метод из базового миксина
+        default=DefaultAdditionalDataMixin.default_additional_data,  
+    )
+
+    class Meta:
+        abstract = True
+
+
+class JSONFieldsDescMixin(DefaultAdditionalDataMixin, models.Model):
+    additional_data_to_desc = models.JSONField(
+        verbose_name="Дополнительные данные для перевода описания",
+        help_text="""Данные поля предназначены для перевода на другие языки.<br>
+                        Можно добавить сколько угодно переводов.""",
+        blank=True,
+        null=True,
+        # Используем метод из базового миксина
+        default=DefaultAdditionalDataMixin.default_additional_data,  
     )
 
     class Meta:
