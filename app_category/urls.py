@@ -4,7 +4,11 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from app_category.views import CategoryViewSet
 
 
-translate_category_list = CategoryViewSet.as_view({"get": "lang"})
+translate_category_list = CategoryViewSet.as_view(
+    {
+        "get": "lang",
+    }
+)
 
 translate_category_detail = CategoryViewSet.as_view(
     {
