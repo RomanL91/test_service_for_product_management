@@ -68,9 +68,9 @@ class ProductsListSerializer(BaseProductSerializer):
 
 
 class ProductsDetailSerializer(BaseProductSerializer):
+    category = CategorySerializer(read_only=True)
     related_product = RelatedProductsSerializer(many=True, read_only=True)
 
     class Meta:
         model = Products
         fields = "__all__"
-

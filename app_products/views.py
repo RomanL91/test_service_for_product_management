@@ -42,13 +42,8 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
             lang = lang.upper()
             data_translate = []
             for el in data:
-                pass_value = el["name_product"]
                 additional_data = el.get("additional_data", {})
-                el.update(
-                    {
-                        "name_product": pass_value,
-                    }
-                )
+
                 if lang in additional_data:
                     value_translate = additional_data[lang]
 
@@ -60,9 +55,29 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
                         )
                 data_translate.append(el)
             if detail:
+                print(f"----data_translate -->> {data_translate}")
+
+                category_product = data_translate[0]["category"]
+                category_product = self.category_product_translate_field(
+                    category_product, lang
+                )
+
                 related_product = data_translate[0]["related_product"]
-                translate_related_product = self.process_translation(related_product, lang)
-                related_product = translate_related_product
+                related_product = self.related_product_translate_field(
+                    related_product, lang
+                )
                 return data_translate[0]
             return data_translate
         return data
+
+    def related_product_translate_field(self, list_related_product, lang):
+        return self.process_translation(list_related_product, lang)
+
+    def category_product_translate_field(self, field, lang):
+        traslate_data = field.get("additional_data", {})
+        traslate_value = traslate_data.get(lang, field["name_category"])
+
+        if traslate_value != "":
+            field["name_category"] = traslate_value
+
+        return field
