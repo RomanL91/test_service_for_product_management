@@ -47,9 +47,9 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = [
         "get_preview",
     ]
-    # filter_horizontal = [
-    #     "related_products",
-    # ]
+    filter_horizontal = [
+        "related_product",
+    ]
     fieldsets = (
         (
             "О продукте",
@@ -67,6 +67,10 @@ class ProductAdmin(admin.ModelAdmin):
         (
             "бренд",
             {"fields": ("brand",)},
+        ),
+        (
+            "Сопутсвующий товар",
+            {"fields": ("related_product",)},
         ),
     )
 
