@@ -24,6 +24,13 @@ class Products(JSONFieldsMixin, models.Model):
         verbose_name="бренд продукта",
     )
 
+    related_product = models.ManyToManyField(
+        "self",
+        null=True,
+        blank=True,
+        verbose_name="Сопутствующий товар",
+    )
+
     class Meta:
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
