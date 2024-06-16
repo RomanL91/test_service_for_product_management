@@ -16,11 +16,11 @@ translate_category_detail = CategoryViewSet.as_view(
     }
 )
 
-translation_products_category = CategoryViewSet.as_view(
-    {
-        "get": "products",
-    }
-)
+# translation_products_category = CategoryViewSet.as_view(
+#     {
+#         "get": "products",
+#     }
+# )
 
 
 urlpatterns = [
@@ -28,10 +28,10 @@ urlpatterns = [
     re_path(
         r"^api/v1/category/(?P<pk>\d+)/lang_/(?P<lang>\w+)/$", translate_category_detail
     ),
-    re_path(
-        r"^api/v1/category/(?P<pk>\d+)/products/(?P<lang>\w+)/$",
-        translation_products_category,
-    ),
+    # re_path(
+    #     r"^api/v1/category/(?P<pk>\d+)/products/(?P<lang>\w+)/$",
+    #     translation_products_category,
+    # ),
 ]
 
 urlpatterns_category_suff = format_suffix_patterns(urlpatterns)

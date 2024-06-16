@@ -31,21 +31,21 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(response_data)
 
     # Метод представления для получения списка продуктов по категории
-    @action(detail=True, methods=["get"])
-    def products(self, request, pk=None, lang=None, *args):
-        # Получаем объект категории по её id (pk)
-        category = self.get_object()
+    # @action(detail=True, methods=["get"])
+    # def products(self, request, pk=None, lang=None, *args):
+    #     # Получаем объект категории по её id (pk)
+    #     category = self.get_object()
 
-        # Получаем все продукты для данной категории и ее подкатегорий
-        products = self.get_products_by_category(category)
+    #     # Получаем все продукты для данной категории и ее подкатегорий
+    #     products = self.get_products_by_category(category)
 
-        # Применяем пагинацию к результатам запроса
-        paginator = LimitOffsetPagination()
-        paginated_products = paginator.paginate_queryset(products, request)
+    #     # Применяем пагинацию к результатам запроса
+    #     paginator = LimitOffsetPagination()
+    #     paginated_products = paginator.paginate_queryset(products, request)
 
-        # Сериализуем товары
-        serializer = ProductsSerializer(paginated_products, many=True)
-        return paginator.get_paginated_response(serializer.data)
+    #     # Сериализуем товары
+    #     serializer = ProductsSerializer(paginated_products, many=True)
+    #     return paginator.get_paginated_response(serializer.data)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
