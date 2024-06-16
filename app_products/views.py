@@ -3,12 +3,19 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from app_products.models import Products
-from app_products.serializers import ProductsSerializer
+from app_products.serializers import ProductsListSerializer, ProductsDetailSerializer
 
 
 class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Products.objects.all()
-    serializer_class = ProductsSerializer
+    serializer_class = ProductsListSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Для представления instance изменяем класс серализатора
+        self.serializer_class = ProductsDetailSerializer
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
     def lang(self, request, lang=None, *args, **kwargs):
@@ -25,6 +32,7 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["get"])
     def lang_(self, request, lang=None, *args, **kwargs):
         instance = self.get_object()
+        self.serializer_class = ProductsDetailSerializer
         serializer = self.get_serializer(instance)
         response_data = self.process_translation([serializer.data], lang, True)
         return Response(response_data)
@@ -52,6 +60,9 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
                         )
                 data_translate.append(el)
             if detail:
+                related_product = data_translate[0]["related_product"]
+                translate_related_product = self.process_translation(related_product, lang)
+                related_product = translate_related_product
                 return data_translate[0]
             return data_translate
         return data
