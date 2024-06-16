@@ -56,13 +56,21 @@ class RelatedProductsSerializer(BaseProductSerializer):
 
     def to_representation(self, instance: Products) -> dict:
         representation = super().to_representation(instance)
-        del representation["related_products"]
+        del representation["related_product"]
         return representation
 
 
-class ProductsSerializer(BaseProductSerializer):
-    related_products = RelatedProductsSerializer(many=True, read_only=True)
+class ProductsListSerializer(BaseProductSerializer):
 
     class Meta:
         model = Products
         fields = "__all__"
+
+
+class ProductsDetailSerializer(BaseProductSerializer):
+    related_product = RelatedProductsSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Products
+        fields = "__all__"
+
