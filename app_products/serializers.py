@@ -1,7 +1,10 @@
 from typing import List
 from rest_framework import serializers
+
 from app_products.models import Products, ProductImage
+
 from app_category.serializers import CategorySerializer
+from app_brands.serializers import BrandsSerializer
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -57,6 +60,8 @@ class RelatedProductsSerializer(BaseProductSerializer):
     def to_representation(self, instance: Products) -> dict:
         representation = super().to_representation(instance)
         del representation["related_product"]
+        del representation["category"]
+        del representation["brand"]
         return representation
 
 
@@ -70,6 +75,7 @@ class ProductsListSerializer(BaseProductSerializer):
 class ProductsDetailSerializer(BaseProductSerializer):
     category = CategorySerializer(read_only=True)
     related_product = RelatedProductsSerializer(many=True, read_only=True)
+    brand = BrandsSerializer(read_only=True)
 
     class Meta:
         model = Products

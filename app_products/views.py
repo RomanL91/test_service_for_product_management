@@ -58,8 +58,13 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
                 print(f"----data_translate -->> {data_translate}")
 
                 category_product = data_translate[0]["category"]
-                category_product = self.category_product_translate_field(
-                    category_product, lang
+                category_product = self.fields_product_translate(
+                    category_product, "name_category", lang
+                )
+
+                brand_product = data_translate[0]["brand"]
+                brand_product = self.fields_product_translate(
+                    brand_product, "name_brand", lang
                 )
 
                 related_product = data_translate[0]["related_product"]
@@ -73,11 +78,11 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     def related_product_translate_field(self, list_related_product, lang):
         return self.process_translation(list_related_product, lang)
 
-    def category_product_translate_field(self, field, lang):
+    def fields_product_translate(self, field, name_field, lang):
         traslate_data = field.get("additional_data", {})
-        traslate_value = traslate_data.get(lang, field["name_category"])
+        traslate_value = traslate_data.get(lang, field[name_field])
 
         if traslate_value != "":
-            field["name_category"] = traslate_value
+            field[name_field] = traslate_value
 
         return field
