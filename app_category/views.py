@@ -3,13 +3,11 @@ from collections import defaultdict
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 
 from app_category.models import Category
 from app_category.serializers import CategorySerializer
 
 from app_products.models import Products
-from app_products.serializers import ProductsSerializer
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
