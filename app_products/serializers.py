@@ -21,7 +21,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         brand (BrandSerializer): Сериализатор бренда продукта.
     """
 
-    category = CategorySerializer()
+    # category = CategorySerializer() # TODO думаю это не нужно в выводе списка
 
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.
