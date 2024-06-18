@@ -1,12 +1,12 @@
 from django.db import models
 
-from core.mixins import JSONFieldsMixin
+from core.mixins import JSONFieldsMixin, SlugModelMixin
 
 from app_brands.models import Brands
 from app_category.models import Category
 
 
-class Products(JSONFieldsMixin, models.Model):
+class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
     name_product = models.CharField(
         max_length=150,
         verbose_name="Наименование продукта",
