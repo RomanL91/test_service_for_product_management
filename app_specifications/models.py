@@ -4,10 +4,14 @@ from core.mixins import JSONFieldsMixin
 from app_products.models import Products
 
 
-class Specifications(JSONFieldsMixin, models.Model):
-    name_specification = models.CharField(
-        max_length=150,
+class Specifications(models.Model):
+    name_specification = models.ForeignKey(
+        'NameSpecifications',
+        on_delete=models.SET_NULL,
+        null=True,
         verbose_name="Название характеристики",
+        help_text="Выберите название для характеристики или создайте новое",
+
     )
     value_specification = models.ForeignKey(
         "ValueSpecifications",
@@ -30,6 +34,19 @@ class Specifications(JSONFieldsMixin, models.Model):
         verbose_name_plural = "Характеристики"
         # TODO ограничение уникальности сочетания
         # имени характеристики и продукта
+
+    def __str__(self) -> str:
+        return str(self.name_specification)
+    
+class NameSpecifications(JSONFieldsMixin, models.Model):
+    name_specification = models.CharField(
+        max_length=150,
+        verbose_name="Название характеристики",
+    )
+
+    class Meta:
+        verbose_name = "Название характеристики"
+        verbose_name_plural = "Название характеристик"
 
     def __str__(self) -> str:
         return self.name_specification
