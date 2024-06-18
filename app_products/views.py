@@ -1,3 +1,6 @@
+
+from django.shortcuts import get_object_or_404
+
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -9,9 +12,10 @@ from app_products.serializers import ProductsListSerializer, ProductsDetailSeria
 class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Products.objects.all()
     serializer_class = ProductsListSerializer
+    lookup_field = "slug_prod"
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def retrieve(self, request, slug_prod=None, *args, **kwargs):
+        instance = self.get_object_by_slug(slug_prod)
         # Для представления instance изменяем класс серализатора
         self.serializer_class = ProductsDetailSerializer
         serializer = self.get_serializer(instance)
@@ -30,8 +34,8 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(data_translate)
 
     @action(detail=True, methods=["get"])
-    def lang_(self, request, lang=None, *args, **kwargs):
-        instance = self.get_object()
+    def lang_(self, request, lang=None, slug_prod=None, *args, **kwargs):
+        instance = self.get_object_by_slug(slug_prod)
         self.serializer_class = ProductsDetailSerializer
         serializer = self.get_serializer(instance)
         response_data = self.process_translation([serializer.data], lang, True)
@@ -85,3 +89,6 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
             field[name_field] = traslate_value
 
         return field
+
+    def get_object_by_slug(self, slug):
+        return get_object_or_404(self.get_queryset(), slug=slug)
