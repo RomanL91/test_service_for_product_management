@@ -29,7 +29,7 @@ class CategoryAdmin(DjangoMpttAdmin):
     fieldsets = (
         (
             "О категории",
-            {"fields": ("name_category", "parent")},
+            {"fields": ("name_category", "slug", "parent")},
         ),
         (
             "Переводы на языки",
@@ -37,3 +37,4 @@ class CategoryAdmin(DjangoMpttAdmin):
             {"fields": ("additional_data",)},
         ),
     )
+    prepopulated_fields = {"slug": ("name_category",)}
