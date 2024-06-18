@@ -4,7 +4,11 @@ from django.contrib import admin
 from flat_json_widget.widgets import FlatJsonWidget
 
 from core.mixins import JsonDocumentForm
-from app_specifications.models import Specifications, NameSpecifications, ValueSpecifications
+from app_specifications.models import (
+    Specifications,
+    NameSpecifications,
+    ValueSpecifications,
+)
 
 
 class SpecificationsInline(admin.StackedInline):
@@ -62,6 +66,7 @@ class NameSpecificationsAdmin(admin.ModelAdmin):
             {"fields": ("additional_data",)},
         ),
     )
+
 
 @admin.register(ValueSpecifications)
 class ValueSpecificationsAdmin(admin.ModelAdmin):

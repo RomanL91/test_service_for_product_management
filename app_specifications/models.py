@@ -6,12 +6,11 @@ from app_products.models import Products
 
 class Specifications(models.Model):
     name_specification = models.ForeignKey(
-        'NameSpecifications',
+        "NameSpecifications",
         on_delete=models.SET_NULL,
         null=True,
         verbose_name="Название характеристики",
         help_text="Выберите название для характеристики или создайте новое",
-
     )
     value_specification = models.ForeignKey(
         "ValueSpecifications",
@@ -37,7 +36,8 @@ class Specifications(models.Model):
 
     def __str__(self) -> str:
         return str(self.name_specification)
-    
+
+
 class NameSpecifications(JSONFieldsMixin, models.Model):
     name_specification = models.CharField(
         max_length=150,

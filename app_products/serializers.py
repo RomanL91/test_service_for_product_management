@@ -22,7 +22,10 @@ class BaseProductSerializer(serializers.ModelSerializer):
 
     def get_specifications(self, instance: Products) -> List[str]:
         all_entity_specifications_product = instance.specifications_set.all()
-        return [SpecificationsSerializer(entity).data for entity in all_entity_specifications_product]
+        return [
+            SpecificationsSerializer(entity).data
+            for entity in all_entity_specifications_product
+        ]
 
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.
