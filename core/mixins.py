@@ -52,6 +52,15 @@ class JSONFieldsDescMixin(DefaultAdditionalDataMixin, models.Model):
         abstract = True
 
 
+class SlugModelMixin(models.Model):
+    slug = models.SlugField(
+        max_length=255, unique=True, db_index=True, verbose_name="URL"
+    )
+
+    class Meta:
+        abstract = True
+
+
 class CustomAdminFileWidget(AdminFileWidget):
     def render(self, name, value, attrs=None, renderer=None):
         result = []
