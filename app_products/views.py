@@ -1,11 +1,10 @@
-
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.response import Response
-from rest_framework.decorators import action
 
 from app_products.models import Products
+from app_category.models import Category
 from app_products.serializers import ProductsListSerializer, ProductsDetailSerializer
 
 
@@ -21,7 +20,6 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
-    @action(detail=False, methods=["get"])
     def lang(self, request, lang=None, *args, **kwargs):
         products_queryset = self.get_queryset()
         page = self.paginate_queryset(products_queryset)
@@ -33,13 +31,17 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         data_translate = self.process_translation(serializer.data, lang)
         return Response(data_translate)
 
-    @action(detail=True, methods=["get"])
     def lang_(self, request, lang=None, slug_prod=None, *args, **kwargs):
         instance = self.get_object_by_slug(slug_prod)
         self.serializer_class = ProductsDetailSerializer
         serializer = self.get_serializer(instance)
         response_data = self.process_translation([serializer.data], lang, True)
         return Response(response_data)
+
+    def filter_by_cat(self, request, slug_cat=None, *args, **kwargs):
+        products_queryset = self.get_products_by_category(slug_cat)
+        serializer = self.get_serializer(products_queryset, many=True)
+        return Response(serializer.data)
 
     def process_translation(self, data, lang, detail=False):
         if lang is not None:
@@ -92,3 +94,20 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_object_by_slug(self, slug):
         return get_object_or_404(self.get_queryset(), slug=slug)
+
+    def get_products_by_category(self, slug_cat):
+        # Получаем все товары, связанные с этой категорией
+        products_queryset = self.queryset.filter(category__slug=slug_cat)
+
+        # Если в категории нет продуктов, рекурсивно получаем продукты из всех подкатегорий
+        if not products_queryset.exists():
+            category = get_object_or_404(Category, slug=slug_cat)
+
+            # Получаем все подкатегории данной категории
+            subcategories = category.children.all()
+
+            # Рекурсивно обходим каждую подкатегорию
+            for subcategory in subcategories:
+                products_queryset |= self.get_products_by_category(subcategory.slug)
+
+        return products_queryset

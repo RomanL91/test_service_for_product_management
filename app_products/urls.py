@@ -20,13 +20,29 @@ translate_products_detail = ProductsViewSet.as_view(
     }
 )
 
+filter_by_cat = ProductsViewSet.as_view(
+    {
+        "get": "filter_by_cat",
+    }
+)
+translate_products_filter_by_cat = ProductsViewSet.as_view(
+    {
+        "get": "lang",
+    }
+)
+
 
 urlpatterns = [
     re_path(r"^api/v1/products/lang/(?P<lang>\w+)/$", translate_products_list),
-    re_path(r"^api/v1/category/(?P<slug_prod>[-\w]+)/$", product_detail),
+    re_path(r"^api/v1/products/(?P<slug_prod>[-\w]+)/$", product_detail),
     re_path(
         r"^api/v1/products/(?P<slug_prod>[-\w]+)/lang_/(?P<lang>\w+)/$",
         translate_products_detail,
+    ),
+    re_path(r"^api/v1/products/filter_by_cat/(?P<slug_cat>[-\w]+)/$", filter_by_cat),
+    re_path(
+        r"^api/v1/products/filter_by_cat/(?P<slug_cat>[-\w]+)/lang/(?P<lang>\w+)/$",
+        translate_products_filter_by_cat,
     ),
 ]
 
