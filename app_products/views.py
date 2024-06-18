@@ -55,22 +55,21 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
                         )
                 data_translate.append(el)
             if detail:
-                print(f"----data_translate -->> {data_translate}")
+                pass
+                # category_product = data_translate[0]["category"]
+                # category_product = self.fields_product_translate(
+                #     category_product, "name_category", lang
+                # )
 
-                category_product = data_translate[0]["category"]
-                category_product = self.fields_product_translate(
-                    category_product, "name_category", lang
-                )
+                # brand_product = data_translate[0]["brand"]
+                # brand_product = self.fields_product_translate(
+                #     brand_product, "name_brand", lang
+                # )
 
-                brand_product = data_translate[0]["brand"]
-                brand_product = self.fields_product_translate(
-                    brand_product, "name_brand", lang
-                )
-
-                related_product = data_translate[0]["related_product"]
-                related_product = self.related_product_translate_field(
-                    related_product, lang
-                )
+                # related_product = data_translate[0]["related_product"]
+                # related_product = self.related_product_translate_field(
+                #     related_product, lang
+                # )
                 return data_translate[0]
             return data_translate
         return data

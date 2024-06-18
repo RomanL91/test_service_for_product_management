@@ -50,7 +50,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         """
         representation = super().to_representation(instance)
         representation["list_url_to_image"] = self.get_image_urls(instance)
-        representation["list_specifications"] = self.get_specifications(instance)
+        # representation["list_specifications"] = self.get_specifications(instance)
         return representation
 
 
@@ -75,9 +75,9 @@ class ProductsListSerializer(BaseProductSerializer):
 
 
 class ProductsDetailSerializer(BaseProductSerializer):
-    category = CategorySerializer(read_only=True)
-    related_product = RelatedProductsSerializer(many=True, read_only=True)
-    brand = BrandsSerializer(read_only=True)
+    # category = CategorySerializer(read_only=True)
+    # related_product = RelatedProductsSerializer(many=True, read_only=True)
+    # brand = BrandsSerializer(read_only=True)
 
     class Meta:
         model = Products
