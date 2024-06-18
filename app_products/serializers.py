@@ -5,6 +5,7 @@ from app_products.models import Products, ProductImage
 
 from app_category.serializers import CategorySerializer
 from app_brands.serializers import BrandsSerializer
+from app_specifications.serializers import SpecificationsSerializer
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -17,14 +18,11 @@ class BaseProductSerializer(serializers.ModelSerializer):
     """Сериализатор базового продукта.
     Этот сериализатор предоставляет базовую функциональность для сериализации продуктов,
     включая категорию и бренд, а также получение URL-адресов изображений продукта.
-
-
-    Args:
-        category (CategorySerializer): Сериализатор категории продукта.
-        brand (BrandSerializer): Сериализатор бренда продукта.
     """
 
-    # category = CategorySerializer() # TODO думаю это не нужно в выводе списка
+    def get_specifications(self, instance: Products) -> List[str]:
+        all_entity_specifications_product = instance.specifications_set.all()
+        return [SpecificationsSerializer(entity).data for entity in all_entity_specifications_product]
 
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.
@@ -49,6 +47,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         """
         representation = super().to_representation(instance)
         representation["list_url_to_image"] = self.get_image_urls(instance)
+        representation["list_specifications"] = self.get_specifications(instance)
         return representation
 
 

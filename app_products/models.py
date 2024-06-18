@@ -26,7 +26,6 @@ class Products(JSONFieldsMixin, models.Model):
 
     related_product = models.ManyToManyField(
         "self",
-        null=True,
         blank=True,
         verbose_name="Сопутствующий товар",
     )
