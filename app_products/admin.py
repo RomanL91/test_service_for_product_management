@@ -7,6 +7,7 @@ from core.mixins import JsonDocumentForm, CustomAdminFileWidget
 from app_products.models import Products, ProductImage
 from app_specifications.admin import SpecificationsInline
 from app_descriptions.admin import ProductDescriptionInline
+from app_sales_points.admin import StockInline
 
 # форма для вывода древовидной структуры категорий
 # from app_products.forms import ProductAdminForm
@@ -27,6 +28,7 @@ class ProductAdmin(admin.ModelAdmin):
         ProductImageInline,
         SpecificationsInline,
         ProductDescriptionInline,
+        StockInline,
     ]
     list_display = [
         "name_product",
