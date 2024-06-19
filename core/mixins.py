@@ -19,7 +19,11 @@ class JsonDocumentForm(forms.ModelForm):
 class DefaultAdditionalDataMixin:
     @staticmethod
     def default_additional_data():
-        return {"RU": "", "EN": "", "KZ": ""}
+        return {
+            # "RU": "",
+            "EN": "",
+            "KZ": "",
+        }
 
 
 class JSONFieldsMixin(DefaultAdditionalDataMixin, models.Model):
