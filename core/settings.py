@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "app_brands",
     "app_specifications",
     "app_descriptions",
+    "app_sales_points",
     # для работы с изображениями
     "easy_thumbnails",
     "image_cropping",
