@@ -2,6 +2,8 @@ from typing import List
 from rest_framework import serializers
 
 from app_products.models import Products, ProductImage
+from app_sales_points.models import Stock
+from app_specifications.models import Specifications
 
 from app_category.serializers import CategorySerializer
 from app_brands.serializers import BrandsSerializer
@@ -20,12 +22,15 @@ class BaseProductSerializer(serializers.ModelSerializer):
     включая категорию и бренд, а также получение URL-адресов изображений продукта.
     """
 
+    def get_related_entity_ids(self, instance: Products, related_model) -> List[int]:
+        all_related_entities = related_model.objects.filter(product=instance)
+        return [entity.id for entity in all_related_entities]
+
     def get_specifications(self, instance: Products) -> List[str]:
-        all_entity_specifications_product = instance.specifications_set.all()
-        return [
-            SpecificationsSerializer(entity).data
-            for entity in all_entity_specifications_product
-        ]
+        return self.get_related_entity_ids(instance, Specifications)
+    
+    def get_stocks(self, instance: Products) -> List[str]:
+        return self.get_related_entity_ids(instance, Stock)
 
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.
@@ -50,7 +55,9 @@ class BaseProductSerializer(serializers.ModelSerializer):
         """
         representation = super().to_representation(instance)
         representation["list_url_to_image"] = self.get_image_urls(instance)
+        del representation["related_product"]
         # representation["list_specifications"] = self.get_specifications(instance)
+        # representation["list_stocks"] = self.get_stocks(instance)
         return representation
 
 
@@ -82,3 +89,18 @@ class ProductsDetailSerializer(BaseProductSerializer):
     class Meta:
         model = Products
         fields = "__all__"
+
+    def to_representation(self, instance: Products) -> dict:
+        """Преобразует экземпляр продукта в представление JSON.
+
+        Args:
+            instance Экземпляр продукта.
+
+        Returns:
+            dict: Представление JSON продукта.
+        """
+        representation = super().to_representation(instance)
+        representation["list_url_to_image"] = self.get_image_urls(instance)
+        representation["list_specifications"] = self.get_specifications(instance)
+        representation["list_stocks"] = self.get_stocks(instance)
+        return representation
