@@ -8,6 +8,7 @@ from .router import router
 
 from app_category.urls import urlpatterns_category_suff
 from app_products.urls import urlpatterns_products_suff
+from app_sales_points.urls import urlpatterns_stocks_suff
 
 urlpatterns = (
     [
@@ -16,6 +17,7 @@ urlpatterns = (
     ]
     + urlpatterns_category_suff
     + urlpatterns_products_suff
+    + urlpatterns_stocks_suff
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 )
