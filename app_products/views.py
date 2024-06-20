@@ -5,7 +5,11 @@ from rest_framework.response import Response
 
 from app_products.models import Products
 from app_category.models import Category
-from app_products.serializers import ProductsListSerializer, ProductsDetailSerializer
+from app_products.serializers import (
+    ProductsListSerializer,
+    ProductsDetailSerializer,
+    PrductsListIDSerializer,
+)
 
 
 class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -111,3 +115,10 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
                 products_queryset |= self.get_products_by_category(subcategory.slug)
 
         return products_queryset
+
+    def ids(self, request):
+        self.serializer_class = PrductsListIDSerializer
+        products_queryset = self.get_queryset()
+        serializer = self.get_serializer(products_queryset, many=True)
+        ids = [el["id"] for el in serializer.data]
+        return Response(ids)
