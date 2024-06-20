@@ -116,9 +116,9 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
 
         return products_queryset
 
-    def ids(self, request):
+    def slugs(self, request):
         self.serializer_class = PrductsListIDSerializer
         products_queryset = self.get_queryset()
         serializer = self.get_serializer(products_queryset, many=True)
-        ids = [el["id"] for el in serializer.data]
-        return Response(ids)
+        slugs = [el["slug"] for el in serializer.data]
+        return Response(slugs)

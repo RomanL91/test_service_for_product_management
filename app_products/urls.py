@@ -30,9 +30,9 @@ translate_products_filter_by_cat = ProductsViewSet.as_view(
         "get": "lang",
     }
 )
-ids = ProductsViewSet.as_view(
+slugs = ProductsViewSet.as_view(
     {
-        "get": "ids",
+        "get": "slugs",
     }
 )
 
@@ -49,7 +49,7 @@ urlpatterns = [
         r"^api/v1/products/filter_by_cat/(?P<slug_cat>[-\w]+)/lang/(?P<lang>\w+)/$",
         translate_products_filter_by_cat,
     ),
-    re_path(r"^api/v1/products/all/ids/$", ids),
+    re_path(r"^api/v1/products/all/slugs/$", slugs),
 ]
 
 urlpatterns_products_suff = format_suffix_patterns(urlpatterns)

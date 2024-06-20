@@ -122,4 +122,4 @@ class ProductsDetailSerializer(BaseProductSerializer):
 class PrductsListIDSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
-        fields = ("id",)
+        fields = ("id", "slug",)
