@@ -1,4 +1,7 @@
 from typing import List
+
+from django.db.models import Min
+
 from rest_framework import serializers
 
 from app_products.models import Products, ProductImage
@@ -31,19 +34,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
 
     def get_stocks(self, instance: Products) -> List[str]:
         return self.get_related_entity_ids(instance, Stock)
-
-    # def extract_slugs_to_root(self, instance):
-    #     slugs = []
-    #     cat_obj = instance.category
-    #     slugs.append(cat_obj.get_additional_data_transate)
-
-    #     for _ in range(cat_obj.level):
-    #         if cat_obj.parent is not None:
-    #             cat_obj = cat_obj.parent
-    #             slugs.append(cat_obj.get_additional_data_transate)
-
-    #     return slugs
-
+    
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.
 
@@ -67,7 +58,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         """
         representation = super().to_representation(instance)
         representation["list_url_to_image"] = self.get_image_urls(instance)
-        del representation["related_product"]
+        # del representation["related_product"]
         # representation["list_specifications"] = self.get_specifications(instance)
         # representation["list_stocks"] = self.get_stocks(instance)
         return representation
@@ -86,11 +77,25 @@ class RelatedProductsSerializer(BaseProductSerializer):
         return representation
 
 
-class ProductsListSerializer(BaseProductSerializer):
+from django.db.models import Avg, Min
+class CityPriceSerializer(serializers.Serializer):
+    city = serializers.CharField()
+    min_price = serializers.DecimalField(max_digits=10, decimal_places=2)
 
+
+class ProductsListSerializer(BaseProductSerializer):
+    price = serializers.SerializerMethodField()
     class Meta:
         model = Products
         fields = "__all__"
+
+    def get_price(self, obj):
+        # Получаем минимальные цены по городам для данного продукта
+        city_prices = Stock.objects.filter(product=obj).values('warehouse__city').annotate(
+            min_price=Min('price')
+        ).values('warehouse__city', 'min_price')
+
+        return {item['warehouse__city']: item['min_price'] for item in city_prices}
 
 
 class ProductsDetailSerializer(BaseProductSerializer):

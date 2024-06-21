@@ -1,9 +1,11 @@
+from django.db.models import Min, OuterRef, Prefetch
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.response import Response
 
 from app_products.models import Products
+from app_sales_points.models import Stock
 from app_category.models import Category
 from app_products.serializers import (
     ProductsListSerializer,
@@ -36,6 +38,24 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, lang=None, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+
+        city_prices_subquery = Stock.objects.filter(
+            product_id=OuterRef('pk')
+        ).values(
+            'warehouse__city'
+        ).annotate(
+            min_price=Min('price')
+        ).values_list(
+            'warehouse__city', 'min_price'
+        )
+
+        # Аннотация в основном запросе
+        queryset = queryset.prefetch_related(
+            Prefetch(
+                'stocks',
+                queryset=Stock.objects.select_related('warehouse__city')
+            )
+        )
 
         if lang is not None:
             self.translate_manager.translate_queryset(queryset, "name_product", lang)
