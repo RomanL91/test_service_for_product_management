@@ -6,26 +6,19 @@ from app_category.views import CategoryViewSet
 
 translate_category_list = CategoryViewSet.as_view(
     {
-        "get": "lang",
-    }
-)
-category_detail = CategoryViewSet.as_view(
-    {
-        "get": "retrieve",
+        "get": "list",
     }
 )
 translate_category_detail = CategoryViewSet.as_view(
     {
-        "get": "lang_",
+        "get": "retrieve",
     }
 )
 
-
 urlpatterns = [
     re_path(r"^api/v1/category/lang/(?P<lang>\w+)/$", translate_category_list),
-    re_path(r"^api/v1/category/(?P<slug_cat>[-\w]+)/$", category_detail),
     re_path(
-        r"^api/v1/category/(?P<slug_cat>[-\w]+)/lang_/(?P<lang>\w+)/$",
+        r"^api/v1/category/(?P<slug_cat>[-\w]+)/lang/(?P<lang>\w+)/$",
         translate_category_detail,
     ),
 ]
