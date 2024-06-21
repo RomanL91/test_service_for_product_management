@@ -1,3 +1,5 @@
+import copy
+
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
@@ -46,13 +48,26 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         products_queryset = self.get_products_by_category(slug_cat)
         serializer = self.get_serializer(products_queryset, many=True)
         return Response(serializer.data)
+    
+    # def translate_bread_crumbs(self, el_prod, lang="RU"):
+    #     default_lang = "RU"
+    #     bread_crumbs = el_prod.get("bread_crumbs", [])
 
+    #     def get_bread_crumbs(language):
+    #         return [crumb[language] for crumb in bread_crumbs if crumb[language] != '']
+
+    #     try:
+    #         return get_bread_crumbs(lang)
+    #     except KeyError:
+    #         return get_bread_crumbs(default_lang)
+        
     def process_translation(self, data, lang, detail=False):
         if lang is not None:
             lang = lang.upper()
             data_translate = []
             for el in data:
                 additional_data = el.get("additional_data", {})
+                # el['bread_crumbs'] = self.translate_bread_crumbs(el, lang)
 
                 if lang in additional_data:
                     value_translate = additional_data[lang]
@@ -65,7 +80,6 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
                         )
                 data_translate.append(el)
             if detail:
-                pass
                 # category_product = data_translate[0]["category"]
                 # category_product = self.fields_product_translate(
                 #     category_product, "name_category", lang

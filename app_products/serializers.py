@@ -32,17 +32,17 @@ class BaseProductSerializer(serializers.ModelSerializer):
     def get_stocks(self, instance: Products) -> List[str]:
         return self.get_related_entity_ids(instance, Stock)
 
-    def extract_slugs_to_root(self, instance):
-        slugs = []
-        cat_obj = instance.category
-        slugs.append(cat_obj.slug)
+    # def extract_slugs_to_root(self, instance):
+    #     slugs = []
+    #     cat_obj = instance.category
+    #     slugs.append(cat_obj.get_additional_data_transate)
 
-        for _ in range(cat_obj.level):
-            if cat_obj.parent is not None:
-                cat_obj = cat_obj.parent
-                slugs.append(cat_obj.slug)
+    #     for _ in range(cat_obj.level):
+    #         if cat_obj.parent is not None:
+    #             cat_obj = cat_obj.parent
+    #             slugs.append(cat_obj.get_additional_data_transate)
 
-        return slugs
+    #     return slugs
 
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.
@@ -115,7 +115,7 @@ class ProductsDetailSerializer(BaseProductSerializer):
         representation["list_url_to_image"] = self.get_image_urls(instance)
         representation["list_specifications"] = self.get_specifications(instance)
         representation["list_stocks"] = self.get_stocks(instance)
-        representation["bread_crumbs"] = self.extract_slugs_to_root(instance)
+        # representation["bread_crumbs"] = self.extract_slugs_to_root(instance)
         return representation
 
 

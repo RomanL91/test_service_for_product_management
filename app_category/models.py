@@ -28,6 +28,12 @@ class Category(MPTTModel, JSONFieldsMixin, SlugModelMixin):
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
 
+    @property
+    def get_additional_data_transate(self):
+        name_default = self.name_category
+        self.additional_data["RU"] = name_default
+        return self.additional_data
+
     def __str__(self):
         return self.name_category
 
