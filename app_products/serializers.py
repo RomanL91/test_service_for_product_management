@@ -34,7 +34,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
 
     def get_stocks(self, instance: Products) -> List[str]:
         return self.get_related_entity_ids(instance, Stock)
-    
+
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.
 
@@ -77,7 +77,6 @@ class RelatedProductsSerializer(BaseProductSerializer):
         return representation
 
 
-from django.db.models import Avg, Min
 class CityPriceSerializer(serializers.Serializer):
     city = serializers.CharField()
     min_price = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -85,17 +84,21 @@ class CityPriceSerializer(serializers.Serializer):
 
 class ProductsListSerializer(BaseProductSerializer):
     price = serializers.SerializerMethodField()
+
     class Meta:
         model = Products
         fields = "__all__"
 
     def get_price(self, obj):
         # Получаем минимальные цены по городам для данного продукта
-        city_prices = Stock.objects.filter(product=obj).values('warehouse__city').annotate(
-            min_price=Min('price')
-        ).values('warehouse__city', 'min_price')
+        city_prices = (
+            Stock.objects.filter(product=obj)
+            .values("warehouse__city")
+            .annotate(min_price=Min("price"))
+            .values("warehouse__city", "min_price")
+        )
 
-        return {item['warehouse__city']: item['min_price'] for item in city_prices}
+        return {item["warehouse__city"]: item["min_price"] for item in city_prices}
 
 
 class ProductsDetailSerializer(BaseProductSerializer):

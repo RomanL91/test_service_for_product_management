@@ -18,3 +18,4 @@ class TranslateManager:
         if value_to_translate == "":
             value_to_translate = default_value
         el.__dict__.update({field_translate: value_to_translate})
+        return el
