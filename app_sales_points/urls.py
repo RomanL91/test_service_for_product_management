@@ -3,29 +3,21 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 from app_sales_points.views import StocksViewSet
 
-translate_stocks_list = StocksViewSet.as_view(
-    {
-        "get": "lang",
-    }
-)
+
 filter_by_prod = StocksViewSet.as_view(
     {
         "get": "filter_by_prod",
     }
 )
-translate_stocks_filter_by_prod = StocksViewSet.as_view(
-    {
-        "get": "lang",
-    }
-)
-
 
 urlpatterns = [
-    re_path(r"^api/v1/stocks/lang/(?P<lang>\w+)/$", translate_stocks_list),
-    re_path(r"^api/v1/stocks/filter_by_prod/(?P<slug_prod>[-\w]+)/$", filter_by_prod),
     re_path(
-        r"^api/v1/stocks/filter_by_prod/(?P<slug_prod>[-\w]+)/lang/(?P<lang>\w+)/$",
-        translate_stocks_filter_by_prod,
+        r"^api/v1/stocks/filter_by_prod/(?P<prod_pk>\d+)/(?P<city_pk>\d+)/$",
+        filter_by_prod,
+    ),
+    re_path(
+        r"^api/v1/stocks/filter_by_prod/(?P<prod_pk>\d+)/(?P<city_pk>\d+)/lang/(?P<lang>\w+)/$",
+        filter_by_prod,
     ),
 ]
 
