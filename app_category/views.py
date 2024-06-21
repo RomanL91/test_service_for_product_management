@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from app_category.models import Category
 from app_category.serializers import CategorySerializer
 
-from app_category.lang_utils import TranslateManager
+from core.lang_utils import TranslateManager
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
