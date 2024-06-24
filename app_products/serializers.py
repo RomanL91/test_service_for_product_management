@@ -29,6 +29,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
     Этот сериализатор предоставляет базовую функциональность для сериализации продуктов,
     включая категорию и бренд, а также получение URL-адресов изображений продукта.
     """
+
     price = serializers.SerializerMethodField()
     # price = CityPriceSerializer(many=True, read_only=True)
 
@@ -41,7 +42,10 @@ class BaseProductSerializer(serializers.ModelSerializer):
             .values("warehouse__city__name_city", "min_price")
         )
 
-        return {item["warehouse__city__name_city"]: item["min_price"] for item in city_prices}
+        return {
+            item["warehouse__city__name_city"]: item["min_price"]
+            for item in city_prices
+        }
 
     def get_related_entity_ids(self, instance: Products, related_model) -> List[int]:
         all_related_entities = related_model.objects.filter(product=instance)
@@ -117,8 +121,8 @@ class ProductsDetailSerializer(BaseProductSerializer):
             dict: Представление JSON продукта.
         """
         representation = super().to_representation(instance)
-        representation["list_url_to_image"] = self.get_image_urls(instance)
-        representation["list_specifications"] = self.get_specifications(instance)
+        # representation["list_url_to_image"] = self.get_image_urls(instance)
+        # representation["list_specifications"] = self.get_specifications(instance)
         representation["list_stocks"] = self.get_stocks(instance)
         # representation["bread_crumbs"] = self.extract_slugs_to_root(instance)
         return representation
