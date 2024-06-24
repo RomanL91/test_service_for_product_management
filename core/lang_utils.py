@@ -19,3 +19,16 @@ class TranslateManager:
             value_to_translate = default_value
         el.__dict__.update({field_translate: value_to_translate})
         return el
+
+    def translate_nested_fields(self, data, field_translate, lang):
+        lang = lang.upper()
+        for field_to_translate in field_translate:
+            for el in data:
+                if field_to_translate in el:
+                    default_value = el[field_to_translate]
+                    data_translate = el[field_to_translate].get("additional_data", {})
+                    value_translate = data_translate.get(
+                        lang, default_value[field_to_translate]
+                    )
+                    if value_translate != "":
+                        default_value.update({field_to_translate: value_translate})
