@@ -42,8 +42,12 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(serializer.data)
 
-    def list(self, request, lang=None, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+    def list(self, request, ids=None, lang=None, *args, **kwargs):
+        if ids:
+            ids_list = [int(i) for i in ids.split(",")]
+            queryset = self.get_products_by_ids(ids_list)
+        else:
+            queryset = self.filter_queryset(self.get_queryset())
 
         annotated_queryset = self.get_annotated_queryset(queryset)
 
@@ -111,3 +115,14 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(products_queryset, many=True)
         slugs = [el["slug"] for el in serializer.data]
         return Response(slugs)
+
+    def get_products_by_ids(self, ids_list):
+        """
+        Функция, которая принимает список идентификаторов и возвращает queryset продуктов.
+
+        :param ids_list: Список идентификаторов продуктов.
+        :return: QuerySet продуктов, соответствующих заданным идентификаторам.
+        """
+        # Фильтрация продуктов по списку идентификаторов
+        queryset = Products.objects.filter(id__in=ids_list)
+        return queryset
