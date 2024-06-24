@@ -104,28 +104,11 @@ class ProductsListSerializer(BaseProductSerializer):
 
 class ProductsDetailSerializer(BaseProductSerializer):
     category = CategorySerializer(read_only=True)
-    # related_product = RelatedProductsSerializer(many=True, read_only=True)
     brand = BrandsSerializer(read_only=True)
 
     class Meta:
         model = Products
         fields = "__all__"
-
-    def to_representation(self, instance: Products) -> dict:
-        """Преобразует экземпляр продукта в представление JSON.
-
-        Args:
-            instance Экземпляр продукта.
-
-        Returns:
-            dict: Представление JSON продукта.
-        """
-        representation = super().to_representation(instance)
-        # representation["list_url_to_image"] = self.get_image_urls(instance)
-        # representation["list_specifications"] = self.get_specifications(instance)
-        representation["list_stocks"] = self.get_stocks(instance)
-        # representation["bread_crumbs"] = self.extract_slugs_to_root(instance)
-        return representation
 
 
 class PrductsListIDSerializer(serializers.ModelSerializer):
