@@ -30,8 +30,12 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
 
         if lang is not None:
             self.translate_manager.translate_instance(instance, "name_product", lang)
-            self.translate_manager.translate_instance(instance.category, "name_category", lang)
-            self.translate_manager.translate_instance(instance.brand, "name_brand", lang)
+            self.translate_manager.translate_instance(
+                instance.category, "name_category", lang
+            )
+            self.translate_manager.translate_instance(
+                instance.brand, "name_brand", lang
+            )
 
         self.serializer_class = ProductsDetailSerializer
         serializer = self.get_serializer(instance)
@@ -44,7 +48,9 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         annotated_queryset = self.get_annotated_queryset(queryset)
 
         if lang is not None:
-            self.translate_manager.translate_queryset(annotated_queryset, "name_product", lang)
+            self.translate_manager.translate_queryset(
+                annotated_queryset, "name_product", lang
+            )
 
         page = self.paginate_queryset(annotated_queryset)
         if page is not None:
@@ -64,7 +70,7 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     def get_object_by_slug(self, slug):
         queryset = self.get_annotated_queryset(Products.objects.filter(slug=slug))
         return queryset.first()
-    
+
     def get_annotated_queryset(self, queryset):
         city_prices_subquery = (
             Stock.objects.filter(product_id=OuterRef("pk"))
