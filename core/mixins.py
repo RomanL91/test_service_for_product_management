@@ -40,6 +40,10 @@ class JSONFieldsMixin(DefaultAdditionalDataMixin, models.Model):
     class Meta:
         abstract = True
 
+    @property
+    def get_additional_data_transate(self):
+        return self.additional_data
+
 
 class JSONFieldsDescMixin(DefaultAdditionalDataMixin, models.Model):
     additional_data_to_desc = models.JSONField(

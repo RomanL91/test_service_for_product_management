@@ -1,11 +1,11 @@
-import copy
-
+from django.db.models import Min, OuterRef, Prefetch, Subquery
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
 from rest_framework.response import Response
 
 from app_products.models import Products
+from app_sales_points.models import Stock
 from app_category.models import Category
 from app_products.serializers import (
     ProductsListSerializer,
@@ -13,105 +13,74 @@ from app_products.serializers import (
     PrductsListIDSerializer,
 )
 
+from core.lang_utils import TranslateManager
+
 
 class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Products.objects.all()
     serializer_class = ProductsListSerializer
     lookup_field = "slug_prod"
 
-    def retrieve(self, request, slug_prod=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.translate_manager = TranslateManager(self)
+
+    def retrieve(self, request, slug_prod=None, lang=None, *args, **kwargs):
         instance = self.get_object_by_slug(slug_prod)
-        # Для представления instance изменяем класс серализатора
+
+        if lang is not None:
+            self.translate_manager.translate_instance(instance, "name_product", lang)
+            self.translate_manager.translate_instance(instance.category, "name_category", lang)
+            self.translate_manager.translate_instance(instance.brand, "name_brand", lang)
+
         self.serializer_class = ProductsDetailSerializer
         serializer = self.get_serializer(instance)
+
         return Response(serializer.data)
 
-    def lang(self, request, lang=None, *args, **kwargs):
-        products_queryset = self.get_queryset()
-        page = self.paginate_queryset(products_queryset)
+    def list(self, request, lang=None, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        annotated_queryset = self.get_annotated_queryset(queryset)
+
+        if lang is not None:
+            self.translate_manager.translate_queryset(annotated_queryset, "name_product", lang)
+
+        page = self.paginate_queryset(annotated_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            data_translate = self.process_translation(serializer.data, lang)
-            return self.get_paginated_response(data_translate)
-        serializer = self.get_serializer(products_queryset, many=True)
-        data_translate = self.process_translation(serializer.data, lang)
-        return Response(data_translate)
+            return self.get_paginated_response(serializer.data)
 
-    def lang_(self, request, lang=None, slug_prod=None, *args, **kwargs):
-        instance = self.get_object_by_slug(slug_prod)
-        self.serializer_class = ProductsDetailSerializer
-        serializer = self.get_serializer(instance)
-        response_data = self.process_translation([serializer.data], lang, True)
-        return Response(response_data)
-
-    def filter_by_cat(self, request, slug_cat=None, *args, **kwargs):
-        products_queryset = self.get_products_by_category(slug_cat)
-        serializer = self.get_serializer(products_queryset, many=True)
+        serializer = self.get_serializer(annotated_queryset, many=True)
         return Response(serializer.data)
-    
-    # def translate_bread_crumbs(self, el_prod, lang="RU"):
-    #     default_lang = "RU"
-    #     bread_crumbs = el_prod.get("bread_crumbs", [])
 
-    #     def get_bread_crumbs(language):
-    #         return [crumb[language] for crumb in bread_crumbs if crumb[language] != '']
-
-    #     try:
-    #         return get_bread_crumbs(lang)
-    #     except KeyError:
-    #         return get_bread_crumbs(default_lang)
-        
-    def process_translation(self, data, lang, detail=False):
+    def filter_by_cat(self, request, slug_cat=None, lang=None, *args, **kwargs):
+        queryset = self.get_products_by_category(slug_cat)
         if lang is not None:
-            lang = lang.upper()
-            data_translate = []
-            for el in data:
-                additional_data = el.get("additional_data", {})
-                # el['bread_crumbs'] = self.translate_bread_crumbs(el, lang)
-
-                if lang in additional_data:
-                    value_translate = additional_data[lang]
-
-                    if value_translate:
-                        el.update(
-                            {
-                                "name_product": value_translate,
-                            }
-                        )
-                data_translate.append(el)
-            if detail:
-                # category_product = data_translate[0]["category"]
-                # category_product = self.fields_product_translate(
-                #     category_product, "name_category", lang
-                # )
-
-                # brand_product = data_translate[0]["brand"]
-                # brand_product = self.fields_product_translate(
-                #     brand_product, "name_brand", lang
-                # )
-
-                # related_product = data_translate[0]["related_product"]
-                # related_product = self.related_product_translate_field(
-                #     related_product, lang
-                # )
-                return data_translate[0]
-            return data_translate
-        return data
-
-    def related_product_translate_field(self, list_related_product, lang):
-        return self.process_translation(list_related_product, lang)
-
-    def fields_product_translate(self, field, name_field, lang):
-        traslate_data = field.get("additional_data", {})
-        traslate_value = traslate_data.get(lang, field[name_field])
-
-        if traslate_value != "":
-            field[name_field] = traslate_value
-
-        return field
+            self.translate_manager.translate_queryset(queryset, "name_product", lang)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     def get_object_by_slug(self, slug):
-        return get_object_or_404(self.get_queryset(), slug=slug)
+        queryset = self.get_annotated_queryset(Products.objects.filter(slug=slug))
+        return queryset.first()
+    
+    def get_annotated_queryset(self, queryset):
+        city_prices_subquery = (
+            Stock.objects.filter(product_id=OuterRef("pk"))
+            .values("warehouse__city")
+            .annotate(min_price=Min("price"))
+            .values("min_price")  # Возвращаем только один столбец
+        )
+
+        return queryset.annotate(
+            city_prices=Subquery(city_prices_subquery)
+        ).prefetch_related(
+            Prefetch(
+                "stocks",
+                queryset=Stock.objects.select_related("warehouse__city"),
+            )
+        )
 
     def get_products_by_category(self, slug_cat):
         # Получаем все товары, связанные с этой категорией
