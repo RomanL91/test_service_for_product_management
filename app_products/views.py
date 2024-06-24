@@ -1,4 +1,4 @@
-from django.db.models import Min, OuterRef, Prefetch
+from django.db.models import Min, OuterRef, Prefetch, Subquery
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
@@ -30,6 +30,8 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
 
         if lang is not None:
             self.translate_manager.translate_instance(instance, "name_product", lang)
+            self.translate_manager.translate_instance(instance.category, "name_category", lang)
+            self.translate_manager.translate_instance(instance.brand, "name_brand", lang)
 
         self.serializer_class = ProductsDetailSerializer
         serializer = self.get_serializer(instance)
@@ -39,30 +41,17 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     def list(self, request, lang=None, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        city_prices_subquery = (
-            Stock.objects.filter(product_id=OuterRef("pk"))
-            .values("warehouse__city")
-            .annotate(min_price=Min("price"))
-            .values_list("warehouse__city", "min_price")
-        )
-
-        # Аннотация в основном запросе
-        queryset = queryset.prefetch_related(
-            Prefetch(
-                "stocks",
-                queryset=Stock.objects.select_related("warehouse__city"),
-            )
-        )
+        annotated_queryset = self.get_annotated_queryset(queryset)
 
         if lang is not None:
-            self.translate_manager.translate_queryset(queryset, "name_product", lang)
+            self.translate_manager.translate_queryset(annotated_queryset, "name_product", lang)
 
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(annotated_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(annotated_queryset, many=True)
         return Response(serializer.data)
 
     def filter_by_cat(self, request, slug_cat=None, lang=None, *args, **kwargs):
@@ -73,7 +62,25 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
     def get_object_by_slug(self, slug):
-        return get_object_or_404(self.get_queryset(), slug=slug)
+        queryset = self.get_annotated_queryset(Products.objects.filter(slug=slug))
+        return queryset.first()
+    
+    def get_annotated_queryset(self, queryset):
+        city_prices_subquery = (
+            Stock.objects.filter(product_id=OuterRef("pk"))
+            .values("warehouse__city")
+            .annotate(min_price=Min("price"))
+            .values("min_price")  # Возвращаем только один столбец
+        )
+
+        return queryset.annotate(
+            city_prices=Subquery(city_prices_subquery)
+        ).prefetch_related(
+            Prefetch(
+                "stocks",
+                queryset=Stock.objects.select_related("warehouse__city"),
+            )
+        )
 
     def get_products_by_category(self, slug_cat):
         # Получаем все товары, связанные с этой категорией
