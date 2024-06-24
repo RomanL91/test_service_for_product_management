@@ -19,11 +19,29 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class CityPriceSerializer(serializers.Serializer):
+    city = serializers.CharField()
+    min_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+
 class BaseProductSerializer(serializers.ModelSerializer):
     """Сериализатор базового продукта.
     Этот сериализатор предоставляет базовую функциональность для сериализации продуктов,
     включая категорию и бренд, а также получение URL-адресов изображений продукта.
     """
+    price = serializers.SerializerMethodField()
+    # price = CityPriceSerializer(many=True, read_only=True)
+
+    def get_price(self, obj):
+        # Получаем минимальные цены по городам для данного продукта
+        city_prices = (
+            Stock.objects.filter(product=obj)
+            .values("warehouse__city")
+            .annotate(min_price=Min("price"))
+            .values("warehouse__city__name_city", "min_price")
+        )
+
+        return {item["warehouse__city__name_city"]: item["min_price"] for item in city_prices}
 
     def get_related_entity_ids(self, instance: Products, related_model) -> List[int]:
         all_related_entities = related_model.objects.filter(product=instance)
@@ -67,44 +85,23 @@ class BaseProductSerializer(serializers.ModelSerializer):
 class RelatedProductsSerializer(BaseProductSerializer):
     class Meta:
         model = Products
-        fields = "__all__"
-
-    def to_representation(self, instance: Products) -> dict:
-        representation = super().to_representation(instance)
-        del representation["related_product"]
-        del representation["category"]
-        del representation["brand"]
-        return representation
-
-
-class CityPriceSerializer(serializers.Serializer):
-    city = serializers.CharField()
-    min_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+        fields = (
+            "id",
+            "name_product",
+            "additional_data",
+        )
 
 
 class ProductsListSerializer(BaseProductSerializer):
-    price = serializers.SerializerMethodField()
-
     class Meta:
         model = Products
         fields = "__all__"
 
-    def get_price(self, obj):
-        # Получаем минимальные цены по городам для данного продукта
-        city_prices = (
-            Stock.objects.filter(product=obj)
-            .values("warehouse__city")
-            .annotate(min_price=Min("price"))
-            .values("warehouse__city", "min_price")
-        )
-
-        return {item["warehouse__city"]: item["min_price"] for item in city_prices}
-
 
 class ProductsDetailSerializer(BaseProductSerializer):
-    # category = CategorySerializer(read_only=True)
+    category = CategorySerializer(read_only=True)
     # related_product = RelatedProductsSerializer(many=True, read_only=True)
-    # brand = BrandsSerializer(read_only=True)
+    brand = BrandsSerializer(read_only=True)
 
     class Meta:
         model = Products
