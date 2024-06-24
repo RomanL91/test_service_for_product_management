@@ -40,6 +40,11 @@ urlpatterns = [
         filter_by_cat,
     ),
     re_path(r"^api/v1/products/all/slugs/$", slugs),
+    re_path(r"^api/v1/products/(?P<slug_prod>[-\w]+)/(?P<ids>[\d,]+)/$", products_list),
+    re_path(
+        r"^api/v1/products/(?P<slug_prod>[-\w]+)/(?P<ids>[\d,]+)/lang/(?P<lang>\w+)/$",
+        products_list,
+    ),
 ]
 
 urlpatterns_products_suff = format_suffix_patterns(urlpatterns)
