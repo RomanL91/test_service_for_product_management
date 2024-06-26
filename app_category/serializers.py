@@ -10,27 +10,18 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = "__all__"
 
-    def get_image_urls(self, instance: Category) -> List[str]:
-        """Получает URL-адреса изображений продукта.
+    def get_image_urls(self, instance: Category, related_set_name: str) -> List[str]:
+        related_set = getattr(instance, related_set_name).all()
+        return [image.image.url for image in related_set]
 
-        Args:
-            instance (_type_): Экземпляр продукта.
+    def get_image_category_urls(self, instance: Category) -> List[str]:
+        return self.get_image_urls(instance, "categoryimage_set")
 
-        Returns:
-            List[str]: Список URL-адресов изображений продукта.
-        """
-        all_entity_image_category = instance.categoryimage_set.all()
-        return [image.image.url for image in all_entity_image_category]
+    def get_image_banner_urls(self, instance: Category) -> List[str]:
+        return self.get_image_urls(instance, "bannerimage_set")
 
     def to_representation(self, instance: Category) -> dict:
-        """Преобразует экземпляр продукта в представление JSON.
-
-        Args:
-            instance Экземпляр продукта.
-
-        Returns:
-            dict: Представление JSON продукта.
-        """
         representation = super().to_representation(instance)
-        representation["list_url_to_image"] = self.get_image_urls(instance)
+        representation["list_url_to_image"] = self.get_image_category_urls(instance)
+        representation["list_url_to_baner"] = self.get_image_banner_urls(instance)
         return representation
