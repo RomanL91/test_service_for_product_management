@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from app_manage_banners.models import BannerImage
+
+
+@admin.register(BannerImage)
+class BannerImageAdmin(admin.ModelAdmin):
+    pass
