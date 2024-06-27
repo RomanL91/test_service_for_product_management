@@ -4,6 +4,7 @@ from core.mixins import JSONFieldsMixin, SlugModelMixin
 
 from app_brands.models import Brands
 from app_category.models import Category
+from app_manager_tags.models import Tag
 
 
 class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
@@ -28,6 +29,11 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
         "self",
         blank=True,
         verbose_name="Сопутствующий товар",
+    )
+    tag_prod = models.ManyToManyField(
+        Tag,
+        blank=True,
+        verbose_name="Теги продукта",
     )
 
     class Meta:
