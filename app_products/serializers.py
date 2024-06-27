@@ -30,6 +30,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
     Этот сериализатор предоставляет базовую функциональность для сериализации продуктов,
     включая категорию и бренд, а также получение URL-адресов изображений продукта.
     """
+
     tag_prod = TagSerializer(many=True, read_only=True)
     price = serializers.SerializerMethodField()
     # price = CityPriceSerializer(many=True, read_only=True)
@@ -106,6 +107,7 @@ class ProductsListSerializer(BaseProductSerializer):
 class ProductsDetailSerializer(BaseProductSerializer):
     category = CategorySerializer(read_only=True)
     brand = BrandsSerializer(read_only=True)
+    present = ProductsListSerializer(many=True)
 
     class Meta:
         model = Products
