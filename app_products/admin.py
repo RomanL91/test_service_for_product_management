@@ -52,6 +52,7 @@ class ProductAdmin(admin.ModelAdmin):
     filter_horizontal = [
         "related_product",
         "tag_prod",
+        "present",
     ]
     prepopulated_fields = {"slug": ("name_product",)}
     fieldsets = (
@@ -79,6 +80,10 @@ class ProductAdmin(admin.ModelAdmin):
         (
             "Теги продукта",
             {"fields": ("tag_prod",)},
+        ),
+        (
+            "В подарок",
+            {"fields": ("present",)},
         ),
     )
 
