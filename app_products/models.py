@@ -35,6 +35,11 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
         blank=True,
         verbose_name="Теги продукта",
     )
+    present =  models.ManyToManyField(
+        "self",
+        blank=True,
+        verbose_name="В подарок",
+    )
 
     class Meta:
         verbose_name = "Продукт"
