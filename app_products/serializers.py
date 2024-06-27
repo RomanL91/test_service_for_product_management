@@ -10,6 +10,7 @@ from app_specifications.models import Specifications
 
 from app_category.serializers import CategorySerializer
 from app_brands.serializers import BrandsSerializer
+from app_manager_tags.serializers import TagSerializer
 from app_specifications.serializers import SpecificationsSerializer
 
 
@@ -29,7 +30,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
     Этот сериализатор предоставляет базовую функциональность для сериализации продуктов,
     включая категорию и бренд, а также получение URL-адресов изображений продукта.
     """
-
+    tag_prod = TagSerializer(many=True, read_only=True)
     price = serializers.SerializerMethodField()
     # price = CityPriceSerializer(many=True, read_only=True)
 
