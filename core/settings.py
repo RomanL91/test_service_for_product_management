@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "app_specifications",
     "app_descriptions",
     "app_sales_points",
+    "app_manager_tags",
     # для работы с изображениями
     "easy_thumbnails",
     "image_cropping",
