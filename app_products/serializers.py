@@ -4,7 +4,7 @@ from django.db.models import Min
 
 from rest_framework import serializers
 
-from app_products.models import Products, ProductImage
+from app_products.models import Products, ProductImage, PopulatesProducts
 from app_sales_points.models import Stock
 from app_specifications.models import Specifications
 
@@ -121,3 +121,11 @@ class PrductsListIDSerializer(serializers.ModelSerializer):
             "id",
             "slug",
         )
+
+
+class PopulatesProductsSerializer(serializers.ModelSerializer):
+    products = ProductsListSerializer(many=True)
+
+    class Meta:
+        model = PopulatesProducts
+        fields = "__all__"
