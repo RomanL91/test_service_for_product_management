@@ -4,16 +4,22 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from app_products.models import Products
+from app_products.models import Products, PopulatesProducts
 from app_sales_points.models import Stock
 from app_category.models import Category
 from app_products.serializers import (
     ProductsListSerializer,
     ProductsDetailSerializer,
     PrductsListIDSerializer,
+    PopulatesProductsSerializer,
 )
 
 from core.lang_utils import TranslateManager
+
+
+class PopulatesProductsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PopulatesProducts.objects.all()
+    serializer_class = PopulatesProductsSerializer
 
 
 class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
