@@ -67,3 +67,26 @@ class ProductImage(models.Model):
 
     def __str__(self) -> str:
         return self.product.name_product
+
+
+class PopulatesProducts(models.Model):
+    name_set = models.CharField(
+        max_length=150,
+        verbose_name="Название сета",
+    )
+    activ_set = models.BooleanField(
+        verbose_name="Активность набора",
+        default=False,
+    )
+    products = models.ManyToManyField(
+        Products,
+        blank=True,
+        verbose_name="Список популярных продуктов",
+    )
+
+    class Meta:
+        verbose_name = "Популярный продукт"
+        verbose_name_plural = "Популярные продукты"
+
+    def __str__(self) -> str:
+        return self.name_set
