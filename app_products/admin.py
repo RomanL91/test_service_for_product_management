@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.utils.html import mark_safe
 
 from core.mixins import JsonDocumentForm, CustomAdminFileWidget
-from app_products.models import Products, ProductImage
+from app_products.models import Products, ProductImage, PopulatesProducts
 from app_specifications.admin import SpecificationsInline
 from app_descriptions.admin import ProductDescriptionInline
 from app_sales_points.admin import StockInline
@@ -128,5 +128,16 @@ class ProductImageAdmin(admin.ModelAdmin):
     get_image.short_description = "ФОТО"
 
 
+class PopulatesProductsAdmin(admin.ModelAdmin):
+    list_display = [
+        "name_set",
+        "activ_set",
+    ]
+    filter_horizontal = [
+        "products",
+    ]
+
+
+admin.site.register(PopulatesProducts, PopulatesProductsAdmin)
 admin.site.register(ProductImage, ProductImageAdmin)
 admin.site.register(Products, ProductAdmin)
