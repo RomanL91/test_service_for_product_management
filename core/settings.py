@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "mptt",
     "django_mptt_admin",
     "flat_json_widget",
+    "rest_framework_simplejwt",
     # приложения
     "app_products",
     "app_category",
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     "app_sales_points",
     "app_manager_tags",
     "app_blogs",
+    "app_reviews",
     # для работы с изображениями
     "easy_thumbnails",
     "image_cropping",
@@ -155,7 +157,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
-TIME_ZONE = "Asia/Omsk"
+TIME_ZONE = "Asia/Almaty"
 USE_TZ = True
 
 REST_FRAMEWORK = {
@@ -166,3 +168,16 @@ REST_FRAMEWORK = {
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+AUTH_SERVICE_URL = "http://127.0.0.1:8001/auth_api/v1/auth_user/token/"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ALGORITHM": "RS256",
+    "VERIFYING_KEY": open(os.path.join(BASE_DIR, "certs", "public.pem")).read(),
+}
