@@ -68,3 +68,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+    def filter_by_prod(self, request, prod_pk, *args, **kwargs):
+        specif = Review.objects.filter(product_id=prod_pk)
+        serializer = self.get_serializer(specif, many=True)
+        return Response(serializer.data)
