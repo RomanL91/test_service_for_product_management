@@ -1,5 +1,5 @@
-from django.db.models import Min, OuterRef, Prefetch, Subquery
 from django.shortcuts import get_object_or_404
+from django.db.models import Avg, Count, Min, OuterRef, Prefetch, Subquery
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -90,6 +90,8 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         return queryset.annotate(
+            average_rating=Avg('review__rating'),
+            reviews_count=Count('review'),
             city_prices=Subquery(city_prices_subquery)
         ).prefetch_related(
             Prefetch(

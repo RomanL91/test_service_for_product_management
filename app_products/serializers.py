@@ -33,6 +33,8 @@ class BaseProductSerializer(serializers.ModelSerializer):
 
     tag_prod = TagSerializer(many=True, read_only=True)
     price = serializers.SerializerMethodField()
+    average_rating = serializers.FloatField(read_only=True)
+    reviews_count = serializers.IntegerField(read_only=True)
     # price = CityPriceSerializer(many=True, read_only=True)
 
     def get_price(self, obj):
