@@ -8,7 +8,9 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = [
         "product",
         "moderation",
+        "rating",
     ]
     list_filter = [
         "moderation",
+        "rating",
     ]

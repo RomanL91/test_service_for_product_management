@@ -7,7 +7,14 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = "__all__"
+        fields = (
+            "id",
+            "rating",
+            "review",
+            "user_id",
+            "product",
+            "jwt_token",
+        )
         read_only_fields = ("moderation", "user_id")
 
     def create(self, validated_data):
