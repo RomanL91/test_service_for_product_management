@@ -12,6 +12,10 @@ from app_reviews.serializers import ReviewSerializer
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    http_method_names = [
+        "get",
+        "post",
+    ]
 
     def create(self, request):
         jwt_token = request.data.get("jwt_token")
