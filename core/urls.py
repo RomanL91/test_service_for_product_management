@@ -11,6 +11,7 @@ from app_products.urls import urlpatterns_products_suff
 from app_sales_points.urls import urlpatterns_stocks_suff
 from app_specifications.urls import urlpatterns_specif_suff
 from app_reviews.urls import urlpatterns_review_suff
+from app_descriptions.urls import urlpatterns_descrip_suff
 
 urlpatterns = (
     [
@@ -22,6 +23,7 @@ urlpatterns = (
     + urlpatterns_stocks_suff
     + urlpatterns_specif_suff
     + urlpatterns_review_suff
+    + urlpatterns_descrip_suff
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 )

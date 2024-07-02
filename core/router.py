@@ -6,6 +6,7 @@ from app_sales_points.views import StocksViewSet
 from app_specifications.views import SpecificationsViewSet
 from app_blogs.views import BlogViewSet
 from app_reviews.views import ReviewViewSet
+from app_descriptions.views import ProductDescriptionViewSet
 
 
 router = routers.DefaultRouter()
@@ -17,3 +18,4 @@ router.register(r"category", CategoryViewSet)
 router.register(r"stocks", StocksViewSet)
 router.register(r"specif", SpecificationsViewSet)
 router.register(r"reviews", ReviewViewSet, basename="review")
+router.register(r"descrip", ProductDescriptionViewSet, basename="descrip")
