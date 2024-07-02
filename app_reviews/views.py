@@ -36,6 +36,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 algorithms=[settings.SIMPLE_JWT["ALGORITHM"]],
             )
             user_id = payload["user_id"]
+            token_type = payload["type"]
+            if token_type != "access":  # если не access
+                raise jwt.InvalidTokenError()
         except jwt.ExpiredSignatureError as e:
             return Response(
                 {"error": f"JWT token has expired: {str(e)}"},
@@ -51,6 +54,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 {"error": f"Error decoding JWT token: {str(e)}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        except KeyError:
+            raise jwt.InvalidTokenError()
 
         # Создание отзыва
         serializer = ReviewSerializer(data=request.data)
