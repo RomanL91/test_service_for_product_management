@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg, Count, Min, OuterRef, Prefetch, Subquery
 
@@ -5,6 +6,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 from app_products.models import Products, PopulatesProducts
+from app_discounts.models import ProductDiscount, CategoryDiscount
 from app_sales_points.models import Stock
 from app_category.models import Category
 from app_products.serializers import (
@@ -81,6 +83,19 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = self.get_annotated_queryset(Products.objects.filter(slug=slug))
         return queryset.first()
 
+    def create_discount_subquery(self, model, filter_key):
+        current_time = timezone.now()
+        return (
+            model.objects.filter(
+                **{filter_key: OuterRef("pk")},
+                active=True,  # Ищу только активные
+                start_date__lte=current_time,  # Скидка началась не позже текущего времени
+                end_date__gte=current_time  # Скидка не закончится до текущего времени
+            )
+            .order_by()
+            .values("amount")[:1]  # Возвращаем только первую активную скидку
+        )
+
     def get_annotated_queryset(self, queryset):
         city_prices_subquery = (
             Stock.objects.filter(product_id=OuterRef("pk"))
@@ -89,10 +104,19 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
             .values("min_price")  # Возвращаем только один столбец
         )
 
+        discount_subquery_p = self.create_discount_subquery(
+            ProductDiscount, "products__id"
+        )
+        discount_subquery_c = self.create_discount_subquery(
+            CategoryDiscount, "categories__id"
+        )
+
         return queryset.annotate(
             average_rating=Avg("review__rating"),
             reviews_count=Count("review"),
             city_prices=Subquery(city_prices_subquery),
+            discount_amount_p=Subquery(discount_subquery_p),
+            discount_amount_c=Subquery(discount_subquery_c),
         ).prefetch_related(
             Prefetch(
                 "stocks",
