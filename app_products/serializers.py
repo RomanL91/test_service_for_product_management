@@ -36,6 +36,16 @@ class BaseProductSerializer(serializers.ModelSerializer):
     average_rating = serializers.FloatField(read_only=True)
     reviews_count = serializers.IntegerField(read_only=True)
     # price = CityPriceSerializer(many=True, read_only=True)
+    discount_amount_p = serializers.DecimalField(
+        read_only=True,
+        max_digits=5,
+        decimal_places=2,
+    )
+    discount_amount_c = serializers.DecimalField(
+        read_only=True,
+        max_digits=5,
+        decimal_places=2,
+    )
 
     def get_price(self, obj):
         # Получаем минимальные цены по городам для данного продукта
