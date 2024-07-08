@@ -44,8 +44,12 @@ class BaseDiscount(JSONFieldsMixin, models.Model):
             return False
         now = timezone.now()
         if self.start_date and self.start_date > now:
+            self.active = False
+            self.save()
             return False
         if self.end_date and self.end_date < now:
+            self.active = False
+            self.save()
             return False
         return True
 
