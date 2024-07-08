@@ -53,6 +53,7 @@ class ProductAdmin(admin.ModelAdmin):
         "related_product",
         "tag_prod",
         "present",
+        "services",
     ]
     prepopulated_fields = {"slug": ("name_product",)}
     fieldsets = (
@@ -84,6 +85,10 @@ class ProductAdmin(admin.ModelAdmin):
         (
             "В подарок",
             {"fields": ("present",)},
+        ),
+        (
+            "Услуги к продукту",
+            {"fields": ("services",)},
         ),
     )
 
