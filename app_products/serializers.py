@@ -12,6 +12,7 @@ from app_category.serializers import CategorySerializer
 from app_brands.serializers import BrandsSerializer
 from app_manager_tags.serializers import TagSerializer
 from app_specifications.serializers import SpecificationsSerializer
+from app_services.serializers import ServiceSerializer
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -120,6 +121,7 @@ class ProductsDetailSerializer(BaseProductSerializer):
     category = CategorySerializer(read_only=True)
     brand = BrandsSerializer(read_only=True)
     present = ProductsListSerializer(many=True)
+    services = ServiceSerializer(many=True)
 
     class Meta:
         model = Products
