@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "app_blogs",
     "app_reviews",
     "app_discounts",
+    "app_services",
     # для работы с изображениями
     "easy_thumbnails",
     "image_cropping",
