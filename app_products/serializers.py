@@ -47,11 +47,11 @@ class BaseProductSerializer(serializers.ModelSerializer):
         max_digits=5,
         decimal_places=2,
     )
-
+    # TODO тут путаница, я уже аннотирую в представлении, это лишний запрос в БД!
     def get_price(self, obj):
         # Получаем минимальные цены по городам для данного продукта
         city_prices = (
-            Stock.objects.filter(product=obj)
+            Stock.objects.filter(product=obj, quantity__gt=0)
             .values("warehouse__city")
             .annotate(min_price=Min("price"))
             .values("warehouse__city__name_city", "min_price")
@@ -104,11 +104,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
 class RelatedProductsSerializer(BaseProductSerializer):
     class Meta:
         model = Products
-        fields = (
-            "id",
-            "name_product",
-            "additional_data",
-        )
+        fields = "__all__"
 
 
 class ProductsListSerializer(BaseProductSerializer):
@@ -122,6 +118,7 @@ class ProductsDetailSerializer(BaseProductSerializer):
     brand = BrandsSerializer(read_only=True)
     present = ProductsListSerializer(many=True)
     services = ServiceSerializer(many=True)
+    related_product = RelatedProductsSerializer(many=True)
 
     class Meta:
         model = Products

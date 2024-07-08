@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from django.db.models import Avg, Count, Min, OuterRef, Prefetch, Subquery
+from django.db.models import Avg, Count, Min, OuterRef, Prefetch, Subquery, F
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -98,7 +98,10 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_annotated_queryset(self, queryset):
         city_prices_subquery = (
-            Stock.objects.filter(product_id=OuterRef("pk"))
+            Stock.objects.filter(
+                product_id=OuterRef("pk"),
+                quantity__gt=0,  # Добавляем условие, чтобы учитывать только склады с остатком больше нуля
+            )
             .values("warehouse__city")
             .annotate(min_price=Min("price"))
             .values("min_price")  # Возвращаем только один столбец
