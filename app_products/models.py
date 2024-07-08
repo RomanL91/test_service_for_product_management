@@ -40,6 +40,12 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
         blank=True,
         verbose_name="В подарок",
     )
+    services = models.ManyToManyField(
+        "app_services.service",
+        # related_name='products',
+        blank=True,
+        verbose_name="Услуги к продукту",
+    )
 
     class Meta:
         verbose_name = "Продукт"
