@@ -24,7 +24,11 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
         null=True,
         verbose_name="бренд продукта",
     )
-
+    configuration = models.ManyToManyField(
+        "self",
+        blank=True,
+        verbose_name="Комплектации",
+    )
     related_product = models.ManyToManyField(
         "self",
         blank=True,
