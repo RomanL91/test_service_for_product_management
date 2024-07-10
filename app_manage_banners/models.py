@@ -11,7 +11,6 @@ class BannerImage(models.Model):
     )
     image = models.ImageField(
         verbose_name="Изображение банера",
-        blank=True,
         upload_to="product_images/%Y/%m/%d/%H/%M/%S/",
     )
     category = models.ForeignKey(
