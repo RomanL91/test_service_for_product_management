@@ -54,6 +54,7 @@ class ProductAdmin(admin.ModelAdmin):
         "tag_prod",
         "present",
         "services",
+        "configuration",
     ]
     prepopulated_fields = {"slug": ("name_product",)}
     fieldsets = (
@@ -71,8 +72,12 @@ class ProductAdmin(admin.ModelAdmin):
             {"fields": ("category",)},
         ),
         (
-            "бренд",
+            "Бренд",
             {"fields": ("brand",)},
+        ),
+        (
+            "Комплектации",
+            {"fields": ("configuration",)},
         ),
         (
             "Сопутсвующий товар",
