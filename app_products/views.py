@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from django.db.models import Avg, Count, Min, OuterRef, Prefetch, Subquery, F
+from django.db.models import Avg, Count, Min, OuterRef, Prefetch, Subquery
 
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -90,7 +90,7 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
                 **{filter_key: OuterRef("pk")},
                 active=True,  # Ищу только активные
                 start_date__lte=current_time,  # Скидка началась не позже текущего времени
-                end_date__gte=current_time  # Скидка не закончится до текущего времени
+                end_date__gte=current_time,  # Скидка не закончится до текущего времени
             )
             .order_by()
             .values("amount")[:1]  # Возвращаем только первую активную скидку
@@ -111,7 +111,7 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
             ProductDiscount, "products__id"
         )
         discount_subquery_c = self.create_discount_subquery(
-            CategoryDiscount, "categories__id"
+            CategoryDiscount, "categories__products__id"
         )
 
         return queryset.annotate(
