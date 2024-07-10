@@ -1,5 +1,7 @@
 from typing import List
 
+from decimal import Decimal
+
 from django.db.models import Min
 
 from rest_framework import serializers
@@ -108,6 +110,27 @@ class RelatedProductsSerializer(BaseProductSerializer):
 
 
 class ProductsListSerializer(BaseProductSerializer):
+    # TODO DRY
+    old_price_p = serializers.SerializerMethodField()
+    old_price_c = serializers.SerializerMethodField()
+
+    def calculate_old_price(self, price_dict, discount):
+        # Проверяем наличие скидки и преобразуем в Decimal
+        if discount:
+            discount_rate = Decimal(discount) / Decimal(100)
+            return {
+                city: price * (1 + discount_rate) for city, price in price_dict.items()
+            }
+        return None
+
+    def get_old_price_p(self, obj):
+        prices = self.get_price(obj)
+        return self.calculate_old_price(prices, obj.discount_amount_p)
+
+    def get_old_price_c(self, obj):
+        prices = self.get_price(obj)
+        return self.calculate_old_price(prices, obj.discount_amount_c)
+
     class Meta:
         model = Products
         fields = "__all__"
@@ -116,9 +139,32 @@ class ProductsListSerializer(BaseProductSerializer):
 class ProductsDetailSerializer(BaseProductSerializer):
     category = CategorySerializer(read_only=True)
     brand = BrandsSerializer(read_only=True)
-    present = ProductsListSerializer(many=True)
+    # present = ProductsListSerializer(many=True)
+    present = RelatedProductsSerializer(many=True)
     services = ServiceSerializer(many=True)
     related_product = RelatedProductsSerializer(many=True)
+    configuration = RelatedProductsSerializer(many=True)
+
+    # TODO DRY
+    old_price_p = serializers.SerializerMethodField()
+    old_price_c = serializers.SerializerMethodField()
+
+    def calculate_old_price(self, price_dict, discount):
+        # Проверяем наличие скидки и преобразуем в Decimal
+        if discount:
+            discount_rate = Decimal(discount) / Decimal(100)
+            return {
+                city: price * (1 + discount_rate) for city, price in price_dict.items()
+            }
+        return None
+
+    def get_old_price_p(self, obj):
+        prices = self.get_price(obj)
+        return self.calculate_old_price(prices, obj.discount_amount_p)
+
+    def get_old_price_c(self, obj):
+        prices = self.get_price(obj)
+        return self.calculate_old_price(prices, obj.discount_amount_c)
 
     class Meta:
         model = Products
