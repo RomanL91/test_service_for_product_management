@@ -8,6 +8,10 @@ from app_manager_tags.models import Tag
 
 
 class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
+    vendor_code = models.CharField(
+        max_length=30,
+        verbose_name="Артикул продукта",
+    )
     name_product = models.CharField(
         max_length=150,
         verbose_name="Наименование продукта",
