@@ -49,6 +49,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         max_digits=5,
         decimal_places=2,
     )
+
     # TODO тут путаница, я уже аннотирую в представлении, это лишний запрос в БД!
     def get_price(self, obj):
         # Получаем минимальные цены по городам для данного продукта
@@ -181,8 +182,7 @@ class PrductsListIDSerializer(serializers.ModelSerializer):
 
 
 class PopulatesProductsSerializer(serializers.ModelSerializer):
-    products = ProductsListSerializer(many=True)
-
+    
     class Meta:
         model = PopulatesProducts
         fields = "__all__"
