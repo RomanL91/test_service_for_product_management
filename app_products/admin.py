@@ -60,7 +60,7 @@ class ProductAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             "О продукте",
-            {"fields": ("name_product", "slug")},
+            {"fields": ("vendor_code", "name_product", "slug")},
         ),
         (
             "Переводы на языки",
