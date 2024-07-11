@@ -20,7 +20,7 @@ from core.lang_utils import TranslateManager
 
 
 class PopulatesProductsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = PopulatesProducts.objects.all()
+    queryset = PopulatesProducts.objects.filter(activ_set=True)
     serializer_class = PopulatesProductsSerializer
 
 
