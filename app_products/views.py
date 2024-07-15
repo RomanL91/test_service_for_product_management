@@ -141,7 +141,7 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
             # Рекурсивно обходим каждую подкатегорию
             for subcategory in subcategories:
                 products_queryset |= self.get_products_by_category(subcategory.slug)
-
+        products_queryset = self.get_annotated_queryset(products_queryset)
         return products_queryset
 
     def slugs(self, request):
