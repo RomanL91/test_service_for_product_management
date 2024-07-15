@@ -15,10 +15,6 @@ urlpatterns = [
         r"^api/v1/specif/filter_by_prod/(?P<prod_pk>\d+)/$",
         filter_by_prod,
     ),
-    re_path(
-        r"^api/v1/specif/filter_by_prod/(?P<prod_pk>\d+)/lang/(?P<lang>\w+)/$",
-        filter_by_prod,
-    ),
 ]
 
 urlpatterns_specif_suff = format_suffix_patterns(urlpatterns)
