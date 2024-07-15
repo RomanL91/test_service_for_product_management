@@ -20,6 +20,7 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
         Category,
         on_delete=models.SET_NULL,
         null=True,
+        related_name="products",
         verbose_name="Категория продукта",
     )
     brand = models.ForeignKey(
