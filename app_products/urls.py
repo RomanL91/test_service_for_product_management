@@ -27,7 +27,11 @@ slugs = ProductsViewSet.as_view(
         "get": "slugs",
     }
 )
-products_by_ids = ProductsViewSet.as_view({"get": "get_products_by_ids"})
+products_by_ids = ProductsViewSet.as_view(
+    {
+        "get": "get_products_by_ids",
+    }
+)
 
 urlpatterns = [
     re_path(
