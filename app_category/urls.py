@@ -4,22 +4,17 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from app_category.views import CategoryViewSet
 
 
-translate_category_list = CategoryViewSet.as_view(
+subcategories_list = CategoryViewSet.as_view(
     {
-        "get": "list",
-    }
-)
-translate_category_detail = CategoryViewSet.as_view(
-    {
-        "get": "retrieve",
+        "get": "subcategories",
     }
 )
 
+
 urlpatterns = [
-    re_path(r"^api/v1/category/lang/(?P<lang>\w+)/$", translate_category_list),
     re_path(
-        r"^api/v1/category/(?P<slug_cat>[-\w]+)/lang/(?P<lang>\w+)/$",
-        translate_category_detail,
+        r"^api/v1/category/(?P<slug_cat>[-\w]+)/subcategories/$",
+        subcategories_list,
     ),
 ]
 
