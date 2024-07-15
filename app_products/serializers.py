@@ -182,7 +182,7 @@ class PrductsListIDSerializer(serializers.ModelSerializer):
 
 
 class PopulatesProductsSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = PopulatesProducts
         fields = "__all__"
