@@ -23,6 +23,7 @@ class Specifications(models.Model):
         Products,
         on_delete=models.SET_NULL,
         null=True,
+        related_name="specifications",
         verbose_name="Продукт",
     )
 
