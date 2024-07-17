@@ -12,7 +12,7 @@ class BlogImageSerializer(serializers.ModelSerializer):
 
 
 class BlogSerializer(serializers.ModelSerializer):
-    related_product = ProductsListSerializer(many=True)
+    # related_product = ProductsListSerializer(many=True)
     images = BlogImageSerializer(
         source="blogimage_set",
         many=True,
