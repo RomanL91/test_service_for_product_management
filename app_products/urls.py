@@ -1,7 +1,7 @@
-from django.urls import re_path
+from django.urls import re_path, path
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from app_products.views import ProductsViewSet
+from app_products.views import ProductsViewSet, ProductFilterView
 
 
 products_list = ProductsViewSet.as_view(
@@ -63,6 +63,11 @@ urlpatterns = [
         r"^api/v1/products/by_ids/(?P<ids>[\d,]+)/$",
         products_by_ids,
         name="products-by-ids",
+    ),
+    path(
+        "api/v1/products/set/filter",
+        ProductFilterView.as_view(),
+        name="product-filter",
     ),
 ]
 

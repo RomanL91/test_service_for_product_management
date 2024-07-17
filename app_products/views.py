@@ -16,8 +16,6 @@ from app_products.serializers import (
     PopulatesProductsSerializer,
 )
 
-from core.lang_utils import TranslateManager
-
 
 class PopulatesProductsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = PopulatesProducts.objects.filter(activ_set=True)
@@ -29,28 +27,13 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductsListSerializer
     lookup_field = "slug_prod"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.translate_manager = TranslateManager(self)
-
-    def retrieve(self, request, slug_prod=None, lang=None, *args, **kwargs):
+    def retrieve(self, request, slug_prod=None, *args, **kwargs):
         instance = self.get_object_by_slug(slug_prod)
-
-        if lang is not None:
-            self.translate_manager.translate_instance(instance, "name_product", lang)
-            self.translate_manager.translate_instance(
-                instance.category, "name_category", lang
-            )
-            self.translate_manager.translate_instance(
-                instance.brand, "name_brand", lang
-            )
-
         self.serializer_class = ProductsDetailSerializer
         serializer = self.get_serializer(instance)
-
         return Response(serializer.data)
 
-    def list(self, request, ids=None, lang=None, *args, **kwargs):
+    def list(self, request, ids=None, *args, **kwargs):
         if ids:
             ids_list = [int(i) for i in ids.split(",")]
             queryset = self.get_products_by_ids(ids_list)
@@ -58,11 +41,6 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = self.filter_queryset(self.get_queryset())
 
         annotated_queryset = self.get_annotated_queryset(queryset)
-
-        if lang is not None:
-            self.translate_manager.translate_queryset(
-                annotated_queryset, "name_product", lang
-            )
 
         page = self.paginate_queryset(annotated_queryset)
         if page is not None:
@@ -72,10 +50,8 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(annotated_queryset, many=True)
         return Response(serializer.data)
 
-    def filter_by_cat(self, request, slug_cat=None, lang=None, *args, **kwargs):
+    def filter_by_cat(self, request, slug_cat=None, *args, **kwargs):
         queryset = self.get_products_by_category(slug_cat)
-        if lang is not None:
-            self.translate_manager.translate_queryset(queryset, "name_product", lang)
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -161,3 +137,64 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         # Фильтрация продуктов по списку идентификаторов
         queryset = Products.objects.filter(id__in=ids_list)
         return queryset
+
+
+from rest_framework.views import APIView
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from app_specifications.models import Specifications
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ProductFilterView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        # {
+        #     "category": 3,
+        #     "brand": 1,
+        #     "price_min": 333,
+        #     "price_max": 5000,
+        #     "specifications": [{"name": "диагональ", "value": "15"}],
+        # }
+        data = request.data
+        category_id = data.get("category")
+        brand_id = data.get("brand")
+        price_min = data.get("price_min")
+        price_max = data.get("price_max")
+        specs = data.get("specifications", [])
+
+        # Используем select_related для загрузки связанных данных через ForeignKey
+        # Используем prefetch_related для загрузки связанных данных через ManyToManyField и reverse ForeignKey
+        query = Products.objects.select_related("brand", "category").prefetch_related(
+            Prefetch(
+                "specifications",
+                queryset=Specifications.objects.select_related(
+                    "name_specification", "value_specification"
+                ),
+            ),
+            Prefetch("stocks", queryset=Stock.objects.select_related("warehouse")),
+        )
+
+        if category_id:
+            query = query.filter(category_id=category_id)
+        if brand_id:
+            query = query.filter(brand_id=brand_id)
+        if price_min is not None and price_max is not None:
+            query = query.filter(
+                stocks__price__gte=price_min, stocks__price__lte=price_max
+            )
+
+        # Фильтрация по спецификациям
+        for spec in specs:
+            name_spec = spec.get("name")
+            value_spec = spec.get("value")
+            query = query.filter(
+                specifications__name_specification__name_specification=name_spec,
+                specifications__value_specification__value_specification=value_spec,
+            )
+
+        # Используем distinct() для избежания дублирования продуктов при множественных фильтрациях
+        query = query.distinct()
+
+        serializer = PrductsListIDSerializer(query, many=True)
+        return Response(serializer.data)
