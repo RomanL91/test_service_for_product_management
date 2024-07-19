@@ -181,8 +181,23 @@ class PrductsListIDSerializer(serializers.ModelSerializer):
         )
 
 
+class PrductsListVendorCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Products
+        fields = ("vendor_code",)
+
+
 class PopulatesProductsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PopulatesProducts
         fields = "__all__"
+
+
+class ExternalProductSerializer(serializers.Serializer):
+    product_name = serializers.CharField(max_length=255)
+    product_code = serializers.IntegerField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    stock = serializers.IntegerField()
+    warehouse_code = serializers.IntegerField()
+    # slug = serializers.CharField(max_length=255)
