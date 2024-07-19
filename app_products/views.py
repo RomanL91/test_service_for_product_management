@@ -33,15 +33,9 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
-    def list(self, request, ids=None, *args, **kwargs):
-        if ids:
-            ids_list = [int(i) for i in ids.split(",")]
-            queryset = self.get_products_by_ids(ids_list)
-        else:
-            queryset = self.filter_queryset(self.get_queryset())
-
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
         annotated_queryset = self.get_annotated_queryset(queryset)
-
         page = self.paginate_queryset(annotated_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -127,25 +121,23 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         slugs = [el["slug"] for el in serializer.data]
         return Response(slugs)
 
-    def get_products_by_ids(self, ids_list):
-        """
-        Функция, которая принимает список идентификаторов и возвращает queryset продуктов.
+    def vendor_cods(self, request):
+        self.serializer_class = PrductsListVendorCodeSerializer
+        products_queryset = self.get_queryset().order_by("vendor_code")
+        serializer = self.get_serializer(products_queryset, many=True)
+        return Response(serializer.data)
 
-        :param ids_list: Список идентификаторов продуктов.
-        :return: QuerySet продуктов, соответствующих заданным идентификаторам.
-        """
+    def get_products_by_ids(self, *args, **kwargs):
         # Фильтрация продуктов по списку идентификаторов
+        ids = kwargs.get("ids", [])
+        ids_list = [i for i in ids.split(",") if i.isdigit()]
         queryset = Products.objects.filter(id__in=ids_list)
-        return queryset
+        annotated_queryset = self.get_annotated_queryset(queryset)
+        serializer = self.get_serializer(annotated_queryset, many=True)
+        return Response(serializer.data)
 
 
-from rest_framework.views import APIView
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from app_specifications.models import Specifications
-
-
-@method_decorator(csrf_exempt, name="dispatch")
+# @method_decorator(csrf_exempt, name="dispatch")
 class ProductFilterView(APIView):
 
     def post(self, request, *args, **kwargs):
