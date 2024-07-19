@@ -22,6 +22,11 @@ class City(JSONFieldsMixin, models.Model):
 
 
 class Warehouse(JSONFieldsMixin, models.Model):
+    external_id = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name="Внешний ID",
+    )
     city = models.ForeignKey(
         City,
         on_delete=models.SET_NULL,
