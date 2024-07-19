@@ -46,32 +46,19 @@ products_by_ids = ProductsViewSet.as_view(
 
 urlpatterns = [
     re_path(
-        r"^api/v1/products/lang/(?P<lang>\w+)/$",
-        products_list,
-    ),
-    re_path(
-        r"^api/v1/products/(?P<slug_prod>[-\w]+)/lang/(?P<lang>\w+)/$",
-        products_detail,
-    ),
-    re_path(
         r"^api/v1/products/filter_by_cat/(?P<slug_cat>[-\w]+)/$",
         filter_by_cat,
     ),
-    re_path(
-        r"^api/v1/products/filter_by_cat/(?P<slug_cat>[-\w]+)/lang/(?P<lang>\w+)/$",
-        filter_by_cat,
+    path(
+        "api/v1/products/all/slugs/",
+        slugs,
     ),
-    re_path(r"^api/v1/products/all/slugs/$", slugs),
-    re_path(
-        r"^api/v1/products/(?P<slug_prod>[-\w]+)/(?P<ids>[\d,]+)/$",
-        products_list,
+    path(
+        "api/v1/products/all/vendor_cods/",
+        vendor_cods,
     ),
-    re_path(
-        r"^api/v1/products/(?P<slug_prod>[-\w]+)/(?P<ids>[\d,]+)/lang/(?P<lang>\w+)/$",
-        products_list,
-    ),
-    re_path(
-        r"^api/v1/products/by_ids/(?P<ids>[\d,]+)/$",
+    path(
+        "api/v1/products/by_ids/<str:ids>/",
         products_by_ids,
         name="products-by-ids",
     ),
