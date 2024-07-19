@@ -1,19 +1,31 @@
-from django.utils import timezone
-from django.shortcuts import get_object_or_404
-from django.db.models import Avg, Count, Min, OuterRef, Prefetch, Subquery
+from slugify import slugify
 
-from rest_framework import viewsets
+from collections import defaultdict
+
+from django.utils import timezone
+
+# from django.utils.decorators import method_decorator
+# from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+from django.db import transaction
+from django.db.models import Q, Avg, Count, Min, OuterRef, Prefetch, Subquery
+
+from rest_framework.views import APIView
+from rest_framework import viewsets, status
 from rest_framework.response import Response
 
-from app_products.models import Products, PopulatesProducts
+from app_products.models import Products, PopulatesProducts, ExternalProduct
 from app_discounts.models import ProductDiscount, CategoryDiscount
 from app_sales_points.models import Stock
 from app_category.models import Category
+from app_specifications.models import Specifications
 from app_products.serializers import (
     ProductsListSerializer,
     ProductsDetailSerializer,
     PrductsListIDSerializer,
     PopulatesProductsSerializer,
+    PrductsListVendorCodeSerializer,
+    ExternalProductSerializer,
 )
 
 
@@ -190,3 +202,124 @@ class ProductFilterView(APIView):
 
         serializer = PrductsListIDSerializer(query, many=True)
         return Response(serializer.data)
+
+
+# @method_decorator(csrf_exempt, name="dispatch")
+class ExternalProductBulkCreateAPIView(APIView):
+    # [
+    #     {
+    #         "product_name": "Плоскопанельный телевизор VESTA V32LH4300 black",
+    #         "product_code": 17679,
+    #         "price": 63262,
+    #         "stock": 1,
+    #         "warehouse_code": 17,
+    #     },
+    # ]
+
+    def post(self, request, *args, **kwargs):
+        serializer = ExternalProductSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            try:
+                # Используем транзакцию для обеспечения атомарности операции
+                with transaction.atomic():
+                    ExternalProduct.objects.bulk_create(
+                        [
+                            ExternalProduct(
+                                product_name=item["product_name"],
+                                product_code=item["product_code"],
+                                price=item["price"],
+                                stock=item["stock"],
+                                warehouse_code=item["warehouse_code"],
+                                slug=slugify(item["product_name"]),
+                            )
+                            for item in serializer.validated_data
+                        ]
+                    )
+                return Response(
+                    {"success": True},
+                    status=status.HTTP_201_CREATED,
+                )
+            except Exception as e:
+                # В случае ошибки во время транзакции
+                return Response(
+                    {
+                        "success": False,
+                        "error": str(e),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        return Response(
+            {
+                "success": False,
+                "errors": serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def patch(self, request, *args, **kwargs):
+        serializer = ExternalProductSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    # Создаем defaultdict для автоматического создания списка для каждого нового ключа
+                    product_warehouse_pairs = defaultdict(list)
+                    data_mapping = {}
+
+                    for product in request.data:
+                        product_warehouse_pairs[product["warehouse_code"]].append(
+                            product["product_code"],
+                        )
+                        key = (
+                            str(product["warehouse_code"]),
+                            str(product["product_code"]),
+                        )
+                        data_mapping[key] = product
+
+                    # Создаем Q объекты для сложной фильтрации
+                    q_objects = Q()
+                    for warehouse_id, product_code in product_warehouse_pairs.items():
+                        q_objects |= Q(
+                            product__vendor_code__in=product_code,
+                            warehouse__external_id=warehouse_id,
+                        )
+
+                    # Выполняем запрос с использованием Q объектов
+                    stocks = Stock.objects.select_related(
+                        "product", "warehouse"
+                    ).filter(q_objects)
+
+                    updated_stocks = []
+                    for stock in stocks:
+                        key = (stock.warehouse.external_id, stock.product.vendor_code)
+                        product_data = data_mapping[key]
+                        stock.price = product_data["price"]
+                        stock.quantity = product_data["stock"]
+                        updated_stocks.append(stock)
+
+                    # Выполняем bulk_update
+                    Stock.objects.bulk_update(updated_stocks, ["price", "quantity"])
+
+                    return Response(
+                        {
+                            "success": True,
+                            "updated": len(updated_stocks),
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+
+            except Exception as e:
+                # В случае ошибки во время транзакции
+                return Response(
+                    {
+                        "success": False,
+                        "error": str(e),
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        return Response(
+            {
+                "success": False,
+                "errors": serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
