@@ -1,4 +1,6 @@
-from django.db import models
+from slugify import slugify
+
+from django.db import models, transaction
 
 from core.mixins import JSONFieldsMixin, SlugModelMixin
 
@@ -59,6 +61,10 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
     class Meta:
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name_product)
+        super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return self.name_product
