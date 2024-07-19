@@ -67,6 +67,11 @@ urlpatterns = [
         ProductFilterView.as_view(),
         name="product-filter",
     ),
+    path(
+        "api/v1/external_products/",
+        ExternalProductBulkCreateAPIView.as_view(),
+        name="external-products-bulk-create",
+    ),
 ]
 
 urlpatterns_products_suff = format_suffix_patterns(urlpatterns)
