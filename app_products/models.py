@@ -228,17 +228,19 @@ def create_or_update_product(sender, instance, **kwargs):
             if img.image.path not in new_image_paths:
                 img.delete()
 
-        warehouse = Warehouse.objects.filter(external_id=instance.warehouse_code).first()
-        
+        warehouse = Warehouse.objects.filter(
+            external_id=instance.warehouse_code
+        ).first()
+
         # Обновление или создание записей о запасах
         stock, created = Stock.objects.update_or_create(
-                warehouse=warehouse,
-                product=product,
-                defaults={
-                    'quantity': instance.stock,
-                    'price': instance.price,
-                }
-            )
+            warehouse=warehouse,
+            product=product,
+            defaults={
+                "quantity": instance.stock,
+                "price": instance.price,
+            },
+        )
 
         instance.delete()
 
