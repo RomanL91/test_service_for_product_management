@@ -4,7 +4,13 @@ from django.contrib import admin
 from django.utils.html import mark_safe
 
 from core.mixins import JsonDocumentForm, CustomAdminFileWidget
-from app_products.models import Products, ProductImage, PopulatesProducts
+from app_products.models import (
+    Products,
+    ProductImage,
+    PopulatesProducts,
+    ExternalProduct,
+    ExternalProductImage,
+)
 from app_specifications.admin import SpecificationsInline
 from app_descriptions.admin import ProductDescriptionInline
 from app_sales_points.admin import StockInline
@@ -19,6 +25,13 @@ class ProductImageInline(admin.StackedInline):
     extra = 0
     formfield_overrides = {models.ImageField: {"widget": CustomAdminFileWidget}}
     # classes = ["collapse"] # свернуть (show/hide)
+
+
+class ExternalProductImageInline(admin.StackedInline):
+    model = ExternalProductImage
+    max_num = 10
+    extra = 0
+    formfield_overrides = {models.ImageField: {"widget": CustomAdminFileWidget}}
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -148,6 +161,13 @@ class PopulatesProductsAdmin(admin.ModelAdmin):
     ]
 
 
+class ExternalProductAdmin(admin.ModelAdmin):
+    inlines = [
+        ExternalProductImageInline,
+    ]
+
+
 admin.site.register(PopulatesProducts, PopulatesProductsAdmin)
 admin.site.register(ProductImage, ProductImageAdmin)
 admin.site.register(Products, ProductAdmin)
+admin.site.register(ExternalProduct, ExternalProductAdmin)
