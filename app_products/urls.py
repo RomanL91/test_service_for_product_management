@@ -1,7 +1,11 @@
 from django.urls import re_path, path
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from app_products.views import ProductsViewSet, ProductFilterView
+from app_products.views import (
+    ProductsViewSet,
+    ProductFilterView,
+    ExternalProductBulkCreateAPIView,
+)
 
 
 products_list = ProductsViewSet.as_view(
@@ -27,6 +31,13 @@ slugs = ProductsViewSet.as_view(
         "get": "slugs",
     }
 )
+
+vendor_cods = ProductsViewSet.as_view(
+    {
+        "get": "vendor_cods",
+    }
+)
+
 products_by_ids = ProductsViewSet.as_view(
     {
         "get": "get_products_by_ids",
