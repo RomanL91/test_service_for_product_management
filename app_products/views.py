@@ -134,10 +134,19 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(slugs)
 
     def vendor_cods(self, request):
-        self.serializer_class = PrductsListVendorCodeSerializer
-        products_queryset = self.get_queryset().order_by("vendor_code")
-        serializer = self.get_serializer(products_queryset, many=True)
-        return Response(serializer.data)
+        # self.serializer_class = PrductsListVendorCodeSerializer
+        products_codes_list = (
+            self.get_queryset()
+            .order_by("vendor_code")
+            .values_list("vendor_code", flat=True)
+        )
+        products_external_codes_list = (
+            ExternalProduct.objects.all()
+            .order_by("product_code")
+            .values_list("product_code", flat=True)
+        )
+        combined_codes = list(products_codes_list) + list(products_external_codes_list)
+        return Response(combined_codes)
 
     def get_products_by_ids(self, *args, **kwargs):
         # Фильтрация продуктов по списку идентификаторов
