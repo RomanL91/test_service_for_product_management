@@ -79,4 +79,5 @@ class Stock(models.Model):
         verbose_name_plural = "Остатки/Цены"
 
     def __str__(self):
-        return f"{self.product.name_product} в {self.warehouse.name_warehouse} ({self.quantity} шт. по {self.price})"
+        # return f"{self.product.name_product} в {self.warehouse.name_warehouse} ({self.quantity} шт. по {self.price})"
+        return f"{self.product.name_product} ({self.quantity} шт. по {self.price})"
