@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "django_mptt_admin",
     "flat_json_widget",
     "rest_framework_simplejwt",
+    "django_celery_results",
+    "django_celery_beat",
     # приложения
     "app_products",
     "app_category",
