@@ -59,9 +59,10 @@ INSTALLED_APPS = [
     "app_reviews",
     "app_discounts",
     "app_services",
+    "app_kaspi",
     # для работы с изображениями
-    "easy_thumbnails",
-    "image_cropping",
+    "easy_thumbnails",  # TODO no use
+    "image_cropping",  # TODO no use
 ]
 
 MIDDLEWARE = [
