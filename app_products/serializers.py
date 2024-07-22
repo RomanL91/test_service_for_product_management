@@ -69,12 +69,6 @@ class BaseProductSerializer(serializers.ModelSerializer):
         all_related_entities = related_model.objects.filter(product=instance)
         return [entity.id for entity in all_related_entities]
 
-    def get_specifications(self, instance: Products) -> List[str]:
-        return self.get_related_entity_ids(instance, Specifications)
-
-    def get_stocks(self, instance: Products) -> List[str]:
-        return self.get_related_entity_ids(instance, Stock)
-
     def get_image_urls(self, instance: Products) -> List[str]:
         """Получает URL-адреса изображений продукта.
 
@@ -98,9 +92,6 @@ class BaseProductSerializer(serializers.ModelSerializer):
         """
         representation = super().to_representation(instance)
         representation["list_url_to_image"] = self.get_image_urls(instance)
-        # del representation["related_product"]
-        # representation["list_specifications"] = self.get_specifications(instance)
-        # representation["list_stocks"] = self.get_stocks(instance)
         return representation
 
 
