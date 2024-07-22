@@ -33,3 +33,11 @@ class SpecificationsViewSet(viewsets.ReadOnlyModelViewSet):
         # Сериализуем данные
         serializer = self.get_serializer(specifications, many=True)
         return Response(serializer.data)
+
+    def get_specif_product_configurations(self, request, ids=None, *args, **kwargs):
+        ids_products = [i for i in ids.split(",") if i.isdigit()]
+        specifications = Specifications.objects.filter(
+            product__id__in=ids_products
+        ).select_related("name_specification", "value_specification")
+        serializer = self.get_serializer(specifications, many=True)
+        return Response(serializer.data)
