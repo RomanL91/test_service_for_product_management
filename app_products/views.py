@@ -163,15 +163,15 @@ class ProductFilterView(APIView):
 
     def post(self, request, *args, **kwargs):
         # {
-        #     "category": 3,
-        #     "brand": 1,
+        #     "category": [3,4],
+        #     "brand": [1,2],
         #     "price_min": 333,
         #     "price_max": 5000,
         #     "specifications": [{"name": "диагональ", "value": "15"}],
         # }
         data = request.data
-        category_id = data.get("category")
-        brand_id = data.get("brand")
+        category_id = data.get("category", [])
+        brand_id = data.get("brand", [])
         price_min = data.get("price_min")
         price_max = data.get("price_max")
         specs = data.get("specifications", [])
@@ -189,9 +189,9 @@ class ProductFilterView(APIView):
         )
 
         if category_id:
-            query = query.filter(category_id=category_id)
+            query = query.filter(category_id__in=category_id)
         if brand_id:
-            query = query.filter(brand_id=brand_id)
+            query = query.filter(brand_id__in=brand_id)
         if price_min is not None and price_max is not None:
             query = query.filter(
                 stocks__price__gte=price_min, stocks__price__lte=price_max
