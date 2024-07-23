@@ -1,0 +1,80 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+      - project_volume:/app
+    entrypoint: ["/app/entrypoint.sh"]
+    networks:
+      - djangonetwork
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile_nginx
+    restart: always
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - web
+    networks:
+      - djangonetwork
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    networks:
+      - djangonetwork
+
+volumes:
+  media_volume:
+  static_volume:
+  project_volume:
+  # postgres_data:
+  cache:
+    driver: local
+networks:
+    djangonetwork:
+        driver: bridge
+
+
+#   postgres:
+#     image: postgres:15.4
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data/
+#     restart: always
+#     environment:
+#       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+#     ports:
+#       - ${POSTGRES_PORT}:${POSTGRES_PORT}
+#     env_file:
+#       - .env
+#     command: -p ${POSTGRES_PORT}
+#     networks:
+#       - djangonetwork
+
+
+#   cache:
+#     image: redis:6.2-alpine
+#     restart: always
+#     ports:
+#       - '6379:6379'
+#     volumes: 
+#       - cache:/data
+#     depends_on:
+#       - postgres
+#     networks:
+#       - djangonetwork
+   
