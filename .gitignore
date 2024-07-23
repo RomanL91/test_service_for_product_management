@@ -142,3 +142,6 @@ db.sqlite3
 static
 today.txt
 api_doc
+.devcontainer/devcontainer.json
+.devcontainer/docker-compose.yml
+.github/dependabot.yml
