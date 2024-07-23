@@ -21,6 +21,6 @@ app.conf.update(
 
 app.autodiscover_tasks()
 
-# celery -A core.celery worker -l info -P eventlet
+# celery -A core.celery worker -l info -c 2 -P eventlet
 # celery -A core beat -l info
 # celery -A core flower
