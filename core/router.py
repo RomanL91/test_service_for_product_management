@@ -8,6 +8,12 @@ from app_blogs.views import BlogViewSet
 from app_reviews.views import ReviewViewSet
 from app_descriptions.views import ProductDescriptionViewSet
 from app_brands.views import BrandsViewSet
+from app_kaspi.views import (
+    CustomerViewSet,
+    AddressViewSet,
+    OrderViewSet,
+    ProductViewSet,
+)
 
 
 router = routers.DefaultRouter()
@@ -21,3 +27,8 @@ router.register(r"specif", SpecificationsViewSet)
 router.register(r"reviews", ReviewViewSet, basename="review")
 router.register(r"descrip", ProductDescriptionViewSet, basename="descrip")
 router.register(r"brands", BrandsViewSet, basename="brands")
+
+router.register(r"customers", CustomerViewSet)
+router.register(r"addresses", AddressViewSet)
+router.register(r"orders", OrderViewSet)
+router.register(r"products", ProductViewSet)
