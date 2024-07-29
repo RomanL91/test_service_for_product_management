@@ -3,10 +3,15 @@ from rest_framework.response import Response
 
 from django.db.models import Min, Max
 
-from app_sales_points.models import Stock
+from app_sales_points.models import Stock, City
 from app_category.models import Category
 from app_products.models import Products
-from app_sales_points.serializers import StockSerializer, PriceRangeByCitySerializer
+from app_sales_points.serializers import StockSerializer, PriceRangeByCitySerializer, CitySerializer
+
+
+class CityViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = City.objects.all()
+    serializer_class = CitySerializer
 
 
 class StocksViewSet(viewsets.ReadOnlyModelViewSet):
