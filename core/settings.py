@@ -204,3 +204,10 @@ BASE_URL_ETL_1C = "http://127.0.0.1:7777//v1/1c/etl/"
 BASE_URL_API_SELF = "http://127.0.0.1:8000/api/v1/external_products/"
 # BROKER_URL = "redis://cache:6379/0" # Для докера
 BROKER_URL = "redis://127.0.0.1:6379/0"
+
+
+# фоновые для каспи
+ORDERS_API = "https://kaspi.kz/shop/api/v2/orders"
+ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = (
+    "http://127.0.0.1:7777/v1/kaspi/etl/get_archive_orders/"
+)
