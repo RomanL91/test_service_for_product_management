@@ -10,7 +10,6 @@ from app_descriptions.views import ProductDescriptionViewSet
 from app_brands.views import BrandsViewSet
 from app_kaspi.views import (
     CustomerViewSet,
-    AddressViewSet,
     OrderViewSet,
     ProductViewSet,
 )
@@ -27,8 +26,7 @@ router.register(r"specif", SpecificationsViewSet)
 router.register(r"reviews", ReviewViewSet, basename="review")
 router.register(r"descrip", ProductDescriptionViewSet, basename="descrip")
 router.register(r"brands", BrandsViewSet, basename="brands")
-
+# Для работы с Каспи
 router.register(r"customers", CustomerViewSet)
-router.register(r"addresses", AddressViewSet)
 router.register(r"orders", OrderViewSet)
-router.register(r"products", ProductViewSet)
+router.register(r"kaspi_products", ProductViewSet)
