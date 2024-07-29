@@ -11,6 +11,7 @@ from app_manager_tags.models import Tag
 
 class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
     vendor_code = models.CharField(
+        unique=True,
         max_length=30,
         verbose_name="Артикул продукта",
     )
