@@ -1,55 +1,41 @@
-from rest_framework import serializers
-from .models import Customer, Address, Order, Product
-
-
-class CustomerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Customer
-        fields = "__all__"
-
-
-class AddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Address
-        fields = "__all__"
-
-
-class OrderSerializer(serializers.ModelSerializer):
-    customer = CustomerSerializer(read_only=True)
-    delivery_address = AddressSerializer(read_only=True)
-
-    class Meta:
-        model = Order
-        fields = "__all__"
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = "__all__"
-
-
 from rest_framework import viewsets
-from .models import Customer, Address, Order, Product
+from rest_framework.response import Response
 
-# from .serializers import CustomerSerializer, AddressSerializer, OrderSerializer, ProductSerializer
+from app_kaspi.models import Customer, Order, Product
+from app_kaspi.serializers import CustomerSerializer, OrderSerializer, ProductSerializer
 
 
-class CustomerViewSet(viewsets.ModelViewSet):
+class BaseFlatViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Базовый класс для viewsets с методом list, возвращающим плоский список.
+    """
+
+    # Атрибут для указания поля, по которому нужно делать values_list
+    flat_field = None
+
+    def list(self, request, *args, **kwargs):
+        if not self.flat_field:
+            raise ValueError("flat_field должен быть задан в подклассе")
+        queryset = self.filter_queryset(self.get_queryset()).values_list(
+            self.flat_field,
+            flat=True,
+        )
+        return Response(queryset)
+
+
+class CustomerViewSet(BaseFlatViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
+    flat_field = "customer_id"
 
 
-class AddressViewSet(viewsets.ModelViewSet):
-    queryset = Address.objects.all()
-    serializer_class = AddressSerializer
-
-
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(BaseFlatViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    flat_field = "order_id"
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(BaseFlatViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    flat_field = "product_id"
