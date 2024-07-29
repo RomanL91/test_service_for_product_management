@@ -197,17 +197,21 @@ class ProductFilterView(APIView):
                 stocks__price__gte=price_min, stocks__price__lte=price_max
             )
 
-        # Фильтрация по спецификациям
+        # Формируем условия по спецификациям с помощью Q-объектов
+        spec_query = Q()
         for spec in specs:
             name_spec = spec.get("name")
             value_spec = spec.get("value")
-            query = query.filter(
+            spec_query |= Q(
                 specifications__name_specification__name_specification=name_spec,
                 specifications__value_specification__value_specification=value_spec,
             )
 
-        # Используем distinct() для избежания дублирования продуктов при множественных фильтрациях
-        query = query.distinct()
+        if spec_query:
+            query = query.filter(spec_query)
+
+        # # Используем distinct() для избежания дублирования продуктов при множественных фильтрациях
+        # query = query.distinct()
 
         serializer = PrductsListIDSerializer(query, many=True)
         return Response(serializer.data)
