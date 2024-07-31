@@ -1,18 +1,12 @@
 from django.db import models
 from django.contrib import admin
 
-from flat_json_widget.widgets import FlatJsonWidget
-
-from core.mixins import JsonDocumentForm
-from app_descriptions.models import ProductDescription
+from core.mixins import JsonDocumentForm, CustomAdminFileWidget
+from app_descriptions.models import ProductDescription, DescriptionImage
 
 
 class ProductDescriptionFieldsets:
     fieldsets = (
-        (
-            "Выбор продукта",
-            {"fields": ("product",)},
-        ),
         (
             "Описание Заголовок",
             {
@@ -34,18 +28,20 @@ class ProductDescriptionFieldsets:
     )
 
 
-class ProductDescriptionInline(admin.StackedInline, ProductDescriptionFieldsets):
-    model = ProductDescription
-    max_num = 1
+class DescriptionImageInline(admin.StackedInline):
+    model = DescriptionImage
+    max_num = 10
     extra = 0
-    formfield_overrides = {models.JSONField: {"widget": FlatJsonWidget}}
-    fieldsets = ProductDescriptionFieldsets.fieldsets
+    formfield_overrides = {models.ImageField: {"widget": CustomAdminFileWidget}}
 
 
 @admin.register(ProductDescription)
 class ProductDescriptionAdmin(admin.ModelAdmin, ProductDescriptionFieldsets):
     form = JsonDocumentForm
-    autocomplete_fields = [
-        "product",
-    ]
     fieldsets = ProductDescriptionFieldsets.fieldsets
+    inlines = [
+        DescriptionImageInline,
+    ]
+    search_fields = [
+        "title_description",
+    ]

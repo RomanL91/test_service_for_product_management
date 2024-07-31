@@ -7,6 +7,7 @@ from core.mixins import JSONFieldsMixin, SlugModelMixin
 from app_brands.models import Brands
 from app_category.models import Category
 from app_manager_tags.models import Tag
+from app_descriptions.models import ProductDescription
 
 
 class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
@@ -30,7 +31,14 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
         Brands,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name="бренд продукта",
+        verbose_name="Бренд продукта",
+    )
+    description = models.ForeignKey(
+        ProductDescription,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Описание продукта",
     )
     configuration = models.ManyToManyField(
         "self",

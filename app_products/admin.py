@@ -12,7 +12,6 @@ from app_products.models import (
     ExternalProductImage,
 )
 from app_specifications.admin import SpecificationsInline
-from app_descriptions.admin import ProductDescriptionInline
 from app_sales_points.admin import StockInline
 
 # форма для вывода древовидной структуры категорий
@@ -40,7 +39,6 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [
         ProductImageInline,
         SpecificationsInline,
-        ProductDescriptionInline,
         StockInline,
     ]
     list_display = [
@@ -53,6 +51,7 @@ class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = [
         "category",
         "brand",
+        "description",
     ]
     search_fields = [
         "name_product__istartswith",
@@ -87,6 +86,10 @@ class ProductAdmin(admin.ModelAdmin):
         (
             "Бренд",
             {"fields": ("brand",)},
+        ),
+        (
+            "Описание",
+            {"fields": ("description",)},
         ),
         (
             "Комплектации",
