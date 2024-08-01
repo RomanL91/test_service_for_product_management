@@ -108,6 +108,14 @@ DATABASES = {
         'PASSWORD': 'MyShopPassword',
         'HOST': 'localhost', 
         'PORT': '5432', 
+    },
+    'orders': {  # Вторая база данных
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'MyBasketDataBase',
+        'USER': 'MyBasketUser',
+        'PASSWORD': 'MyBasketPassword',
+        'HOST': 'localhost',  # Имя второго сервиса в Docker Compose или другой адрес
+        'PORT': '5433',
     }
 }
 
@@ -215,3 +223,5 @@ ORDERS_API = "https://kaspi.kz/shop/api/v2/orders"
 ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = (
     "http://127.0.0.1:7777/v1/kaspi/etl/get_archive_orders/"
 )
+
+# DATABASE_ROUTERS = ['models_orders.py.OrderRouter']
