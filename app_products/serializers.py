@@ -15,6 +15,7 @@ from app_brands.serializers import BrandsSerializer
 from app_manager_tags.serializers import TagSerializer
 from app_specifications.serializers import SpecificationsSerializer
 from app_services.serializers import ServiceSerializer
+from app_descriptions.serializers import ProductDescriptionSerializer
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -136,6 +137,7 @@ class ProductsDetailSerializer(BaseProductSerializer):
     services = ServiceSerializer(many=True)
     related_product = RelatedProductsSerializer(many=True)
     configuration = RelatedProductsSerializer(many=True)
+    description = ProductDescriptionSerializer()
 
     # TODO DRY
     old_price_p = serializers.SerializerMethodField()
