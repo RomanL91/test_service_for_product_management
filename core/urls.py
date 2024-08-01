@@ -11,6 +11,7 @@ from app_products.urls import urlpatterns_products_suff
 from app_sales_points.urls import urlpatterns_stocks_suff
 from app_specifications.urls import urlpatterns_specif_suff
 from app_reviews.urls import urlpatterns_review_suff
+
 # from app_descriptions.urls import urlpatterns_descrip_suff # not use
 from app_brands.urls import urlpatterns_brands_suff
 

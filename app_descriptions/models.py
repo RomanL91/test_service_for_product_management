@@ -27,7 +27,7 @@ class ProductDescription(BaseDescription, JSONFieldsDescMixin):
 
     def __str__(self) -> str:
         return self.title_description
-    
+
 
 class DescriptionImage(models.Model):
     image = models.ImageField(
@@ -37,7 +37,10 @@ class DescriptionImage(models.Model):
         help_text="Это миниатюрное представление изображения описания.",
     )
     description = models.ForeignKey(
-        ProductDescription, on_delete=models.CASCADE, verbose_name="Описание", blank=True,
+        ProductDescription,
+        on_delete=models.CASCADE,
+        verbose_name="Описание",
+        blank=True,
     )
 
     class Meta:

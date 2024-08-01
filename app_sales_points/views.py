@@ -6,7 +6,11 @@ from django.db.models import Min, Max
 from app_sales_points.models import Stock, City
 from app_category.models import Category
 from app_products.models import Products
-from app_sales_points.serializers import StockSerializer, PriceRangeByCitySerializer, CitySerializer
+from app_sales_points.serializers import (
+    StockSerializer,
+    PriceRangeByCitySerializer,
+    CitySerializer,
+)
 
 
 class CityViewSet(viewsets.ReadOnlyModelViewSet):
