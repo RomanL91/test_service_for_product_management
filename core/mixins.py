@@ -1,11 +1,9 @@
 from django import forms
-
 from django.db import models
-
-from flat_json_widget.widgets import FlatJsonWidget
-
 from django.utils.html import format_html
 from django.contrib.admin.widgets import AdminFileWidget
+
+from flat_json_widget.widgets import FlatJsonWidget
 
 
 class JsonDocumentForm(forms.ModelForm):
