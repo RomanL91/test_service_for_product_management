@@ -1,0 +1,11 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+        <h3>My Custom Content</h3>
+        <p>Все кнопки My Custom Button размешены для тестов и ведут на главную страницу.</p>
+        <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a>
+        <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a>
+        <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a>
+        <br><br><br>
+    {{ block.super }}
+{% endblock %}

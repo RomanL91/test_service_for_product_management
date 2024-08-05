@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+
+{% block branding %}
+    <h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+    <h1 id="site-name"><a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a></h1>
+    <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a>
+{% endblock %}
+
+{% block userlinks %}
+    <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a>
+    {{ block.super }}
+{% endblock %}
