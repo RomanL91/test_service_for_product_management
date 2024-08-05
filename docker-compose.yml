@@ -9,8 +9,24 @@ services:
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
-      - project_volume:/app
+      # - project_volume:/app
+    depends_on:
+      - postgres
     entrypoint: ["/app/entrypoint.sh"]
+    networks:
+      - djangonetwork
+  
+  postgres:
+    image: postgres:15.4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+    environment:
+      - POSTGRES_USER=MyShopUser
+      - POSTGRES_PASSWORD=MyShopPassword
+      - POSTGRES_DB=MyShopDataBase
+    ports:
+      - 5432:5432
     networks:
       - djangonetwork
 
@@ -35,46 +51,18 @@ services:
     restart: always
     ports:
       - '6379:6379'
+    depends_on:
+      - web
     networks:
       - djangonetwork
 
 volumes:
   media_volume:
   static_volume:
-  project_volume:
-  # postgres_data:
+  # project_volume:
+  postgres_data:
   cache:
     driver: local
 networks:
     djangonetwork:
         driver: bridge
-
-
-#   postgres:
-#     image: postgres:15.4
-#     volumes:
-#       - postgres_data:/var/lib/postgresql/data/
-#     restart: always
-#     environment:
-#       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-#     ports:
-#       - ${POSTGRES_PORT}:${POSTGRES_PORT}
-#     env_file:
-#       - .env
-#     command: -p ${POSTGRES_PORT}
-#     networks:
-#       - djangonetwork
-
-
-#   cache:
-#     image: redis:6.2-alpine
-#     restart: always
-#     ports:
-#       - '6379:6379'
-#     volumes: 
-#       - cache:/data
-#     depends_on:
-#       - postgres
-#     networks:
-#       - djangonetwork
-   

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
-# python manage.py makemigrations
-# python manage.py migrate
+python manage.py makemigrations
+python manage.py migrate
 python manage.py collectstatic --no-input
 
 python -m celery -A core.celery worker -l info -c 2 -P eventlet &

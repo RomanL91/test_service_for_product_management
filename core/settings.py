@@ -107,7 +107,8 @@ DATABASES = {
         "NAME": "MyShopDataBase",
         "USER": "MyShopUser",
         "PASSWORD": "MyShopPassword",
-        "HOST": "localhost",
+        # "HOST": "localhost",
+        "HOST": "postgres", # для докера
         "PORT": "5432",
     }
 }
@@ -194,8 +195,8 @@ SIMPLE_JWT = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        # "LOCATION": "redis://cache:6379", # Для докера
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": "redis://cache:6379", # Для докера
+        # "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
@@ -205,8 +206,8 @@ CACHES = {
 
 BASE_URL_ETL_1C = "http://127.0.0.1:7777//v1/1c/etl/"
 BASE_URL_API_SELF = "http://127.0.0.1:8000/api/v1/external_products/"
-# BROKER_URL = "redis://cache:6379/0" # Для докера
-BROKER_URL = "redis://127.0.0.1:6379/0"
+BROKER_URL = "redis://cache:6379/0" # Для докера
+# BROKER_URL = "redis://127.0.0.1:6379/0"
 
 
 # фоновые для каспи
