@@ -136,7 +136,7 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 
-migrations
+# migrations
 core/__pycache__/*
 db.sqlite3
 static
