@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+import os
 
 from pathlib import Path
 
@@ -80,7 +81,7 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'core/templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -101,21 +102,13 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': { # Запущена в контейнере
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'MyShopDataBase',
-        'USER': 'MyShopUser',
-        'PASSWORD': 'MyShopPassword',
-        'HOST': 'localhost', 
-        'PORT': '5432', 
-    },
-    'orders': {  # Вторая база данных
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'MyBasketDataBase',
-        'USER': 'MyBasketUser',
-        'PASSWORD': 'MyBasketPassword',
-        'HOST': 'localhost',  # Имя второго сервиса в Docker Compose или другой адрес
-        'PORT': '5433',
+    "default": {  # Запущена в контейнере
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "MyShopDataBase",
+        "USER": "MyShopUser",
+        "PASSWORD": "MyShopPassword",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 
@@ -163,8 +156,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # ==============================MY ADDING======================================
-import os
-
 LANG_EN = "EN"
 LANG_KZ = "KZ"
 
@@ -224,4 +215,4 @@ ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = (
     "http://127.0.0.1:7777/v1/kaspi/etl/get_archive_orders/"
 )
 
-# DATABASE_ROUTERS = ['models_orders.py.OrderRouter']
+# DATABASE_ROUTERS = ["app_orders.db_router.OrderRouter"]
