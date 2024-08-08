@@ -99,7 +99,7 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset.annotate(
             average_rating=Avg("review__rating"),
             reviews_count=Count("review"),
-            city_prices=Subquery(city_prices_subquery),
+            # city_prices=Subquery(city_prices_subquery),
             discount_amount_p=Subquery(discount_subquery_p),
             discount_amount_c=Subquery(discount_subquery_c),
         ).prefetch_related(
