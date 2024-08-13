@@ -1,0 +1,249 @@
+<style>
+    /* Стили для заголовка страницы */
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 2em;
+        color: #333;
+    }
+
+    /* Стили для контейнера деталей заказа */
+    .order-details {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+    }
+
+    /* Стили для заголовка деталей заказа */
+    .order-details h2 {
+        font-size: 1.5em;
+        color: #555;
+        margin-bottom: 10px;
+    }
+
+    /* Стили для параграфов в деталях заказа */
+    .order-details p {
+        margin: 10px 0;
+        font-size: 1em;
+        line-height: 1.5;
+    }
+
+    /* Стили для списка товаров в корзине */
+    .order-details ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Стили для каждого элемента списка товаров */
+    .order-details li {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        position: relative;
+    }
+
+    /* Стили для ссылок в списке товаров */
+    .order-details li a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .order-details li a:hover {
+        text-decoration: underline;
+    }
+
+    /* Стили для всплывающей подсказки */
+    .tooltip-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip-content {
+        display: none;
+        position: absolute;
+        /* bottom: 100%; */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #4cd43a91;
+        color: #ea0c14;
+        padding: 10px;
+        border-radius: 4px;
+        white-space: nowrap;
+        z-index: 1000;
+        width: 200px;
+        box-shadow: 0 2px 5px rgba(20, 51, 228, 0.734);
+    }
+
+    .tooltip-container:hover .tooltip-content {
+        display: block;
+    }
+
+
+    /* Стили для кнопок */
+    .order-actions {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .btn-accept,
+    .btn-cancel {
+        display: inline-block;
+        padding: 10px 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        font-size: 1em;
+        text-decoration: none;
+        text-align: center;
+        margin: 5px;
+    }
+
+    .btn-accept {
+        background-color: #28a745;
+        /* Зеленый цвет */
+        color: white;
+    }
+
+    .btn-accept:hover {
+        background-color: #218838;
+        /* Темно-зеленый при наведении */
+    }
+
+    .btn-cancel {
+        background-color: #dc3545;
+        /* Красный цвет */
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background-color: #c82333;
+        /* Темно-красный при наведении */
+    }
+
+
+    /* Стили для управления элементами корзины */
+    .basket-item {
+        margin-bottom: 15px;
+    }
+
+    .basket-item-actions {
+        margin-top: 10px;
+    }
+
+    .btn-action {
+        display: inline-block;
+        padding: 5px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1em;
+        text-decoration: none;
+        text-align: center;
+        color: #ffffff;
+        margin: 0 5px;
+    }
+
+    .btn-action:hover {
+        background-color: #e9ecef;
+    }
+
+    .btn-remove {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-remove:hover {
+        background-color: #c82333;
+    }
+</style>
+
+{% block content %}
+<h1>Order Details</h1>
+<div class="order-details">
+    <h2>Order ID: {{ order.id }}</h2>
+    <p><strong>UUID:</strong> {{ order.uuid_id }}</p>
+    <p><strong>Status:</strong> {{ order.order_status }}</p>
+    <p><strong>Phone:</strong> {{ order.phone_number }}</p>
+    <p><strong>City:</strong> {{ order.shipping_city }}</p>
+    <p><strong>Address:</strong> {{ order.delivery_address }}</p>
+    <p><strong>Comment:</strong> {{ order.comment }}</p>
+    <p><strong>Delivery Type:</strong> {{ order.delivery_type }}</p>
+    <p><strong>Created At:</strong> {{ order.created_at }}</p>
+    <p><strong>Updated At:</strong> {{ order.updated_at }}</p>
+
+    <h3>Basket Items</h3>
+    <ul>
+        {% for item in order.basket.basket_items %}
+        <li class="tooltip-container" data-item-id="{{ item.urlapi }}">
+            <a href="{{ item.url }}">{{ item.name | default:"Не изветный продукт" }}</a>
+            ({{ item.price }} т.) * ({{ item.count }} у.е.)
+            <div class="basket-item-actions">
+                <a href="" class="btn-action">+</a>
+                <a href="" class="btn-action">-</a>
+                <a href="" class="btn-action btn-remove">УДАЛИТЬ</a>
+            </div>
+            <div class="tooltip-content" id="tooltip-{{ item.id }}">
+                <p>Loading...</p>
+            </div>
+        </li>
+        <br>
+        <br>
+        {% endfor %}
+    </ul>
+    <!-- Кнопка "ПРИНЯТЬ" -->
+    <div class="order-actions">
+        <a href="" class="btn-accept">ПРИНЯТЬ</a>
+        <a href="" class="btn-cancel">ОТМЕНИТЬ ОРДЕР</a>
+    </div>
+</div>
+{% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.tooltip-container').forEach(container => {
+            container.addEventListener('mouseenter', async function () {
+                const itemUrl = this.getAttribute('data-item-id');
+                const tooltip = this.querySelector('.tooltip-content');
+
+                // console.log(`itemUrl -- >> ${itemUrl}`)
+                // Внимание используется УРЛ локальной машины!!!
+                // const tets_url = "http://127.0.0.1:8000/api/v1/products/test-red/"
+
+                if (itemUrl) {
+                    try {
+                        const response = await fetch(itemUrl);
+                        if (response.ok) {
+                            const data = await response.json();
+
+                            // Преобразуем объект price в HTML
+                            let priceHtml = '<p>Prices:</p><ul>';
+                            for (const [city, price] of Object.entries(data.price)) {
+                                priceHtml += `<li>${city}: ${price}</li>`;
+                            }
+                            priceHtml += '</ul>';
+
+
+                            tooltip.innerHTML = `
+                            <p>Name: ${data.name_product}</p>
+                            <p>Category: ${data.category.name_category}</p>
+                            ${priceHtml}
+                            <p>Product_discount: ${data.discount_amount_p}</p>
+                            <p>Category_discount: ${data.discount_amount_c}</p>
+                            `
+                        } else {
+                            tooltip.innerHTML = '<p>Error loading data.</p>';
+                        }
+                    } catch (error) {
+                        tooltip.innerHTML = '<p>Error loading data.</p>';
+                    }
+                }
+            });
+        });
+    });
+</script>

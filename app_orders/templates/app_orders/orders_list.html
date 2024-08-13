@@ -1,0 +1,161 @@
+{% block content %}
+<h1>Order List</h1>
+
+<div class="order-cards">
+    {% for order in orders %}
+    <a href="{% url 'order-detail' order.uuid_id %}" class="order-card">
+        <!-- <h2>Order ID: {{ order.uuid_id }}</h2> -->
+        <p><strong>UUID:</strong> {{ order.uuid_id }}</p>
+        <p><strong>Status:</strong> {{ order.order_status }}</p>
+        <p><strong>Phone:</strong> {{ order.phone_number }}</p>
+        <p><strong>City:</strong> {{ order.shipping_city }}</p>
+        <p><strong>Address:</strong> {{ order.delivery_address }}</p>
+        <p><strong>Comment:</strong> {{ order.comment }}</p>
+        <p><strong>Delivery Type:</strong> {{ order.delivery_type }}</p>
+        <p><strong>Created At:</strong> {{ order.created_at }}</p>
+        <p><strong>Updated At:</strong> {{ order.updated_at }}</p>
+    </a>
+
+    {% endfor %}
+</div>
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if is_paginated %}
+        {% if page > 1 %}
+        <a href="?page=1">&laquo; first</a>
+        <a href="?page={{ page|add:'-1' }}">previous</a>
+        {% endif %}
+        <span class="current">
+            Page {{ page }} of {{ pages }}.
+        </span>
+        {% if page < pages %} <a href="?page={{ page|add:'1' }}">next</a>
+            <a href="?page={{ pages }}">last &raquo;</a>
+            {% endif %}
+            {% endif %}
+    </span>
+</div>
+
+{% endblock %}
+
+
+
+<style>
+    /* Стили для заголовка */
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 2em;
+        color: #333;
+    }
+
+    /* Стили для контейнера карточек заказов */
+    .order-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    /* Стили для каждой карточки заказа */
+    .order-card {
+        display: block;
+        width: 300px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
+        color: #333;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .order-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Стили для элементов внутри карточки */
+    .order-card p {
+        margin: 5px 0;
+    }
+
+    /* Стили для пагинации */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+    }
+
+    .step-links {
+        display: flex;
+        align-items: center;
+    }
+
+    .step-links a {
+        color: #007bff;
+        text-decoration: none;
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .step-links a:hover,
+    .step-links a:focus {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .step-links .current {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0;
+    }
+
+    .step-links {
+        display: flex;
+        align-items: center;
+    }
+
+    .step-links a {
+        color: #007bff;
+        text-decoration: none;
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .step-links a:hover,
+    .step-links a:focus {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .step-links .current {
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .step-links .current {
+        font-weight: bold;
+    }
+</style>

@@ -1,11 +1,15 @@
 {% extends "admin/index.html" %}
 
 {% block content %}
+    {% if user.is_authenticated %}
         <h3>My Custom Content</h3>
         <p>Все кнопки My Custom Button размешены для тестов и ведут на главную страницу.</p>
-        <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a>
-        <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a>
-        <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a>
+        <a href="{% url 'orders_list' %}" class="button">Список Ордеров</a>
+        <!-- <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a> -->
+        <!-- <a href="http://127.0.0.1:8000/admin/" class="button">My Custom Button</a> -->
         <br><br><br>
+    {% else %}
+        <p>У вас нет доступа к этому разделу.</p>
+        {% endif %}
     {{ block.super }}
 {% endblock %}
