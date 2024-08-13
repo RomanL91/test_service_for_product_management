@@ -14,11 +14,13 @@ from app_reviews.urls import urlpatterns_review_suff
 
 # from app_descriptions.urls import urlpatterns_descrip_suff # not use
 from app_brands.urls import urlpatterns_brands_suff
+from app_orders.urls import urlpatterns as url_orders_api
 
 urlpatterns = (
     [
         path("admin/", admin.site.urls),
         path("api/v1/", include(router.urls)),
+        path("api/orders/", include(url_orders_api)),
     ]
     + urlpatterns_category_suff
     + urlpatterns_products_suff

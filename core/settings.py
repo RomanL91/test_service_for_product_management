@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+
 import os
 
 from pathlib import Path
@@ -81,7 +82,10 @@ ROOT_URLCONF = "core.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'core/templates')],
+        "DIRS": [
+            os.path.join(BASE_DIR, "core/templates"),
+            os.path.join(BASE_DIR, "app_orders/templates"),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -217,3 +221,7 @@ ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = (
 )
 
 # DATABASE_ROUTERS = ["app_orders.db_router.OrderRouter"]
+
+# это общение с сервисом корзины
+API_URL_GET_ORDERS = "http://localhost:8989/basket_api/v1/order/all/?page={page}&size={size}"
+API_URL_GET_INFO_ORDER_WITH_BASKET = "http://localhost:8989/basket_api/v1/order/info_with_basket/{uuid_id}/"
