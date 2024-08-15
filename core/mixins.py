@@ -70,7 +70,7 @@ class SlugModelMixin(models.Model):
 class CustomAdminFileWidget(AdminFileWidget):
     def render(self, name, value, attrs=None, renderer=None):
         result = []
-        if hasattr(value, "url"):
+        if value and hasattr(value, "url"):
             result.append(
                 f"""<a href="{value.url}" target="_blank">
                       <img 

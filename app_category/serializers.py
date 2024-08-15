@@ -12,7 +12,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     def get_image_urls(self, instance: Category, related_set_name: str) -> List[str]:
         related_set = getattr(instance, related_set_name).all()
-        return [image.image.url for image in related_set]
+        return [image.image.url for image in related_set if image.image]
 
     def get_image_category_urls(self, instance: Category) -> List[str]:
         return self.get_image_urls(instance, "categoryimage_set")
