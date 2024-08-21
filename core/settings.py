@@ -223,5 +223,13 @@ ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = (
 # DATABASE_ROUTERS = ["app_orders.db_router.OrderRouter"]
 
 # это общение с сервисом корзины
-API_URL_GET_ORDERS = "http://localhost:8989/basket_api/v1/order/all/?page={page}&size={size}"
-API_URL_GET_INFO_ORDER_WITH_BASKET = "http://localhost:8989/basket_api/v1/order/info_with_basket/{uuid_id}/"
+BASKET_HOST = "localhost"
+BASKET_PORT = 8989
+API_URL_GET_ORDERS = "http://{basket_host}:{basket_port}/basket_api/v1/order/all/?page={page}&size={size}"
+API_URL_GET_INFO_ORDER_WITH_BASKET = (
+    "http://{basket_host}:{basket_port}/basket_api/v1/order/info_with_basket/{uuid_id}/"
+)
+API_URL_UPDATE_ORDER = (
+    "http://{basket_host}:{basket_port}/basket_api/v1/order/{uuid_id}/"
+)
+API_URL_GET_ARCHIVE_ORDERS_MANAGER = "http://{basket_host}:{basket_port}/basket_api/v1/order/get_manager_order_archive/{id_manager}/?page={page}&size={size}"
