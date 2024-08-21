@@ -1,5 +1,10 @@
 {% block content %}
-<h1>Order List</h1>
+<h1>List of new orders</h1>
+
+<!-- Кнопка "Мой архив" -->
+<div class="archive-button">
+    <a href="{% url 'archive_orders_list' user.pk %}" class="btn-archive">Мой архив</a>
+</div>
 
 <div class="order-cards">
     {% for order in orders %}
@@ -157,5 +162,28 @@
 
     .step-links .current {
         font-weight: bold;
+    }
+
+    /* Стили для кнопки "Мой архив" */
+    .archive-button {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .btn-archive {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 1em;
+        color: #fff;
+        background-color: #007bff;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .btn-archive:hover,
+    .btn-archive:focus {
+        background-color: #0056b3;
+        color: #fff;
     }
 </style>

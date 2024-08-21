@@ -165,10 +165,18 @@
 
 {% block content %}
 <h1>Order Details</h1>
+<p><strong>ID менеджера:</strong> {{ request.user.pk }}</p>
+<p><strong>Текущий менеджер:</strong> {{ request.user.username }}</p>
+<p><strong>Email:</strong> {{ request.user.email }}</p>
+<!-- Кнопка возврата к списку -->
+<div class="order-actions">
+    <a href="{% url 'orders_list' %}" class="btn-back">Вернуться к списку заказов</a>
+</div>
 <div class="order-details">
     <h2>Order ID: {{ order.id }}</h2>
     <p><strong>UUID:</strong> {{ order.uuid_id }}</p>
     <p><strong>Status:</strong> {{ order.order_status }}</p>
+    <p><strong>Manager Executive:</strong> {{ order.manager_executive }}</p>
     <p><strong>Phone:</strong> {{ order.phone_number }}</p>
     <p><strong>City:</strong> {{ order.shipping_city }}</p>
     <p><strong>Address:</strong> {{ order.delivery_address }}</p>
@@ -183,11 +191,13 @@
         <li class="tooltip-container" data-item-id="{{ item.urlapi }}">
             <a href="{{ item.url }}">{{ item.name | default:"Не изветный продукт" }}</a>
             ({{ item.price }} т.) * ({{ item.count }} у.е.)
+            {% if order.order_status == 'NEW' or  order.order_status == 'INWORK' %}
             <div class="basket-item-actions">
                 <a href="" class="btn-action">+</a>
                 <a href="" class="btn-action">-</a>
                 <a href="" class="btn-action btn-remove">УДАЛИТЬ</a>
             </div>
+            {% endif %}
             <div class="tooltip-content" id="tooltip-{{ item.id }}">
                 <p>Loading...</p>
             </div>
@@ -197,10 +207,28 @@
         {% endfor %}
     </ul>
     <!-- Кнопка "ПРИНЯТЬ" -->
+    {% if order.order_status == 'NEW' %}
     <div class="order-actions">
-        <a href="" class="btn-accept">ПРИНЯТЬ</a>
-        <a href="" class="btn-cancel">ОТМЕНИТЬ ОРДЕР</a>
+        <!-- <a href="" class="btn-accept">ПРИНЯТЬ</a> -->
+        <!-- <a href="" class="btn-cancel">ОТМЕНИТЬ ОРДЕР</a> -->
+        <form method="post" action="{% url 'order-detail' order.uuid_id %}">
+            {% csrf_token %}
+            <input type="hidden" name="order_status" value="INWORK">
+            <input type="hidden" name="manager_executive" value="{{ user.username }}">
+            <input type="hidden" name="manager_executive_id" value="{{ user.pk }}">
+            <input type="hidden" name="manager_mailbox" value="{{ user.email }}">
+            <button type="submit" class="btn-accept">ПРИНЯТЬ</button>
+        </form>
+        <form method="post" action="{% url 'order-detail' order.uuid_id %}">
+            {% csrf_token %}
+            <input type="hidden" name="order_status" value="CANCELED">
+            <input type="hidden" name="manager_executive" value="{{ user.username }}">
+            <input type="hidden" name="manager_executive_id" value="{{ user.id }}">
+            <input type="hidden" name="manager_mailbox" value="{{ user.email }}">
+            <button type="submit" class="btn-cancel">ОТМЕНИТЬ ОРДЕР</button>
+        </form>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 
