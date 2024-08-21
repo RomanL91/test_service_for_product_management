@@ -29,5 +29,5 @@ router.register(r"descrip", ProductDescriptionViewSet, basename="descrip")
 router.register(r"brands", BrandsViewSet, basename="brands")
 # Для работы с Каспи
 router.register(r"customers", CustomerViewSet)
-router.register(r"orders", OrderViewSet)
+# router.register(r"orders", OrderViewSet)
 router.register(r"kaspi_products", ProductViewSet)
