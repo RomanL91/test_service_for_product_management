@@ -26,6 +26,15 @@ class OrdersApiAdapter:
         )
         return self._make_patch_requests(url, **data_update)
 
+    def update_basket_item(self, **data):
+        url = settings.API_URL_BASKET_ITEM_UPDATE.format(
+            basket_host=self.host,
+            basket_port=self.port,
+            uuid_id=data.pop("uuid_id"),
+            prod_id=data.pop("prod_id"),
+        )
+        return self._make_patch_requests(url, **data)
+
     def get_orders(self):
         url = settings.API_URL_GET_ORDERS.format(
             basket_host=self.host,
