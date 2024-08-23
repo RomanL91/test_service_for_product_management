@@ -191,11 +191,16 @@
         <li class="tooltip-container" data-item-id="{{ item.urlapi }}">
             <a href="{{ item.url }}">{{ item.name | default:"Не изветный продукт" }}</a>
             ({{ item.price }} т.) * ({{ item.count }} у.е.)
-            {% if order.order_status == 'NEW' or  order.order_status == 'INWORK' %}
+            {% if order.order_status == 'NEW' or order.order_status == 'INWORK' %}
             <div class="basket-item-actions">
-                <a href="" class="btn-action">+</a>
-                <a href="" class="btn-action">-</a>
-                <a href="" class="btn-action btn-remove">УДАЛИТЬ</a>
+                <a href="javascript:void(0);" class="btn-action"
+                    onclick="updateBasketItem('{{ order.uuid_id }}', '{{ item.prod_id }}', '{{ item.count }}', '{% url 'order-detail' order.uuid_id %}', delete_item = false, str2 = '1', operator = '+')">+</a>
+                <a href="javascript:void(0);" class="btn-action"
+                    onclick="updateBasketItem('{{ order.uuid_id }}', '{{ item.prod_id }}', '{{ item.count }}', '{% url 'order-detail' order.uuid_id %}', delete_item = false, str2 = '1', operator = '-')">-</a>
+                {% if order.basket.basket_items|length != 1 %}
+                <a href="javascript:void(0);" class="btn-action btn-remove"
+                    onclick="updateBasketItem('{{ order.uuid_id }}', '{{ item.prod_id }}', '{{ item.count }}', '{% url 'order-detail' order.uuid_id %}', delete_item = true)">УДАЛИТЬ</a>
+                {% endif %}
             </div>
             {% endif %}
             <div class="tooltip-content" id="tooltip-{{ item.id }}">
@@ -274,4 +279,76 @@
             });
         });
     });
+</script>
+
+<script>
+    function getCSRFToken() {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrftoken') {
+                return decodeURIComponent(value);
+            }
+        }
+        return '';
+    }
+
+    function calculate(str1, str2, operator) {
+        // Приводим первые два аргумента к числам
+        const num1 = Number(str1);
+        const num2 = Number(str2);
+        let result;
+        // Выполняем арифметическую операцию в зависимости от оператора
+        console.log("operator >> : ", operator)
+        switch (operator) {
+            case '+':
+                result = num1 + num2;
+                break;
+            case '-':
+                result = num1 - num2;
+                break;
+            default:
+                throw new Error('Invalid operator');
+        }
+
+        return result;
+    }
+
+    function updateBasketItem(uuid_id, prod_id, count, ordersUrl, delete_item = false, str2 = "0", operator = "+") {
+        const csrftoken = getCSRFToken();
+
+        if (delete_item == false) {
+            count = calculate(count, str2, operator)
+        }
+        // Тело запроса
+        const requestBody = {
+            uuid_id: uuid_id,
+            prod_id: prod_id,
+            count: parseInt(count, 10),
+            delete: delete_item
+        };
+        console.log("operator: ", operator)
+        fetch(ordersUrl, {
+            method: 'PATCH',
+            headers: {
+                'X-CSRFToken': csrftoken,  // Добавляем CSRF-токен для безопасности
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)  // Передаем тело запроса
+        })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Data received:', data);
+                if (data.success) {
+                    console.log('Item deleted successfully');
+                    location.reload();
+                } else {
+                    console.error('Error deleting item:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
 </script>
