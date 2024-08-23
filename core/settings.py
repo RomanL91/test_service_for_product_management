@@ -233,3 +233,6 @@ API_URL_UPDATE_ORDER = (
     "http://{basket_host}:{basket_port}/basket_api/v1/order/{uuid_id}/"
 )
 API_URL_GET_ARCHIVE_ORDERS_MANAGER = "http://{basket_host}:{basket_port}/basket_api/v1/order/get_manager_order_archive/{id_manager}/?page={page}&size={size}"
+API_URL_BASKET_ITEM_UPDATE = (
+    "http://{basket_host}:{basket_port}/basket_api/v1/bascket/{uuid_id}/{prod_id}/"
+)
