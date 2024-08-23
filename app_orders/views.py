@@ -1,8 +1,7 @@
-import requests
+import json
 
+from django.http import JsonResponse, HttpResponseRedirect
 from django.views.generic import ListView, DetailView
-from django.http import HttpResponseRedirect
-from django.conf import settings
 
 from app_orders.OrdersApiAdapter import OrdersApiAdapter
 
@@ -77,3 +76,20 @@ class OrderDetailView(DetailView):
         return self.render_to_response(
             self.get_context_data(order=self.get_object(), error=resp_data)
         )
+
+    def patch(self, request, *args, **kwargs):
+        json_string = request.body.decode("utf-8")
+        data_dict = json.loads(json_string)
+        resp_status_code, resp_data = self.adapter.update_basket_item(**data_dict)
+        # Если статус ответа 200, возвращаем JSON с данными
+        if resp_status_code == 200:
+            return JsonResponse({"success": True, "data": resp_data})
+        else:
+            # Если что-то пошло не так, возвращаем ошибку
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Произошла ошибка при обновлении элемента корзины",
+                },
+                status=resp_status_code,
+            )
