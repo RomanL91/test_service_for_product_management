@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     "app_reviews",
     "app_discounts",
     "app_services",
-    "app_kaspi",
+    "app_kaspi", # приложение без регистрации в админке
     # для работы с изображениями
     "easy_thumbnails",  # TODO no use
     "image_cropping",  # TODO no use
