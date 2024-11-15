@@ -112,17 +112,14 @@ class ProductsViewSet(viewsets.ReadOnlyModelViewSet):
     def get_products_by_category(self, slug_cat):
         # Получаем все товары, связанные с этой категорией
         products_queryset = self.queryset.filter(category__slug=slug_cat)
-
         # Если в категории нет продуктов, рекурсивно получаем продукты из всех подкатегорий
-        if not products_queryset.exists():
-            category = get_object_or_404(Category, slug=slug_cat)
-
-            # Получаем все подкатегории данной категории
-            subcategories = category.children.all()
-
-            # Рекурсивно обходим каждую подкатегорию
-            for subcategory in subcategories:
-                products_queryset |= self.get_products_by_category(subcategory.slug)
+        # if not products_queryset.exists():
+        category = get_object_or_404(Category, slug=slug_cat)
+        # Получаем все подкатегории данной категории
+        subcategories = category.children.all()
+        # Рекурсивно обходим каждую подкатегорию
+        for subcategory in subcategories:
+            products_queryset |= self.get_products_by_category(subcategory.slug)
         products_queryset = self.get_annotated_queryset(products_queryset)
         return products_queryset
 
