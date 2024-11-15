@@ -10,10 +10,13 @@ from app_products.models import Products, ProductImage, PopulatesProducts
 from app_sales_points.models import Stock
 from app_specifications.models import Specifications
 
-from app_category.serializers import CategorySerializer
+from app_category.serializers import CategorySerializer, CategorySerializerElastic
 from app_brands.serializers import BrandsSerializer
 from app_manager_tags.serializers import TagSerializer
-from app_specifications.serializers import SpecificationsSerializer
+from app_specifications.serializers import (
+    SpecificationsSerializer,
+    SpecificationsSerializerElasticSearch,
+)
 from app_services.serializers import ServiceSerializer
 from app_descriptions.serializers import ProductDescriptionSerializer
 
@@ -194,3 +197,24 @@ class ExternalProductSerializer(serializers.Serializer):
     stock = serializers.IntegerField()
     warehouse_code = serializers.IntegerField()
     # slug = serializers.CharField(max_length=255)
+
+
+class ProductsDetailSerializerSearch(serializers.ModelSerializer):
+    category = CategorySerializerElastic(read_only=True)
+    brand = BrandsSerializer(read_only=True)
+    tag_prod = TagSerializer(many=True, read_only=True)
+    specifications = SpecificationsSerializerElasticSearch(many=True, required=False)
+
+    class Meta:
+        model = Products
+        fields = [
+            "id",
+            "vendor_code",
+            "name_product",
+            "slug",
+            "category",
+            "brand",
+            "additional_data",
+            "tag_prod",
+            "specifications",
+        ]
