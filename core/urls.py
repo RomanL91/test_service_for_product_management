@@ -21,6 +21,7 @@ urlpatterns = (
         path("admin/", admin.site.urls),
         path("api/v1/", include(router.urls)),
         path("api/orders/", include(url_orders_api)),
+        path("search/", include("app_elastic.urls")),
     ]
     + urlpatterns_category_suff
     + urlpatterns_products_suff
