@@ -26,3 +26,12 @@ class SpecificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Specifications
         fields = "__all__"
+
+
+class SpecificationsSerializerElasticSearch(serializers.ModelSerializer):
+    name_specification = serializers.CharField(max_length=255)
+    value_specification = serializers.CharField(max_length=255)
+
+    class Meta:
+        model = Specifications
+        fields = "__all__"
