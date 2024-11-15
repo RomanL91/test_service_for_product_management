@@ -25,3 +25,14 @@ class CategorySerializer(serializers.ModelSerializer):
         representation["list_url_to_image"] = self.get_image_category_urls(instance)
         representation["list_url_to_baner"] = self.get_image_banner_urls(instance)
         return representation
+
+
+class CategorySerializerElastic(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = [
+            "id",
+            "name_category",
+            "slug",
+            "additional_data",
+        ]
