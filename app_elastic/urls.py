@@ -4,6 +4,6 @@ from app_elastic.views import SearchCategories, SearchProducts
 
 
 urlpatterns = [
-    path("category_s/<str:query>/", SearchCategories.as_view()),
-    path("product_s/<str:query>/", SearchProducts.as_view()),
+    path("category/<str:query>/", SearchCategories.as_view()),
+    path("product/<str:query>/", SearchProducts.as_view()),
 ]
