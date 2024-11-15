@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_celery_results",
     "django_celery_beat",
+    "django_elasticsearch_dsl",
     # приложения
     "app_products",
     "app_category",
@@ -61,7 +62,8 @@ INSTALLED_APPS = [
     "app_reviews",
     "app_discounts",
     "app_services",
-    "app_kaspi", # приложение без регистрации в админке
+    "app_kaspi",  # приложение без регистрации в админке
+    "app_elastic",  # приложение без регистрации в админке
     # для работы с изображениями
     "easy_thumbnails",  # TODO no use
     "image_cropping",  # TODO no use
@@ -205,6 +207,17 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     },
+}
+
+ELASTICSEARCH_DSL = {
+    "default": {
+        "hosts": "http://localhost:9200",
+        "timeout": 30,  # Увеличьте время ожидания, например, до 30 секунд
+        "retry_on_timeout": True,  # Включите повторную попытку при тайм-ауте
+        "max_retries": 3,  # Установите количество повторных попыток
+        # "http_auth": ("elastic", "YOUR_PASSWORD"),
+        # "ca_certs": "PATH_TO_http_ca.crt",
+    }
 }
 
 
