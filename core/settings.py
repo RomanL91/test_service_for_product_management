@@ -113,7 +113,7 @@ DATABASES = {
         "NAME": "MyShopDataBase",
         "USER": "MyShopUser",
         "PASSWORD": "MyShopPassword",
-        "HOST": "localhost",
+        "HOST": "postgres",
         # "HOST": "postgres", # для докера
         "PORT": "5432",
     }
@@ -202,7 +202,7 @@ CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         # "LOCATION": "redis://cache:6379", # Для докера
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": "redis://redis:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
@@ -211,7 +211,7 @@ CACHES = {
 
 ELASTICSEARCH_DSL = {
     "default": {
-        "hosts": "http://localhost:9200",
+        "hosts": "http://elasticsearch:9200",
         "timeout": 30,  # Увеличьте время ожидания, например, до 30 секунд
         "retry_on_timeout": True,  # Включите повторную попытку при тайм-ауте
         "max_retries": 3,  # Установите количество повторных попыток
@@ -224,7 +224,7 @@ ELASTICSEARCH_DSL = {
 BASE_URL_ETL_1C = "http://127.0.0.1:7777//v1/1c/etl/"
 BASE_URL_API_SELF = "http://127.0.0.1:8000/api/v1/external_products/"
 # BROKER_URL = "redis://cache:6379/0" # Для докера
-BROKER_URL = "redis://127.0.0.1:6379/0"
+BROKER_URL = "redis://redis:6379/0"
 
 
 # фоновые для каспи
