@@ -9,60 +9,15 @@ services:
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
-      # - project_volume:/app
-    depends_on:
-      - postgres
-    entrypoint: ["/app/entrypoint.sh"]
+    entrypoint: [ "/app/entrypoint.sh" ]
     networks:
-      - djangonetwork
-  
-  postgres:
-    image: postgres:15.4
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    restart: always
-    environment:
-      - POSTGRES_USER=MyShopUser
-      - POSTGRES_PASSWORD=MyShopPassword
-      - POSTGRES_DB=MyShopDataBase
-    ports:
-      - 5432:5432
-    networks:
-      - djangonetwork
-
-  nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile_nginx
-    restart: always
-    volumes:
-      - static_volume:/app/static
-      - media_volume:/app/media
-    ports:
-      - 80:80
-      - 443:443
-    depends_on:
-      - web
-    networks:
-      - djangonetwork
-
-  cache:
-    image: redis:6.2-alpine
-    restart: always
-    ports:
-      - '6379:6379'
-    depends_on:
-      - web
-    networks:
-      - djangonetwork
+      - backend
 
 volumes:
   media_volume:
   static_volume:
-  # project_volume:
-  postgres_data:
-  cache:
-    driver: local
+
+
 networks:
-    djangonetwork:
-        driver: bridge
+  backend:
+    external: true
