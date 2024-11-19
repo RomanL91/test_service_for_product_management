@@ -42,3 +42,9 @@ class PriceRangeByCitySerializer(serializers.Serializer):
         decimal_places=2,
         read_only=True,
     )
+
+
+class StockSerializerElasticSearch(serializers.Serializer):
+    city = serializers.CharField()
+    quantity = serializers.IntegerField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
