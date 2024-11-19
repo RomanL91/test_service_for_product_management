@@ -167,14 +167,23 @@ class FilterProducts(PaginatedElasticSearchAPIView):
                     Q("bool", should=spec_queries, minimum_should_match=1)
                 )
 
-        # Фильтр по диапазону значений
+        # Фильтр по диапазону цен
         if filters.get("price_min") or filters.get("price_max"):
             price_filter = {}
             if filters.get("price_min"):
-                price_filter["gte"] = filters["price_min"]
+                price_filter["gte"] = float(filters["price_min"])
             if filters.get("price_max"):
-                price_filter["lte"] = filters["price_max"]
-            filter_queries.append(Q("range", price=price_filter))
+                price_filter["lte"] = float(filters["price_max"])
+            filter_queries.append(
+                Q(
+                    "nested",
+                    path="stocks",
+                    query=Q(
+                        "range",
+                        stocks__price=price_filter,
+                    ),
+                )
+            )
 
         return filter_queries
 
