@@ -90,3 +90,117 @@ class SearchProducts(PaginatedElasticSearchAPIView):
             ],
             minimum_should_match=1,
         )
+
+
+class FilterProducts(PaginatedElasticSearchAPIView):
+    serializer_class = ProductsDetailSerializerSearch
+    document_class = ProductDocument
+
+    def parse_specifications(self, filters):
+        """Обработка повторяющихся параметров spec_name и spec_value"""
+        spec_names = filters.getlist("spec_name")
+        spec_values = filters.getlist("spec_value")
+
+        # Создаем список характеристик из повторяющихся параметров
+        specifications = []
+        for name, value in zip(spec_names, spec_values):
+            specifications.append({"spec_name": name, "spec_value": value})
+
+        return specifications
+
+    def generate_filter_query(self, filters):
+        """Создает фильтры для Elasticsearch запроса"""
+        filter_queries = []
+
+        # Фильтр по категории
+        if filters.get("category"):
+            filter_queries.append(
+                Q("match", category__name_category=filters["category"])
+            )
+
+        # Фильтр по брендам
+        if filters.getlist("brand"):
+            brands = filters.getlist("brand")  # Получаем список брендов
+            filter_queries.append(Q("terms", brand__name_brand=brands))
+
+        # Фильтр по тегам
+        if filters.get("tag"):
+            filter_queries.append(
+                Q(
+                    "nested",
+                    path="tag_prod",
+                    query=Q("match", tag_prod__tag_text=filters["tag"]),
+                )
+            )
+
+        # Фильтр по характеристикам
+        if filters.get("specifications"):
+            specs = filters["specifications"]
+            spec_queries = []
+            for spec in specs:
+                spec_queries.append(
+                    Q(
+                        "nested",
+                        path="specifications",
+                        query=Q(
+                            "bool",
+                            must=[
+                                Q(
+                                    "term",
+                                    specifications__name_specification=spec[
+                                        "spec_name"
+                                    ],
+                                ),
+                                Q(
+                                    "term",
+                                    specifications__value_specification=spec[
+                                        "spec_value"
+                                    ],
+                                ),
+                            ],
+                        ),
+                    )
+                )
+            # Добавляем все спецификации в запрос как should (логическое OR)
+            if spec_queries:
+                filter_queries.append(
+                    Q("bool", should=spec_queries, minimum_should_match=1)
+                )
+
+        # Фильтр по диапазону значений
+        if filters.get("price_min") or filters.get("price_max"):
+            price_filter = {}
+            if filters.get("price_min"):
+                price_filter["gte"] = filters["price_min"]
+            if filters.get("price_max"):
+                price_filter["lte"] = filters["price_max"]
+            filter_queries.append(Q("range", price=price_filter))
+
+        return filter_queries
+
+    def get(self, request, *args, **kwargs):
+        try:
+            # Получаем фильтры из GET параметров
+            filters = request.GET.copy()  # Копируем параметры запроса
+            specifications = self.parse_specifications(filters)  # Парсим характеристики
+
+            # Добавляем характеристики в фильтры
+            if specifications:
+                filters["specifications"] = specifications
+
+            filter_queries = self.generate_filter_query(filters)
+
+            # Создаем базовый запрос
+            search_query = Q("bool", filter=filter_queries)
+
+            # Выполняем запрос к Elasticsearch
+            search = self.document_class.search().query(search_query)
+            response = search.execute()
+
+            # Преобразуем результаты поиска
+            results = [hit.to_dict() for hit in response]
+            serializer = self.serializer_class(results, many=True)
+            return JsonResponse(serializer.data, safe=False)
+
+        except Exception as e:
+            return HttpResponse(str(e), status=500)
