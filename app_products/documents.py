@@ -52,6 +52,13 @@ class ProductDocument(Document):
             ),
         }
     )
+    stocks = fields.NestedField(  # Добавляем поле для цен и остатков
+        properties={
+            "warehouse": fields.TextField(analyzer="keyword"),  # Название склада
+            "quantity": fields.IntegerField(),  # Количество на складе
+            "price": fields.FloatField(),  # Цена товара
+        }
+    )
 
     class Index:
         name = "products"
@@ -121,4 +128,17 @@ class ProductDocument(Document):
                 "value_specification": spec.value_specification.__str__(),
             }
             for spec in instance.specifications.all()
+        ]
+
+    def prepare_stocks(self, instance):
+        """Подготовка данных о ценах и остатках для индексации"""
+        return [
+            {
+                "city": (
+                    stock.warehouse.city.name_city if stock.warehouse else "Unknown"
+                ),
+                "quantity": stock.quantity,
+                "price": float(stock.price),
+            }
+            for stock in instance.stocks.all()
         ]
