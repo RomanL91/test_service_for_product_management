@@ -54,6 +54,7 @@ pycparser==2.22 ; python_version >= "3.10" and python_version < "4.0" and platfo
 pyjwt==2.8.0 ; python_version >= "3.10" and python_version < "4.0"
 python-crontab==3.2.0 ; python_version >= "3.10" and python_version < "4.0"
 python-dateutil==2.9.0.post0 ; python_version >= "3.10" and python_version < "4.0"
+python-dotenv==1.0.1 ; python_version >= "3.10" and python_version < "4.0"
 python-magic==0.4.27 ; python_version >= "3.10" and python_version < "4.0"
 python-slugify==8.0.4 ; python_version >= "3.10" and python_version < "4.0"
 pytz==2024.1 ; python_version >= "3.10" and python_version < "4.0"
