@@ -11,4 +11,4 @@ python -m celery -A core flower --port=8001 --basic_auth=admin:admin &
 python manage.py search_index --rebuild -f
 
 # gunicorn --bind 0.0.0.0:8000 core.asgi -w 4 -k uvicorn.workers.UvicornWorker # с возможностью указания количества воркеров
-uvicorn core.asgi:application --host 0.0.0.0 --port 8000
+uvicorn core.asgi:application --host 0.0.0.0 --port 8888
