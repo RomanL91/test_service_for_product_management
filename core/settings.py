@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Загрузка переменных окружения из .env файла
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-=*k&zk_*f_9%k7+4z0(1eh1^1&!to*tonwj2cf%x1mf76jmd3w"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
@@ -110,12 +114,11 @@ ASGI_APPLICATION = "core.asgi.application"
 DATABASES = {
     "default": {  # Запущена в контейнере
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "MyShopDataBase",
-        "USER": "MyShopUser",
-        "PASSWORD": "MyShopPassword",
-        "HOST": "postgres",
-        # "HOST": "postgres", # для докера
-        "PORT": "5432",
+        "NAME": os.getenv("DATABASE_NAME"),
+        "USER": os.getenv("DATABASE_USER"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD"),
+        "HOST": os.getenv("DATABASE_HOST"),
+        "PORT": os.getenv("DATABASE_PORT"),
     }
 }
 
@@ -184,8 +187,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-AUTH_SERVICE_URL = "http://127.0.0.1:8001/auth_api/v1/auth_user/token/"
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -201,8 +202,7 @@ SIMPLE_JWT = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        # "LOCATION": "redis://cache:6379", # Для докера
-        "LOCATION": "redis://redis:6379/1",
+        "LOCATION": os.getenv("LOCATION"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
@@ -211,7 +211,7 @@ CACHES = {
 
 ELASTICSEARCH_DSL = {
     "default": {
-        "hosts": "http://elasticsearch:9200",
+        "hosts": os.getenv("HOST"),
         "timeout": 30,  # Увеличьте время ожидания, например, до 30 секунд
         "retry_on_timeout": True,  # Включите повторную попытку при тайм-ауте
         "max_retries": 3,  # Установите количество повторных попыток
@@ -221,23 +221,20 @@ ELASTICSEARCH_DSL = {
 }
 
 
-BASE_URL_ETL_1C = "http://127.0.0.1:7777//v1/1c/etl/"
-BASE_URL_API_SELF = "http://127.0.0.1:8000/api/v1/external_products/"
-# BROKER_URL = "redis://cache:6379/0" # Для докера
-BROKER_URL = "redis://redis:6379/0"
+BASE_URL_ETL_1C = os.getenv("BASE_URL_ETL_1C")
+BASE_URL_API_SELF = os.getenv("BASE_URL_API_SELF")
+BROKER_URL = os.getenv("BROKER_URL")
 
 
 # фоновые для каспи
-ORDERS_API = "https://kaspi.kz/shop/api/v2/orders"
-ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = (
-    "http://127.0.0.1:7777/v1/kaspi/etl/get_archive_orders/"
-)
+ORDERS_API = os.getenv("ORDERS_API")
+ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = os.getenv("ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI")
 
 # DATABASE_ROUTERS = ["app_orders.db_router.OrderRouter"]
 
 # это общение с сервисом корзины
-BASKET_HOST = "localhost"
-BASKET_PORT = 8989
+BASKET_HOST = os.getenv("BASKET_HOST")
+BASKET_PORT = os.getenv("BASKET_PORT")
 API_URL_GET_ORDERS = "http://{basket_host}:{basket_port}/basket_api/v1/order/all/?page={page}&size={size}"
 API_URL_GET_INFO_ORDER_WITH_BASKET = (
     "http://{basket_host}:{basket_port}/basket_api/v1/order/info_with_basket/{uuid_id}/"
