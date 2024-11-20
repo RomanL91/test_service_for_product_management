@@ -4,8 +4,11 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    env_file:
+      - .env
     ports:
       - "8000:8000"
+      - "8001:8001"
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
