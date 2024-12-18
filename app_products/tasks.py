@@ -21,7 +21,9 @@ class ProductDataHandler:
 
     def send_data(self, data):
         # Отправка данных в целевой API
-        result = self.http_method(self.BASE_URL_API_SELF, json=data)
+        result = self.http_method(
+            self.BASE_URL_API_SELF, headers={"Host": "localhost"}, json=data
+        )
         result.raise_for_status()  # Проверка на ошибки HTTP
         return result
 
