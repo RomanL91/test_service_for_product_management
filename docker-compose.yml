@@ -1,5 +1,6 @@
 services:
   web:
+    container_name: shop_service
     build:
       context: .
       dockerfile: Dockerfile
