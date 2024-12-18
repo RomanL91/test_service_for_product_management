@@ -57,6 +57,7 @@ class ProductAdmin(admin.ModelAdmin):
         "name_product__istartswith",
         "name_product__iexact",
         "name_product__icontains",
+        "vendor_code__iexact",
     ]
     readonly_fields = [
         "get_preview",
@@ -167,6 +168,12 @@ class PopulatesProductsAdmin(admin.ModelAdmin):
 class ExternalProductAdmin(admin.ModelAdmin):
     inlines = [
         ExternalProductImageInline,
+    ]
+    search_fields = [
+        "product_name__istartswith",
+        "product_name__iexact",
+        "product_name__icontains",
+        "product_code__iexact",
     ]
 
 
