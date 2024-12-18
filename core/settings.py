@@ -31,7 +31,7 @@ SECRET_KEY = "django-insecure-=*k&zk_*f_9%k7+4z0(1eh1^1&!to*tonwj2cf%x1mf76jmd3w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["shop_service", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     "app_services",
     "app_kaspi",  # приложение без регистрации в админке
     "app_elastic",  # приложение без регистрации в админке
+    "app_orders",
     # для работы с изображениями
     "easy_thumbnails",  # TODO no use
     "image_cropping",  # TODO no use
@@ -114,12 +115,20 @@ ASGI_APPLICATION = "core.asgi.application"
 DATABASES = {
     "default": {  # Запущена в контейнере
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DATABASE_NAME"),
-        "USER": os.getenv("DATABASE_USER"),
-        "PASSWORD": os.getenv("DATABASE_PASSWORD"),
-        "HOST": os.getenv("DATABASE_HOST"),
-        "PORT": os.getenv("DATABASE_PORT"),
-    }
+        "NAME": os.getenv("DATABASE_NAME_DEFAULT"),
+        "USER": os.getenv("DATABASE_USER_DEFAULT"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD_DEFAULT"),
+        "HOST": os.getenv("DATABASE_HOST_DEFAULT"),
+        "PORT": os.getenv("DATABASE_PORT_DEFAULT"),
+    },
+    "fastapi_db": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DATABASE_NAME_BASKET"),
+        "USER": os.getenv("DATABASE_USER_BASKET"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD_BASKET"),
+        "HOST": os.getenv("DATABASE_HOST_BASKET"),
+        "PORT": os.getenv("DATABASE_PORT_BASKET"),
+    },
 }
 
 
@@ -230,7 +239,7 @@ BROKER_URL = os.getenv("BROKER_URL")
 ORDERS_API = os.getenv("ORDERS_API")
 ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = os.getenv("ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI")
 
-# DATABASE_ROUTERS = ["app_orders.db_router.OrderRouter"]
+DATABASE_ROUTERS = ["app_orders.FastAPIDatabaseRouter.FastAPIDatabaseRouter"]
 
 # это общение с сервисом корзины
 BASKET_HOST = os.getenv("BASKET_HOST")
