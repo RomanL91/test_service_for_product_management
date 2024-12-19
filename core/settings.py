@@ -33,6 +33,7 @@ DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = [
     "shop_service",
+    "web",
     "pimenov.kz",
     "localhost",
     "127.0.0.1",
@@ -41,7 +42,7 @@ ALLOWED_HOSTS = [
 
 
 # Application definition
-
+""
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
