@@ -206,9 +206,11 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://pimenov.kz",
+    "https://sck.kz",
 ]
 CORS_ALLOWED_ORIGINS = [
     "https://pimenov.kz",
+    "https://sck.kz",
 ]
 CSRF_COOKIE_SECURE = True
 
