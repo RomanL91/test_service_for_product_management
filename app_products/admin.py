@@ -175,6 +175,24 @@ class ExternalProductAdmin(admin.ModelAdmin):
         "product_name__icontains",
         "product_code__iexact",
     ]
+    list_display = [
+        "product_name",
+        "product_code",
+        "price",
+        "stock",
+        "category",
+        "brand",
+    ]
+    list_filter = [
+        "stock",
+        "warehouse_code",
+    ]
+    list_editable = [
+        "category",
+        "brand",
+    ]
+    autocomplete_fields = ("category", "brand")
+    list_per_page = 20
 
 
 admin.site.register(PopulatesProducts, PopulatesProductsAdmin)
