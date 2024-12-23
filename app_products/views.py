@@ -258,13 +258,14 @@ class ExternalProductBulkCreateAPIView(APIView):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        return Response(
-            {
-                "success": False,
-                "errors": serializer.errors,
-            },
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        else:
+            return Response(
+                {
+                    "success": False,
+                    "errors": serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def patch(self, request, *args, **kwargs):
         serializer = ExternalProductSerializer(data=request.data, many=True)
