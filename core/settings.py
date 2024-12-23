@@ -35,6 +35,7 @@ ALLOWED_HOSTS = [
     "shop_service",
     "web",
     "pimenov.kz",
+    "sck.kz",
     "localhost",
     "127.0.0.1",
     "185.100.67.246",
