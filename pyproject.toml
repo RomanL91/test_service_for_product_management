@@ -38,6 +38,7 @@ elasticsearch = "^8.15.1"
 elasticsearch-dsl = "8.11.0"
 django-elasticsearch-dsl = "8.0"
 python-dotenv = "^1.0.1"
+django-autocompletefilter = "^0.0.9"
 
 
 [build-system]

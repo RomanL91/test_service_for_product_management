@@ -14,6 +14,9 @@ from app_products.models import (
 from app_specifications.admin import SpecificationsInline
 from app_sales_points.admin import StockInline
 
+from autocompletefilter.admin import AutocompleteFilterMixin
+from autocompletefilter.filters import AutocompleteListFilter
+
 # форма для вывода древовидной структуры категорий
 # from app_products.forms import ProductAdminForm
 
@@ -33,7 +36,7 @@ class ExternalProductImageInline(admin.StackedInline):
     formfield_overrides = {models.ImageField: {"widget": CustomAdminFileWidget}}
 
 
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(AutocompleteFilterMixin, admin.ModelAdmin):
     # form = ProductAdminForm   # форма для вывода древовидной структуры категорий
     form = JsonDocumentForm
     inlines = [
@@ -49,7 +52,8 @@ class ProductAdmin(admin.ModelAdmin):
         "get_image",
     ]
     list_filter = [
-        "category",
+        # "category",
+        ("category", AutocompleteListFilter),
         "brand",
     ]
     autocomplete_fields = [

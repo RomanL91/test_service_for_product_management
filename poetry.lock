@@ -506,6 +506,20 @@ files = [
 django = "*"
 
 [[package]]
+name = "django-autocompletefilter"
+version = "0.0.9"
+description = "Django ModelAdmin list_filter with autocomplete widget."
+optional = false
+python-versions = ">=3.4"
+files = [
+    {file = "django_autocompletefilter-0.0.9-py3-none-any.whl", hash = "sha256:2225053538a3621260016c228d439aa5fcf37eacc8c17a7de9bed85393a255b3"},
+    {file = "django_autocompletefilter-0.0.9.tar.gz", hash = "sha256:d1d43c2c5cabcf0b657ab03dcde6773ad1bb045dec6ea90164394b5198e7ff5c"},
+]
+
+[package.dependencies]
+Django = ">=2.0"
+
+[[package]]
 name = "django-celery-beat"
 version = "2.6.0"
 description = "Database-backed Periodic Tasks."
@@ -1487,4 +1501,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "71b1ecce2f40ecc47b5d136c12846efc90a94960fe7ecafba42acf65b8615d4f"
+content-hash = "5dc165febaa5cfd492004cef75e9ef09c2f3e12bd56bcff4671318c72d1201bc"
