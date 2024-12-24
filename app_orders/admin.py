@@ -8,6 +8,8 @@ from app_orders.models import Baskets, Orders
 
 @admin.register(Baskets)
 class BasketsAdmin(admin.ModelAdmin):
+    date_hierarchy = "created_at"
+
     list_display = [
         "id",
         "uuid_id",
@@ -16,6 +18,11 @@ class BasketsAdmin(admin.ModelAdmin):
         "checkout_stage",
         "created_at",
         "updated_at",
+    ]
+
+    list_filter = [
+        "completed",
+        "checkout_stage",
     ]
 
     readonly_fields = (
@@ -27,9 +34,11 @@ class BasketsAdmin(admin.ModelAdmin):
         "completed",
         "checkout_stage",
         "products_summary_with_actions",
+    )
+    exclude = [
         "gift_items",
         "basket_items",
-    )
+    ]
 
     class Media:
         js = ("admin/custom.js",)
@@ -70,12 +79,36 @@ class BasketsAdmin(admin.ModelAdmin):
         # return format_html(f"{products_html}<br><br>{buttons_html}")
         return format_html(f"{products_html}")
 
-    products_summary_with_actions.short_description = "Products Summary with Actions"
+    products_summary_with_actions.short_description = "Обзор товаров в корзине"
 
 
 @admin.register(Orders)
 class OrdersAdmin(admin.ModelAdmin):
-    pass
+    list_display = [
+        "user_full_name",
+        "phone_number",
+        "shipping_city",
+        "delivery_type",
+        "total_amount",
+        "payment_type",
+        "order_status",
+        "payment_status",
+    ]
+    list_filter = [
+        "shipping_city",
+        "delivery_type",
+        "payment_type",
+        "order_status",
+        "payment_status",
+        "manager_executive",
+    ]
+    search_fields = [
+        "user_full_name",
+        "total_amount",
+        "comment",
+        "delivery_address",
+        "account_number",
+    ]
 
 
 # @admin.register(Transactionpayments)
