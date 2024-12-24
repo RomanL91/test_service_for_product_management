@@ -98,8 +98,9 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(BASE_DIR, "core/templates"),
-            os.path.join(BASE_DIR, "app_orders/templates"),
+            # использовать для добавления своих шаблонов в админку или переопределения
+            # os.path.join(BASE_DIR, "core/templates"),
+            # os.path.join(BASE_DIR, "app_orders/templates"),
         ],
         "APP_DIRS": True,
         "OPTIONS": {
