@@ -9,9 +9,20 @@ from django.utils.translation import gettext_lazy as _
 
 
 class BaseModel(models.Model):
-    id = models.AutoField(primary_key=True)
-    created_at = models.DateTimeField(default=now, null=True)
-    updated_at = models.DateTimeField(default=now, null=True)
+    id = models.AutoField(
+        primary_key=True,
+        verbose_name="ИД записи в системе",
+    )
+    created_at = models.DateTimeField(
+        default=now,
+        null=True,
+        verbose_name="Время создания",
+    )
+    updated_at = models.DateTimeField(
+        default=now,
+        null=True,
+        verbose_name="Время обновления",
+    )
 
     class Meta:
         abstract = True
@@ -34,23 +45,33 @@ class CheckoutStageSchema(Enum):
 
 class Baskets(BaseModel):
     uuid_id = models.CharField(
-        unique=True, default=uuid.uuid4
+        unique=True,
+        default=uuid.uuid4,
+        verbose_name="Уникальный ИД устройства",
     )  # UUIDField с уникальным значением
     user_id = models.UUIDField(
-        null=True, blank=True
+        null=True,
+        blank=True,
+        verbose_name="ИД зарегистрированного пользователя",
     )  # UUID пользователя (сопоставление SQLAlchemy UUID)
     completed = models.BooleanField(
-        default=False, null=True, blank=True
+        default=False,
+        null=True,
+        blank=True,
+        verbose_name="Логический статус корзины",
     )  # Поле для статуса
     checkout_stage = models.CharField(
         max_length=20,
         choices=CheckoutStageSchema.choices(),
         default=CheckoutStageSchema.CREATED.value,  # Аналог Enum по строковому значению
+        verbose_name="Описательный статус корзины",
     )
     basket_items = models.JSONField(null=True, blank=True, default=list)  # JSON аналог
     gift_items = models.JSONField(null=True, blank=True, default=list)  # JSON аналог
 
     class Meta:
+        verbose_name = "Корзина"
+        verbose_name_plural = "Корзины"
         db_table = "baskets"
         managed = False
 
@@ -141,6 +162,8 @@ class Orders(models.Model):
     manager_executive = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
+        verbose_name = "Ордер"
+        verbose_name_plural = "Ордера"
         db_table = "orders"
         managed = False
 
