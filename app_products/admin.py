@@ -90,28 +90,28 @@ class ProductAdmin(admin.ModelAdmin):
         ),
         (
             "Описание",
-            {"fields": ("description",)},
+            {"fields": ("description",), "classes": ("collapse",)},
         ),
         (
             "Комплектации",
-            {"fields": ("configuration",)},
+            {"fields": ("configuration",), "classes": ("collapse",)},
         ),
         (
             "Сопутсвующий товар",
-            {"fields": ("related_product",)},
+            {"fields": ("related_product",), "classes": ("collapse",)},
         ),
-        (
-            "Теги продукта",
-            {"fields": ("tag_prod",)},
-        ),
-        (
-            "В подарок",
-            {"fields": ("present",)},
-        ),
-        (
-            "Услуги к продукту",
-            {"fields": ("services",)},
-        ),
+        # (
+        #     "Теги продукта",
+        #     {"fields": ("tag_prod",)},
+        # ),
+        # (
+        #     "В подарок",
+        #     {"fields": ("present",)},
+        # ),
+        # (
+        #     "Услуги к продукту",
+        #     {"fields": ("services",)},
+        # ),
     )
 
     def get_image(self, obj):
