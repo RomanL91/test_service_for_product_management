@@ -48,6 +48,10 @@ class ProductAdmin(admin.ModelAdmin):
         # "remaining_goods",
         "get_image",
     ]
+    list_filter = [
+        "category",
+        "brand",
+    ]
     autocomplete_fields = [
         "category",
         "brand",
