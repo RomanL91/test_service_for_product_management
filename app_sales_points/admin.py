@@ -34,10 +34,19 @@ class StockAdmin(admin.ModelAdmin):
     form = JsonDocumentForm
     list_display = [
         "product",
+        "warehouse",
+        "price",
+        "quantity",
     ]
-    # search_fields = [
-    #     "name_specification",
-    # ]
+    search_fields = [
+        "product__name_product__istartswith",
+        "product__name_product__iexact",
+        "product__name_product__icontains",
+    ]
+    list_filter = [
+        "warehouse",
+        "quantity",
+    ]
     autocomplete_fields = [
         "product",
         "warehouse",
