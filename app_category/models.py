@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.contenttypes.fields import GenericRelation
 
 from mptt.models import MPTTModel, TreeForeignKey
 
@@ -19,6 +20,11 @@ class Category(MPTTModel, JSONFieldsMixin, SlugModelMixin):
         db_index=True,
         verbose_name="Родительская категория",
     )
+    edges = GenericRelation(
+        "app_sales_points.Edges",
+        content_type_field="content_type",
+        object_id_field="object_id",
+    )
 
     class MPTTMeta:
         order_insertion_by = ["name_category"]
@@ -29,6 +35,9 @@ class Category(MPTTModel, JSONFieldsMixin, SlugModelMixin):
         verbose_name_plural = "Категории"
 
     def __str__(self):
+        return self.name_category
+
+    def get_name(self):
         return self.name_category
 
 
