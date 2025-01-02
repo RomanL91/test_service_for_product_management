@@ -14,6 +14,7 @@ urlpatterns = [
     re_path(
         r"^api/v1/reviews/filter_by_prod/(?P<prod_pk>\d+)/$",
         filter_by_prod,
+        name="all_reviews_to_product",
     ),
 ]
 
