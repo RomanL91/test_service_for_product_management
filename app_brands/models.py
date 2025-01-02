@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.contenttypes.fields import GenericRelation
 
 from core.mixins import JSONFieldsMixin
 
@@ -8,10 +9,18 @@ class Brands(JSONFieldsMixin, models.Model):
         max_length=150,
         verbose_name="Наименование бренда",
     )
+    edges = GenericRelation(
+        "app_sales_points.Edges",
+        content_type_field="content_type",
+        object_id_field="object_id",
+    )
 
     class Meta:
-        verbose_name = "бренд"
-        verbose_name_plural = "бренды"
+        verbose_name = "Бренд"
+        verbose_name_plural = "Бренды"
+
+    def get_name(self):
+        return self.name_brand
 
     def __str__(self) -> str:
         return self.name_brand
