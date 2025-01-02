@@ -5,7 +5,8 @@ from flat_json_widget.widgets import FlatJsonWidget
 
 from core.mixins import JsonDocumentForm
 
-from app_sales_points.models import City, Warehouse, Stock
+from app_sales_points.models import City, Warehouse, Stock, Edges
+from app_sales_points.forms import EdgesForm
 
 
 class StockInline(admin.StackedInline):
@@ -51,3 +52,36 @@ class StockAdmin(admin.ModelAdmin):
         "product",
         "warehouse",
     ]
+
+
+@admin.register(Edges)
+class EdgesAdmin(admin.ModelAdmin):
+    form = EdgesForm
+    list_display = [
+        "edges_name",
+        "city_from",
+        "city_to",
+        "content_type",
+        "estimated_delivery_days",
+        "transportation_cost",
+        "is_active",
+        "expiration_date",
+    ]
+
+    fields = [
+        "edges_name",
+        "city_from",
+        "city_to",
+        "content_type",
+        "object_name",
+        "estimated_delivery_days",
+        "transportation_cost",
+        "is_active",
+        "expiration_date",
+    ]
+
+    class Media:
+        js = (
+            "admin/js/vendor/jquery/jquery.js",
+            "app_sales_points/js/edges_admin.js",
+        )
