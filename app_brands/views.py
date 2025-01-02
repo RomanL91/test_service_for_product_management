@@ -5,12 +5,12 @@ from django.shortcuts import get_object_or_404
 
 from app_brands.models import Brands
 from app_category.models import Category
-from app_brands.serializers import BrandsSerializer
+from app_brands.serializers import BrandSerializer
 
 
 class BrandsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Brands.objects.all()
-    serializer_class = BrandsSerializer
+    serializer_class = BrandSerializer
 
     def filter_brands_by_category(self, **category_filter):
         # Получаем категорию по заданному фильтру (id или slug)
