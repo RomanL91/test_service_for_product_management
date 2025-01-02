@@ -10,7 +10,7 @@ from app_products.models import Products, ProductImage, PopulatesProducts
 from app_sales_points.models import Stock
 
 from app_category.serializers import CategorySerializer, CategorySerializerElastic
-from app_brands.serializers import BrandsSerializer
+from app_brands.serializers import BrandSerializer
 from app_manager_tags.serializers import TagSerializer
 from app_sales_points.serializers import StockSerializerElasticSearch
 from app_specifications.serializers import (
@@ -133,7 +133,7 @@ class ProductsListSerializer(BaseProductSerializer):
 
 class ProductsDetailSerializer(BaseProductSerializer):
     category = CategorySerializer(read_only=True)
-    brand = BrandsSerializer(read_only=True)
+    brand = BrandSerializer(read_only=True)
     # present = ProductsListSerializer(many=True)
     present = RelatedProductsSerializer(many=True)
     services = ServiceSerializer(many=True)
@@ -200,7 +200,7 @@ class ExternalProductSerializer(serializers.Serializer):
 
 class ProductsDetailSerializerSearch(serializers.ModelSerializer):
     category = CategorySerializerElastic(read_only=True)
-    brand = BrandsSerializer(read_only=True)
+    brand = BrandSerializer(read_only=True)
     tag_prod = TagSerializer(many=True, read_only=True)
     specifications = SpecificationsSerializerElasticSearch(many=True, required=False)
     stocks = StockSerializerElasticSearch(many=True, required=False)
