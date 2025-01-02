@@ -17,9 +17,6 @@ from app_sales_points.admin import StockInline
 from autocompletefilter.admin import AutocompleteFilterMixin
 from autocompletefilter.filters import AutocompleteListFilter
 
-# форма для вывода древовидной структуры категорий
-# from app_products.forms import ProductAdminForm
-
 
 class ProductImageInline(admin.StackedInline):
     model = ProductImage
@@ -37,7 +34,6 @@ class ExternalProductImageInline(admin.StackedInline):
 
 
 class ProductAdmin(AutocompleteFilterMixin, admin.ModelAdmin):
-    # form = ProductAdminForm   # форма для вывода древовидной структуры категорий
     form = JsonDocumentForm
     inlines = [
         ProductImageInline,
@@ -108,18 +104,18 @@ class ProductAdmin(AutocompleteFilterMixin, admin.ModelAdmin):
             "Сопутсвующий товар",
             {"fields": ("related_product",), "classes": ("collapse",)},
         ),
-        # (
-        #     "Теги продукта",
-        #     {"fields": ("tag_prod",)},
-        # ),
+        (
+            "Теги продукта",
+            {"fields": ("tag_prod",), "classes": ("collapse",)},
+        ),
         # (
         #     "В подарок",
         #     {"fields": ("present",)},
         # ),
-        # (
-        #     "Услуги к продукту",
-        #     {"fields": ("services",)},
-        # ),
+        (
+            "Услуги к продукту",
+            {"fields": ("services",), "classes": ("collapse",)},
+        ),
     )
 
     def get_image(self, obj):
