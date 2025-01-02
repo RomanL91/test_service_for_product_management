@@ -1,7 +1,9 @@
+from django.http import JsonResponse
+from django.db.models import Min, Max
+from django.contrib.contenttypes.models import ContentType
+
 from rest_framework import viewsets
 from rest_framework.response import Response
-
-from django.db.models import Min, Max
 
 from app_sales_points.models import Stock, City
 from app_category.models import Category
@@ -54,3 +56,18 @@ class StocksViewSet(viewsets.ReadOnlyModelViewSet):
         # Сериализуем данные
         serializer = PriceRangeByCitySerializer(prices, many=True)
         return Response(serializer.data)
+
+
+def get_objects(request):
+    content_type_id = request.GET.get("content_type")
+    if not content_type_id:
+        return JsonResponse({"objects": []})
+
+    try:
+        model_class = ContentType.objects.get(id=content_type_id).model_class()
+        objects = model_class.objects.all()
+        return JsonResponse(
+            {"objects": [{"id": obj.id, "name": obj.get_name()} for obj in objects]}
+        )
+    except ContentType.DoesNotExist:
+        return JsonResponse({"objects": []})
