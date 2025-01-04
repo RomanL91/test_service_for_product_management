@@ -4,6 +4,8 @@ from rest_framework import serializers
 
 from app_sales_points.models import City, Warehouse, Stock, Edges
 
+from app_sales_points.utils import StockUpdater
+
 
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
@@ -79,3 +81,33 @@ class EdgeSerializer(serializers.ModelSerializer):
             )
             return self.estimated_delivery_date
         return 0
+
+
+class StocksByCityField(serializers.Field):
+    def to_representation(self, product):
+        if not hasattr(product, "prefetched_stocks"):
+            return {}
+
+        stocks_by_city = {}
+        stock_updater = StockUpdater(stocks_by_city)
+
+        for stock in product.prefetched_stocks:
+            city_name = stock.warehouse.city.name_city
+            stocks_by_city[city_name] = {
+                "price": stock.price,
+                "quantity": stock.quantity,
+                "edge": False,
+                "transportation_cost": None,
+                "estimated_delivery_days": None,
+            }
+            # Логика ребер
+            if hasattr(product.category, "related_edges"):
+                stock_updater.update_from_edges(
+                    product.category.related_edges, stock, city_name
+                )
+            if hasattr(product.brand, "related_edges"):
+                stock_updater.update_from_edges(
+                    product.brand.related_edges, stock, city_name
+                )
+
+        return stocks_by_city
