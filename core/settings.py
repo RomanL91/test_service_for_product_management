@@ -60,8 +60,9 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_celery_results",
     "django_celery_beat",
-    "django_elasticsearch_dsl",
+    # "django_elasticsearch_dsl",
     "autocompletefilter",
+    "silk",
     # приложения
     "app_products",
     "app_category",
@@ -91,6 +92,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "silk.middleware.SilkyMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -199,7 +201,7 @@ USE_TZ = True
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "PAGE_SIZE": 1,
+    "PAGE_SIZE": 20,
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
