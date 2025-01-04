@@ -3,12 +3,11 @@ from rest_framework.reverse import reverse
 
 from app_products.models import Products, ProductImage
 
-from app_sales_points.serializers import EdgeSerializer
+from app_sales_points.serializers import EdgeSerializer, StocksByCityField
 from app_brands.serializers import BrandSerializer
 from app_manager_tags.serializers import TagSerializer
+from app_specifications.serializers import SpecificationsSerializer
 from app_category.serializers_v2 import CategorySerializer
-
-from app_products.utils import StockUpdater
 
 
 # Сериализатор для ProductImage
@@ -24,13 +23,21 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)  # Изображения
     avg_rating = serializers.FloatField(read_only=True)  # Средний рейтинг
     reviews_count = serializers.IntegerField(read_only=True)  # Количество отзывов
-    stocks = serializers.SerializerMethodField()  # Поле для остатков по городам
+    stocks = StocksByCityField(source="*")  # Поле для остатков по городам
     category = CategorySerializer(read_only=True)  # Информация о категории
     brand = BrandSerializer(read_only=True)  # Информация о бренде
-    tag_prod = TagSerializer(many=True, read_only=True)  # Теги продукта
-    specifications = serializers.SerializerMethodField()  # Характеристики
+    tags = TagSerializer(
+        many=True, read_only=True, source="prefetched_tags"
+    )  # Теги продукта
+    specifications = SpecificationsSerializer(
+        many=True, read_only=True, source="prefetched_specifications"
+    )  # Характеристики
     reviews_url = serializers.SerializerMethodField()  # Ссылка на отзывы к продукту
     desc_url = serializers.SerializerMethodField()  # Ссылка на описание к продукту
+    related_products_url = (
+        serializers.SerializerMethodField()
+    )  # Ссылка на связанные продукты
+    configuration_url = serializers.SerializerMethodField()  # Ссылка на конфигурации
 
     class Meta:
         model = Products
@@ -46,62 +53,45 @@ class ProductSerializer(serializers.ModelSerializer):
             "related_edges",
             "avg_rating",
             "reviews_count",
-            "reviews_url",
             "stocks",
-            "tag_prod",
+            "tags",
             "specifications",
             "desc_url",
+            "reviews_url",
+            "related_products_url",
+            "configuration_url",
         ]
 
+    #
+    # ========== Вспомогательный метод для формирования URL с ?ids=... ==========
+    #
+    def _build_filter_by_ids_url(
+        self, items, request, url_name="products-filter-by-ids"
+    ):
+        """
+        Обобщённый метод:
+          - items: список объектов (например, obj.prefetched_related_products)
+          - request: объект запроса, нужен для reverse()
+          - url_name: имя маршрута, по умолчанию "products-filter-by-ids"
+        Возвращает строку вида:  <base_url>?ids=1,2,3
+        """
+        if not request:
+            return None
+        base_url = reverse(url_name, request=request)
+        if not items:
+            return f"{base_url}?ids="
+        ids_param = ",".join(str(item.pk) for item in items)
+        return f"{base_url}?ids={ids_param}"
+
     def get_related_edges(self, obj):
-        # Проверяем, если у категории или бренда есть аннотированные ребра
         if hasattr(obj.brand, "related_edges") or hasattr(
             obj.category, "related_edges"
         ):
-            edges_cat = obj.category.related_edges
-            edges_brand = obj.brand.related_edges
+            edges_cat = getattr(obj.category, "related_edges", [])
+            edges_brand = getattr(obj.brand, "related_edges", [])
             edges_brand.extend(edges_cat)
             return EdgeSerializer(edges_brand, many=True).data
         return []
-
-    def get_stocks(self, obj):
-        # Проверяем, если у продукта есть аннотированные остатки или ребра
-        if hasattr(obj, "prefetched_stocks"):
-            stocks_by_city = {}
-            stock_updater = StockUpdater(stocks_by_city)
-            # Инициализация информации о запасах по городам
-            for stock in obj.prefetched_stocks:
-                city_name = stock.warehouse.city.name_city
-                stocks_by_city[city_name] = {
-                    "price": stock.price,
-                    "quantity": stock.quantity,
-                    "edge": False,
-                    "transportation_cost": None,
-                    "estimated_delivery_days": None,
-                }
-                # Обновление запасов на основе ребер категории
-                if hasattr(obj.category, "related_edges"):
-                    stock_updater.update_from_edges(
-                        obj.category.related_edges, stock, city_name
-                    )
-
-                # Обновление запасов на основе ребер бренда
-                if hasattr(obj.brand, "related_edges"):
-                    stock_updater.update_from_edges(
-                        obj.brand.related_edges, stock, city_name
-                    )
-            return stocks_by_city
-
-        return {}
-
-    def get_specifications(self, obj):
-        # Преобразуем аннотированные спецификации в нужный формат
-        if hasattr(obj, "prefetched_specifications"):
-            return {
-                spec.name_specification.name_specification: spec.value_specification.value_specification
-                for spec in obj.prefetched_specifications
-            }
-        return {}
 
     def get_reviews_url(self, obj):
         request = self.context.get("request")
@@ -110,3 +100,17 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_desc_url(self, obj):
         request = self.context.get("request")
         return reverse("all_desc_to_product", args=[obj.id], request=request)
+
+    #
+    # ========== Методы для related_products_url и configuration_url ==========
+    #
+    def get_related_products_url(self, obj):
+        # Вместо повторения кода, вызываем _build_filter_by_ids_url
+        related_list = getattr(obj, "prefetched_related_products", [])
+        request = self.context.get("request")
+        return self._build_filter_by_ids_url(related_list, request)
+
+    def get_configuration_url(self, obj):
+        config_list = getattr(obj, "prefetched_configuration", [])
+        request = self.context.get("request")
+        return self._build_filter_by_ids_url(config_list, request)
