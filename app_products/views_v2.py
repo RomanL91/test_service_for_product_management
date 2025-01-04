@@ -1,15 +1,11 @@
-from datetime import date
-from django.db.models import Avg, Count, Prefetch
-
+from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 
-from app_products.models import Products, ProductImage
-from app_sales_points.models import Edges
-from app_sales_points.models import Stock
-from app_specifications.models import Specifications
-
 from app_products.serializers_v2 import ProductSerializer
+
+from app_products.ProductsQueryFactory import ProductsQueryFactory
 
 
 class ProductsPagination(LimitOffsetPagination):
@@ -22,52 +18,25 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
     Представление только для чтения продуктов с аннотированной информацией.
     """
 
-    queryset = (
-        Products.objects.select_related(
-            "category__parent",
-            "brand",
-        )
-        .prefetch_related(
-            "tag_prod",
-            Prefetch(
-                "specifications",
-                queryset=Specifications.objects.select_related(
-                    "name_specification", "value_specification"
-                ),
-                to_attr="prefetched_specifications",
-            ),
-            Prefetch(
-                "stocks",
-                queryset=Stock.objects.select_related(
-                    "warehouse__city",
-                ),
-                to_attr="prefetched_stocks",
-            ),
-            Prefetch(
-                "category__edges",
-                queryset=Edges.objects.filter(
-                    expiration_date__gt=date.today(), is_active=True
-                ).select_related("city_from", "city_to"),
-                to_attr="related_edges",
-            ),
-            Prefetch(
-                "brand__edges",
-                queryset=Edges.objects.filter(
-                    expiration_date__gt=date.today(), is_active=True
-                ).select_related("city_from", "city_to"),
-                to_attr="related_edges",
-            ),
-            Prefetch(
-                "productimage_set",  # Связь с изображениями продукта
-                queryset=ProductImage.objects.select_related("product"),
-                to_attr="images",  # Сохраняем изображения в поле `images`
-            ),
-        )
-        .annotate(
-            avg_rating=Avg("review__rating"),  # Средний рейтинг
-            reviews_count=Count("review", distinct=True),  # Количество отзывов
-        )
-    )
+    queryset = ProductsQueryFactory.get_all_details()
     serializer_class = ProductSerializer
     pagination_class = ProductsPagination
     lookup_field = "slug"  # Указываем поле для поиска
+
+    @action(detail=False, methods=["get"], url_path="filter_by_ids")
+    def filter_by_ids(self, request, *args, **kwargs):
+        ids_param = request.query_params.get("ids")
+        if not ids_param:
+            return Response({"detail": "No 'ids' param"}, status=400)
+        try:
+            ids_list = [int(pk) for pk in ids_param.split(",") if pk.strip()]
+        except ValueError:
+            return Response({"detail": "Invalid 'ids' format"}, status=400)
+
+        queryset = self.filter_queryset(self.get_queryset().filter(pk__in=ids_list))
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
