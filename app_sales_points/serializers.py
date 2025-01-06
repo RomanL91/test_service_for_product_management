@@ -117,7 +117,10 @@ class StocksByCityField(serializers.Field):
         stock_updater = StockUpdater(stocks_by_city)
 
         for stock in product.prefetched_stocks:
-            city_name = stock.warehouse.city.name_city
+            warehouse = getattr(stock, "warehouse", None)
+            if not warehouse:
+                continue  # Пропускаем объект, если нет склада
+            city_name = warehouse.city.name_city
             price_before = stock.price * (1 + discount_decimal / 100)
             stocks_by_city[city_name] = {
                 "price": stock.price,
