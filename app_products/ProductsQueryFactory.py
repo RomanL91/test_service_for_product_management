@@ -1,10 +1,12 @@
 from django.utils.timezone import now
-from django.db.models import Prefetch, Avg, Count
+from django.db.models import Prefetch, Q, Avg, Count, Sum
 
+from app_reviews.models import Review
 from app_manager_tags.models import Tag
 from app_sales_points.models import Stock, Edges
 from app_specifications.models import Specifications
 from app_products.models import Products, ProductImage
+from app_discounts.models import ProductDiscount, CategoryDiscount, BrandDiscount
 
 
 class ProductsQueryFactory:
@@ -157,11 +159,84 @@ class ProductsQueryFactory:
     @staticmethod
     def annotate_reviews(queryset):
         """
-        Добавляем аннотации рейтинга и количества отзывов
+        Добавляем аннотации рейтинга и количества отзывов, включая сами отзывы.
         """
         return queryset.annotate(
-            avg_rating=Avg("review__rating"),
-            reviews_count=Count("review", distinct=True),
+            avg_rating=Avg("reviews__rating", filter=Q(reviews__moderation=True)),
+            reviews_count=Count(
+                "reviews", filter=Q(reviews__moderation=True), distinct=True
+            ),
+        ).prefetch_related(
+            Prefetch(
+                "reviews",
+                queryset=Review.objects.filter(moderation=True).order_by("-created_at"),
+            )
+        )
+
+    # -------------------------------
+    # Скидки
+    # -------------------------------
+    @staticmethod
+    def with_product_discounts(queryset):
+        """
+        Предзагружаем скидки ProductDiscount, связанные через product_discounts (ManyToMany).
+        Фильтруем только активные.
+        """
+        discount_qs = ProductDiscount.objects.filter(active=True)
+        return queryset.prefetch_related(
+            Prefetch(
+                "product_discounts",
+                queryset=discount_qs,
+                to_attr="prefetched_product_discounts",
+            )
+        )
+
+    @staticmethod
+    def with_category_discounts(queryset):
+        """
+        Предзагружаем скидки CategoryDiscount, связанные с категорией товара (category_discounts).
+        """
+        discount_qs = CategoryDiscount.objects.filter(active=True)
+        return queryset.prefetch_related(
+            Prefetch(
+                "category__category_discounts",
+                queryset=discount_qs,
+                to_attr="prefetched_category_discounts",
+            )
+        )
+
+    @staticmethod
+    def with_brand_discounts(queryset):
+        """
+        Предзагружаем скидки BrandDiscount, связанные с брендом товара (brand_discounts).
+        """
+        discount_qs = BrandDiscount.objects.filter(active=True)
+        return queryset.prefetch_related(
+            Prefetch(
+                "brand__brand_discounts",
+                queryset=discount_qs,
+                to_attr="prefetched_brand_discounts",
+            )
+        )
+
+    @staticmethod
+    def with_all_discounts(queryset):
+        """
+        Объединяем все три вида скидок: product, category, brand.
+        """
+        queryset = ProductsQueryFactory.with_product_discounts(queryset)
+        queryset = ProductsQueryFactory.with_category_discounts(queryset)
+        queryset = ProductsQueryFactory.with_brand_discounts(queryset)
+        return queryset
+
+    @staticmethod
+    def only_in_stock(queryset):
+        """
+        Оставляем в выборке только те товары, у которых
+        суммарный остаток (stocks__quantity) > 0.
+        """
+        return queryset.annotate(total_quantity=Sum("stocks__quantity")).filter(
+            total_quantity__gt=0
         )
 
     # На этом уровне можно организовать кеширование (использую пока уровне маршрутов)
@@ -172,6 +247,7 @@ class ProductsQueryFactory:
         """
         base = ProductsQueryFactory.get_base_query()
         base = ProductsQueryFactory.with_tags(base)
+        base = ProductsQueryFactory.with_all_discounts(base)
         base = ProductsQueryFactory.with_images(base)
         base = ProductsQueryFactory.with_specifications(base)
         base = ProductsQueryFactory.with_stocks(base)
@@ -180,6 +256,7 @@ class ProductsQueryFactory:
         base = ProductsQueryFactory.with_related_products(base)
         base = ProductsQueryFactory.with_configuration(base)
         base = ProductsQueryFactory.annotate_reviews(base)
+        base = ProductsQueryFactory.only_in_stock(base)
         return base
 
     @staticmethod
