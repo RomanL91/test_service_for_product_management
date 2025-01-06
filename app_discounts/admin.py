@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from core.mixins import JsonDocumentForm
-from app_discounts.models import ProductDiscount, CategoryDiscount
+from app_discounts.models import ProductDiscount, CategoryDiscount, BrandDiscount
 
 
 class BaseDiscountAdmin(admin.ModelAdmin):
@@ -26,3 +26,8 @@ class ProductDiscountAdmin(BaseDiscountAdmin):
 @admin.register(CategoryDiscount)
 class CategoryDiscountAdmin(BaseDiscountAdmin):
     filter_horizontal = ["categories"]
+
+
+@admin.register(BrandDiscount)
+class BrandDiscountAdmin(BaseDiscountAdmin):
+    filter_horizontal = ["brands"]

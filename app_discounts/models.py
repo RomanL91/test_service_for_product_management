@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 from core.mixins import JSONFieldsMixin
+from app_brands.models import Brands
 from app_category.models import Category
 from app_products.models import Products
 
@@ -64,6 +65,7 @@ class ProductDiscount(BaseDiscount):
     products = models.ManyToManyField(
         Products,
         blank=True,
+        related_name="product_discounts",
         verbose_name="Продукты",
     )
 
@@ -76,9 +78,23 @@ class CategoryDiscount(BaseDiscount):
     categories = models.ManyToManyField(
         Category,
         blank=True,
+        related_name="category_discounts",
         verbose_name="Категории",
     )
 
     class Meta:
         verbose_name = "Скидка на категорию"
         verbose_name_plural = "Скидка на категории"
+
+
+class BrandDiscount(BaseDiscount):
+    brands = models.ManyToManyField(
+        Brands,
+        blank=True,
+        related_name="brand_discounts",
+        verbose_name="Бренд",
+    )
+
+    class Meta:
+        verbose_name = "Скидка на бренд"
+        verbose_name_plural = "Скидка на бренды"
