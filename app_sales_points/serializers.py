@@ -1,3 +1,4 @@
+from decimal import Decimal
 from datetime import date, timedelta
 
 from rest_framework import serializers
@@ -84,7 +85,31 @@ class EdgeSerializer(serializers.ModelSerializer):
 
 
 class StocksByCityField(serializers.Field):
+    def get_discount(self, obj):
+        """
+        Приоритет: товар → категория → бренд.
+        Возвращаем объект скидки (или None).
+        """
+        product_discounts = getattr(obj, "prefetched_product_discounts", [])
+        if product_discounts:
+            return max(product_discounts, key=lambda d: d.amount)
+        cat_discounts = []
+        if obj.category:
+            cat_discounts = getattr(obj.category, "prefetched_category_discounts", [])
+            if cat_discounts:
+                return max(cat_discounts, key=lambda d: d.amount)
+        brand_discounts = []
+        if obj.brand:
+            brand_discounts = getattr(obj.brand, "prefetched_brand_discounts", [])
+            if brand_discounts:
+                return max(brand_discounts, key=lambda d: d.amount)
+        return None
+
     def to_representation(self, product):
+        # 1) Получаем саму скидку (obj), если есть
+        discount_obj = self.get_discount(product)  # возвращает объект скидки или None
+        discount_amount = discount_obj.amount if discount_obj else 0
+        discount_decimal = Decimal(discount_amount)
         if not hasattr(product, "prefetched_stocks"):
             return {}
 
@@ -93,8 +118,10 @@ class StocksByCityField(serializers.Field):
 
         for stock in product.prefetched_stocks:
             city_name = stock.warehouse.city.name_city
+            price_before = stock.price * (1 + discount_decimal / 100)
             stocks_by_city[city_name] = {
                 "price": stock.price,
+                "price_before_discount": float(price_before),
                 "quantity": stock.quantity,
                 "edge": False,
                 "transportation_cost": None,
