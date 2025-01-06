@@ -1,7 +1,13 @@
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 from rest_framework.decorators import action
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
+
+from django.shortcuts import get_object_or_404
+
+from app_category.models import Category
+from app_products.models import PopulatesProducts
 
 from app_products.serializers_v2 import ProductSerializer
 
@@ -38,5 +44,56 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="popular_set")
+    def popular_set(self, request, *args, **kwargs):
+        """
+        Возвращает первый активный набор из PopulatesProducts.
+        """
+        populate_set = PopulatesProducts.objects.filter(activ_set=True).first()
+        if not populate_set:
+            raise NotFound({"detail": "No active populate set found."})
+
+        # Получаем товары из активного набора
+        product_ids = populate_set.products.values_list("id", flat=True)
+
+        # Используем фабрику для аннотирования товаров
+        queryset = ProductsQueryFactory.get_all_details().filter(id__in=product_ids)
+
+        # Пагинация, если нужна
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def products_by_category(self, request, category_slug=None, *args, **kwargs):
+        """
+        Возвращает товары определённой категории и её подкатегорий.
+        """
+        # Получаем категорию по slug
+        category = get_object_or_404(Category, slug=category_slug)
+
+        # Получаем все категории: текущую и её подкатегории
+        category_ids = list(
+            category.get_descendants(include_self=True).values_list("id", flat=True)
+        )
+
+        # Фильтруем товары по категориям
+        queryset = ProductsQueryFactory.get_all_details().filter(
+            category_id__in=category_ids
+        )
+
+        # Пагинация, если нужна
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
