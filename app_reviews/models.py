@@ -37,12 +37,14 @@ class Review(models.Model):
         Products,
         on_delete=models.CASCADE,
         verbose_name="Продукт",
+        related_name="reviews",
     )
     user_id = models.IntegerField(
         verbose_name="ID пользователя",
         blank=True,
         null=True,
     )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
 
     class Meta:
         verbose_name = "Отзыв/Рейтинг"
