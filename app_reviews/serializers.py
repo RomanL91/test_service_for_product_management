@@ -26,3 +26,15 @@ class ReviewSerializer(serializers.ModelSerializer):
         # Дополнительная логика с jwt_token, если необходимо
 
         return instance
+
+
+class ReviewsForProductsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Review
+        fields = (
+            "id",
+            "rating",
+            "review",
+            "created_at",
+        )
