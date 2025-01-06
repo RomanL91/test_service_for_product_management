@@ -130,11 +130,11 @@ class StocksByCityField(serializers.Field):
             # Логика ребер
             if hasattr(product.category, "related_edges"):
                 stock_updater.update_from_edges(
-                    product.category.related_edges, stock, city_name
+                    product.category.related_edges, stock, city_name, discount_decimal
                 )
             if hasattr(product.brand, "related_edges"):
                 stock_updater.update_from_edges(
-                    product.brand.related_edges, stock, city_name
+                    product.brand.related_edges, stock, city_name, discount_decimal
                 )
 
         return stocks_by_city
