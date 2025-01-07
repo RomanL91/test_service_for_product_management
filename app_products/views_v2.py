@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.decorators import action
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -32,11 +32,15 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
     lookup_field = "slug"  # Указываем поле для поиска
     filter_backends = [
         OrderingFilter,
+        SearchFilter,
     ]
     ordering_fields = [
         "avg_rating",
         "stocks__price",
     ]  # Поля для сортировки
+    search_fields = [
+        "name_product",
+    ]
 
     def filter_by_city_and_edges(self, queryset, city_name):
         """
