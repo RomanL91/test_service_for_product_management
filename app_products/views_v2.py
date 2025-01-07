@@ -57,6 +57,28 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
         # Применяем фильтры и удаляем дубли
         return queryset.filter(stocks_filter | edges_filter).distinct()
 
+    def list(self, request, *args, **kwargs):
+        """
+        Переопределяем метод list для применения фильтрации по городам.
+        """
+        # Получаем базовый QuerySet
+        queryset = self.filter_queryset(self.get_queryset())
+
+        # Проверяем наличие параметра `city`
+        city_name = request.query_params.get("city")
+        if city_name:
+            queryset = self.filter_by_city_and_edges(queryset, city_name)
+
+        # Применяем пагинацию
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        # Сериализация без пагинации
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     @action(detail=False, methods=["get"], url_path="filter_by_ids")
     def filter_by_ids(self, request, *args, **kwargs):
         ids_param = request.query_params.get("ids")
