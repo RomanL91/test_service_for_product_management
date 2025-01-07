@@ -239,6 +239,13 @@ class ProductsQueryFactory:
             total_quantity__gt=0
         )
 
+    @staticmethod
+    def only_with_images(queryset):
+        """
+        Фильтрует товары, у которых есть хотя бы одно изображение.
+        """
+        return queryset.filter(productimage__isnull=False).distinct()
+
     # На этом уровне можно организовать кеширование (использую пока уровне маршрутов)
     @staticmethod
     def get_all_details():
@@ -257,6 +264,7 @@ class ProductsQueryFactory:
         base = ProductsQueryFactory.with_configuration(base)
         base = ProductsQueryFactory.annotate_reviews(base)
         base = ProductsQueryFactory.only_in_stock(base)
+        base = ProductsQueryFactory.only_with_images(base)
         return base
 
     @staticmethod
