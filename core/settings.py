@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_celery_results",
     "django_celery_beat",
-    # "django_elasticsearch_dsl",
+    "django_elasticsearch_dsl",
     "autocompletefilter",
     "silk",
     # приложения
