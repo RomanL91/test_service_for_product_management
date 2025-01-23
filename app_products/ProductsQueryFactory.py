@@ -19,7 +19,9 @@ class ProductsQueryFactory:
         """
         Базовый QuerySet без сложных prefetch/annotate, но с select_related
         """
-        return Products.objects.select_related("category__parent", "brand")
+        return Products.objects.select_related(
+            "category__parent", "brand", "description"
+        )
 
     @staticmethod
     def with_tags(queryset, to_attr="prefetched_tags"):

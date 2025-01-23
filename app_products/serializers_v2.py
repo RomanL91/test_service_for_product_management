@@ -9,6 +9,7 @@ from app_manager_tags.serializers import TagSerializer
 from app_reviews.serializers import ReviewsForProductsSerializer
 from app_specifications.serializers import SpecificationsSerializer
 from app_category.serializers_v2 import CategorySerializer
+from app_descriptions.serializers import ProductDescriptionSerializer
 
 
 # Сериализатор для ProductImage
@@ -42,7 +43,8 @@ class ProductSerializer(serializers.ModelSerializer):
     )  # Характеристики
     reviews = serializers.SerializerMethodField()  # Ограничиваем отзывы через метод
     reviews_url = serializers.SerializerMethodField()  # Ссылка на отзывы к продукту
-    desc_url = serializers.SerializerMethodField()  # Ссылка на описание к продукту
+    # desc_url = serializers.SerializerMethodField()  # Ссылка на описание к продукту
+    description = ProductDescriptionSerializer(read_only=True)
     related_products_url = (
         serializers.SerializerMethodField()
     )  # Ссылка на связанные продукты
@@ -69,7 +71,8 @@ class ProductSerializer(serializers.ModelSerializer):
             "specifications",
             "reviews",
             "reviews_url",
-            "desc_url",
+            # "desc_url",
+            "description",
             "related_products_url",
             "configuration_url",
         ]
@@ -119,9 +122,9 @@ class ProductSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         return reverse("all_reviews_to_product", args=[obj.id], request=request)
 
-    def get_desc_url(self, obj):
-        request = self.context.get("request")
-        return reverse("all_desc_to_product", args=[obj.id], request=request)
+    # def get_desc_url(self, obj):
+    #     request = self.context.get("request")
+    #     return reverse("all_desc_to_product", args=[obj.id], request=request)
 
     #
     # ========== Методы для related_products_url и configuration_url ==========
