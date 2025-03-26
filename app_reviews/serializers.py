@@ -11,11 +11,11 @@ class ReviewSerializer(serializers.ModelSerializer):
             "id",
             "rating",
             "review",
-            "user_id",
+            "user_uuid",
             "product",
             "jwt_token",
         )
-        read_only_fields = ("moderation", "user_id")
+        read_only_fields = ("moderation", "user_uuid")
 
     def create(self, validated_data):
         jwt_token = validated_data.pop(

@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -39,10 +41,11 @@ class Review(models.Model):
         verbose_name="Продукт",
         related_name="reviews",
     )
-    user_id = models.IntegerField(
+    user_uuid = models.UUIDField(
         verbose_name="ID пользователя",
         blank=True,
         null=True,
+        default=uuid4,
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Время создания")
 

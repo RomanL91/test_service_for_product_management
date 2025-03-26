@@ -35,9 +35,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 settings.SIMPLE_JWT["VERIFYING_KEY"],
                 algorithms=[settings.SIMPLE_JWT["ALGORITHM"]],
             )
-            user_id = payload["user_id"]
+            user_uuid = payload["user_id"]
             token_type = payload["type"]
-            if token_type != "access":  # если не access
+            if token_type != "access_token":  # если не access
                 raise jwt.InvalidTokenError()
         except jwt.ExpiredSignatureError as e:
             return Response(
@@ -61,7 +61,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer = ReviewSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save(user_id=user_id)
+            serializer.save(user_uuid=user_uuid)
             return Response(
                 {
                     "message": "Отзыв успешно создан",
