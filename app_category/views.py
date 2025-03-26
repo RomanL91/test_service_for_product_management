@@ -1,63 +1,120 @@
-from collections import defaultdict
-
+from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
-
 from rest_framework import viewsets
 from rest_framework.response import Response
 
 from app_category.models import Category
 from app_category.serializers import CategorySerializer
+from app_products.ProductsQueryFactory import ProductsQueryFactory
+from app_products.views_v2 import (
+    ProductsViewSet_v2,
+)
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Пример CategoryViewSet, который показывает только те категории,
+    у которых есть хотя бы один товар, «видимый» для запрошенного города.
+    """
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = "slug_cat"
+
+    def list(self, request, *args, **kwargs):
+        """
+        GET /categories/?city=НазваниеГорода
+        Возвращает «прореженное» дерево категорий, в которых есть
+        хотя бы один товар, доступный (через остатки или рёбра) для данного города.
+        """
+        city_name = request.query_params.get("city")
+        if city_name:
+            # 1) Собираем «видимые» для города товары
+            products_qs = ProductsQueryFactory.get_all_details()
+            products_qs = ProductsViewSet_v2.filter_by_city_and_edges(
+                self=None,  # Потому что метод filter_by_city_and_edges — статический по смыслу
+                queryset=products_qs,
+                city_name=city_name,
+            )
+
+            # 2) Определяем список категорий, в которых есть «видимый» товар
+            category_ids_with_products = products_qs.values_list(
+                "category_id", flat=True
+            ).distinct()
+
+            # 3) Расширяем за счёт всех ancestor'ов:
+            #    если у подкатегории есть видимые товары, её родитель тоже нужен в дереве.
+            all_category_ids = set(category_ids_with_products)
+            for cat_id in category_ids_with_products:
+                ancestors = Category.objects.get(id=cat_id).get_ancestors()
+                all_category_ids.update(a.id for a in ancestors)
+
+            # 4) Достаём все нужные категории из базы
+            #    и АННОТИРУЕМ счётчик видимых продуктов (чтобы при сборке дерева знать, где 0)
+            categories_qs = Category.objects.filter(id__in=all_category_ids).annotate(
+                visible_products_count=Count(
+                    "products",
+                    filter=Q(products__in=products_qs),
+                    distinct=True,
+                )
+            )
+        else:
+            # Если город не задан, возвращаем всё как обычно (или оставьте пустой список — на ваше усмотрение)
+            categories_qs = self.filter_queryset(
+                self.get_queryset().annotate(visible_products_count=Count("products"))
+            )
+
+        # Превращаем в serializer.data
+        serializer = self.get_serializer(categories_qs, many=True)
+
+        # 5) Собираем дерево
+        tree = self.build_tree(serializer.data)
+
+        # 6) «Прореживаем» пустые категории
+        pruned_tree = [node for node in tree if self.prune_empty(node)]
+
+        return Response(pruned_tree)
 
     def retrieve(self, request, slug_cat=None, *args, **kwargs):
         instance = self.get_object_by_slug(slug_cat)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        tree_category = self.build_tree(serializer.data)
-        return Response(tree_category)
-
-    def build_tree(self, categories):
-        category_map = defaultdict(list)
-        roots = []
-
-        for category in categories:
-            name_category = category["name_category"]
-            category.update(
-                {
-                    "name_category": name_category,
-                    "title": name_category,
-                    "label": name_category,
-                    "value": name_category,
-                    "key": f"{category['level']}-{category['tree_id']}-{category['id']}",
-                    "children": [],
-                }
-            )
-
-            # Добавление категории в соответствующий словарь
-            category_map[category["id"]] = category
-
-            if category["parent"] is None:
-                roots.append(category)
-            else:
-                # Добавление категории как дочерней для ее родителя
-                category_map[category["parent"]]["children"].append(category)
-
-        return roots
-
     def get_object_by_slug(self, slug):
         return get_object_or_404(self.get_queryset(), slug=slug)
 
-    def subcategories(self, request, slug_cat=None):
-        category = self.get_object_by_slug(slug_cat)
-        subcategories = category.get_descendants(include_self=False)
-        serializer = self.get_serializer(subcategories, many=True)
-        return Response(serializer.data)
+    def build_tree(self, categories):
+        """
+        Собирает дерево категорий, как в вашем исходном коде.
+        Но теперь у нас есть поле 'visible_products_count'.
+        """
+        category_map = {}
+        roots = []
+
+        for cat in categories:
+            cat["children"] = []
+            category_map[cat["id"]] = cat
+
+        for cat in categories:
+            parent_id = cat["parent"]
+            if parent_id is None:
+                roots.append(cat)
+            else:
+                category_map[parent_id]["children"].append(cat)
+
+        return roots
+
+    def prune_empty(self, node):
+        """
+        Рекурсивно исключаем узлы, у которых visible_products_count == 0
+        и нет детей с товарами.
+        """
+        # Сначала обрабатываем детей
+        node["children"] = [
+            child for child in node["children"] if self.prune_empty(child)
+        ]
+
+        # Если нет видимых товаров и нет детей — узел "мертв"
+        if node.get("visible_products_count", 0) == 0 and not node["children"]:
+            return False
+        return True
