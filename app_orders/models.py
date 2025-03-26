@@ -5,6 +5,7 @@ from random import randint
 
 from django.db import models
 from django.utils.timezone import now
+from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
 
@@ -261,14 +262,13 @@ class Orders(models.Model):
         """,
     )
     # Менеджер, ответственный за выполнение заказа
-    manager_executive = models.CharField(
-        max_length=255,
+    manager_executive = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
         null=True,
-        blank=True,
+        blank=False,
         verbose_name="Менеджер исполнитель",
-        help_text="""
-            Поле хранит данные о менеджере, который принял заявку в работу
-        """,
+        help_text="Пользователь, принявший заявку в работу",
     )
 
     class Meta:

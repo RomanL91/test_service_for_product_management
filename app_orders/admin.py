@@ -1,9 +1,11 @@
+from collections import Counter
+
 from django.contrib import admin
 from django.utils.html import format_html
 
-from django.conf import settings
-
+from django.contrib.auth.models import User
 from app_orders.models import Baskets, Orders
+from app_products.models import Products
 
 
 @admin.register(Baskets)
@@ -47,25 +49,28 @@ class BasketsAdmin(admin.ModelAdmin):
         if not obj.basket_items:
             return "No products"
 
+        prod_with_count = dict(Counter(obj.basket_items))
+
+        products = Products.objects.filter(id__in=obj.basket_items)
+
         # Формируем строку с продуктами
         products_html = "<br><br>".join(
             [
                 f"""
-                <img src="{product['prod']['list_url_to_image'][0]}" alt="{product['name']}" style="max-height: 100px; max-width: 100px;">
-                <a class='button add-btn' data-product-url="{settings.API_URL_BASKET_ITEM_UPDATE.format(uuid_id=obj.uuid_id, prod_id=product['prod_id'])}" data-product-count="{product['count']}" href="#">[+]</a>
-                <a class='button remove-btn' data-product-url="{settings.API_URL_BASKET_ITEM_UPDATE.format(uuid_id=obj.uuid_id, prod_id=product['prod_id'])}" data-product-count="{product['count']}" href="#">[-]</a>
-                <a class='button delete-btn' data-product-url="{settings.API_URL_BASKET_ITEM_UPDATE.format(uuid_id=obj.uuid_id, prod_id=product['prod_id'])}" data-product-count="{product['count']}" href="#">[DEL]</a>
-                <a href='{product["url"]}'>{ind+1:0.0f}) {product['name']}</a>
+                {(
+                    f'<img src="{prod.productimage_set.first().image.url}" style="max-height: 100px; max-width: 100px;">'
+                    if prod.productimage_set.first() else "Изображение отсутствует"
+                )}
+                <a href='{prod.get_admin_url()}'>{ind+1:0.0f}) {prod.name_product}</a>
+                <ul>в количестве: {prod_with_count.get(prod.pk, None)} у.е.</ul>
                 <br>
-                <ul>в количестве: {product['count']} у.е.</ul>
-                <br>
-                {
-                    "".join([f"<li>в городе: {c} цена = {p} | суммарно за позицию (цена*у.е.) = {p*product['count']}</li>" for c, p in product['prod']['price'].items()])
-                }
+                    {
+                        "".join([f"<li>Склад: {stock.warehouse} цена = {stock.price} | суммарно за позицию (цена*у.е.) = {stock.price*prod_with_count.get(prod.pk, None)}</li>" for stock in prod.stocks.all()])
+                    }
                 <br>
                 <hr>
                 """
-                for ind, product in enumerate(obj.basket_items)
+                for ind, prod in enumerate(products)
             ]
         )
 
@@ -109,6 +114,21 @@ class OrdersAdmin(admin.ModelAdmin):
         "delivery_address",
         "account_number",
     ]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "manager_executive":
+            kwargs["initial"] = request.user  # Подставляем текущего пользователя
+
+            if request.user.is_superuser:
+                kwargs["queryset"] = User.objects.filter(
+                    is_staff=True
+                )  # Все администраторы
+            else:
+                kwargs["queryset"] = User.objects.filter(
+                    pk=request.user.id, is_staff=True
+                )  # Только текущий пользователь
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 # @admin.register(Transactionpayments)

@@ -1,5 +1,7 @@
 from slugify import slugify
 
+from django.urls import reverse
+
 from django.db import models, transaction
 
 from core.mixins import JSONFieldsMixin, SlugModelMixin
@@ -74,6 +76,15 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name_product)
         super().save(*args, **kwargs)
+
+    def get_admin_url(self):
+        """
+        Возвращает URL для страницы изменения объекта в админке.
+        """
+        return reverse(
+            "admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name),
+            args=(self.pk,),
+        )
 
     def __str__(self) -> str:
         return self.name_product

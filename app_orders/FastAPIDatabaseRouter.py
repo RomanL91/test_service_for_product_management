@@ -5,12 +5,20 @@ class FastAPIDatabaseRouter:
 
     def db_for_read(self, model, **hints):
         """Directs read operations to the FastAPI database for specific models."""
+        if (
+            model._meta.app_label != "app_orders"
+        ):  # User и другие стандартные модели Django
+            return "default"
         if model._meta.app_label == "app_orders":  # Укажите ваше приложение
             return "fastapi_db"
         return None
 
     def db_for_write(self, model, **hints):
         """Directs write operations to the FastAPI database for specific models."""
+        if (
+            model._meta.app_label != "app_orders"
+        ):  # User и другие стандартные модели Django
+            return "default"
         if model._meta.app_label == "app_orders":  # Укажите ваше приложение
             return "fastapi_db"
         return None
