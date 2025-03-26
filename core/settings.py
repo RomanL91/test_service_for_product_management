@@ -60,9 +60,10 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_celery_results",
     "django_celery_beat",
-    "django_elasticsearch_dsl",
+    # "django_elasticsearch_dsl",
     "autocompletefilter",
     "silk",
+    "django.contrib.postgres",
     # приложения
     "app_products",
     "app_category",
@@ -77,7 +78,7 @@ INSTALLED_APPS = [
     "app_discounts",
     "app_services",
     "app_kaspi",  # приложение без регистрации в админке
-    "app_elastic",  # приложение без регистрации в админке
+    # "app_elastic",  # приложение без регистрации в админке
     "app_orders",
     # для работы с изображениями
     "easy_thumbnails",  # TODO no use
