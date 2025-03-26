@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.db.models import Min, Max
+from django.db.models import Min, Max, Count, Sum
 from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import viewsets
@@ -18,6 +18,12 @@ from app_sales_points.serializers import (
 class CityViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
+
+    def get_queryset(self):
+        return City.objects.annotate(
+            total_products=Count("warehouses__stocks__product", distinct=True),
+            # total_quality=Sum("warehouses__stocks__quantity"),
+        )
 
 
 class StocksViewSet(viewsets.ReadOnlyModelViewSet):

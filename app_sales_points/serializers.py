@@ -9,6 +9,9 @@ from app_sales_points.utils import StockUpdater
 
 
 class CitySerializer(serializers.ModelSerializer):
+    total_products = serializers.IntegerField(read_only=True)
+    # total_quality = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = City
         fields = "__all__"
