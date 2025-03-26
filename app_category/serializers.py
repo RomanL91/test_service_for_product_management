@@ -6,6 +6,8 @@ from app_category.models import Category
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    visible_products_count = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Category
         fields = "__all__"
