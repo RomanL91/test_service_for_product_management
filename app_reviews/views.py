@@ -38,6 +38,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             user_uuid = payload["user_id"]
             token_type = payload["type"]
             if token_type != "access_token":  # если не access
+                print(f"--- view - raise - InvalidTokenError --- >>")
                 raise jwt.InvalidTokenError()
         except jwt.ExpiredSignatureError as e:
             return Response(
@@ -45,6 +46,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except jwt.InvalidTokenError as e:
+            print(f"--- view - e --- >> {e}")
             return Response(
                 {"error": f"Invalid JWT token: {str(e)}"},
                 status=status.HTTP_400_BAD_REQUEST,
