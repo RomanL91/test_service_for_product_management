@@ -33,7 +33,34 @@ class ExternalProductImageInline(admin.StackedInline):
     formfield_overrides = {models.ImageField: {"widget": CustomAdminFileWidget}}
 
 
+from django.shortcuts import redirect
+from django.urls import reverse, path
+from app_products.utils import (
+    get_price,
+    extract_features,
+    get_medium_links,
+    save_images_for_product,
+    create_specifications_from_list,
+    global_session_storage,
+)
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/134.0.0.0 Safari/537.36"
+    ),
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;"
+        "q=0.9,image/avif,image/webp,image/apng,*/*;"
+        "q=0.8,application/signed-exchange;v=b3;q=0.7"
+    ),
+    "Referer": "https://kaspi.kz/mc/",
+}
+
+
 class ProductAdmin(AutocompleteFilterMixin, admin.ModelAdmin):
+    change_form_template = "admin/app_products/prod/change_form.html"
     form = JsonDocumentForm
     inlines = [
         ProductImageInline,
@@ -117,6 +144,109 @@ class ProductAdmin(AutocompleteFilterMixin, admin.ModelAdmin):
             {"fields": ("services",), "classes": ("collapse",)},
         ),
     )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:object_id>/<int:idpk>/do-spec/",
+                self.admin_site.admin_view(self.load_spec),
+                name="load_spec_base",
+            ),
+            path(
+                "<int:object_id>/<int:idpk>/do-img/",
+                self.admin_site.admin_view(self.load_img),
+                name="load_img_base",
+            ),
+            path(
+                "<int:object_id>/<int:idpk>/do-price/",
+                self.admin_site.admin_view(self.load_price),
+                name="load_price_base",
+            ),
+        ]
+        return custom_urls + urls
+
+    # 3) Наш метод, который будет вызываться при нажатии на кнопку
+    def load_spec(self, request, object_id, idpk):
+        try:
+            session = global_session_storage.do_authorization()
+            url = (
+                f"https://mc.shop.kaspi.kz/bff/offer-view/details?m=BUGA&s={object_id}"
+            )
+            if session:
+                r = session.get(
+                    url,
+                    headers=HEADERS,
+                )
+                res = r.json()
+                master_product = res.get("masterProduct")
+                spec = master_product.get("specifications")
+                extract_spec = extract_features(spec)
+                create_specifications_from_list(extract_spec, idpk)
+
+                self.message_user(request, "Подкачка успешна!")
+                # Возвращаем пользователя обратно на форму редактирования
+                # Используем META['HTTP_REFERER'], чтобы вернуться, или просто:
+                # return redirect("admin:appname_extproduct_change", object_id)
+                return redirect(
+                    request.META.get("HTTP_REFERER") or reverse("admin:index")
+                )
+            self.message_user(request, "Сессия сдохла", level="error")
+
+        except Exception as e:
+            self.message_user(request, str(e), level="error")
+            return redirect(request.META.get("HTTP_REFERER") or reverse("admin:index"))
+
+    def load_img(self, request, object_id, idpk):
+        try:
+            session = global_session_storage.do_authorization()
+            url = (
+                f"https://mc.shop.kaspi.kz/bff/offer-view/details?m=BUGA&s={object_id}"
+            )
+            if session:
+                r = session.get(
+                    url,
+                    headers=HEADERS,
+                )
+                res = r.json()
+                master_product = res.get("masterProduct")
+                gallery_images = master_product.get("galleryImages")
+                medium_links_img = get_medium_links(gallery_images)
+                save_images_for_product(medium_links_img, idpk)
+                self.message_user(request, "Подкачка успешна!")
+                return redirect(
+                    request.META.get("HTTP_REFERER") or reverse("admin:index")
+                )
+            self.message_user(request, "Сессия сдохла", level="error")
+
+        except Exception as e:
+            self.message_user(request, str(e), level="error")
+            return redirect(request.META.get("HTTP_REFERER") or reverse("admin:index"))
+
+    def load_price(self, request, object_id, idpk):
+        try:
+            session = global_session_storage.do_authorization()
+            url = (
+                f"https://mc.shop.kaspi.kz/bff/offer-view/details?m=BUGA&s={object_id}"
+            )
+            if session:
+                r = session.get(
+                    url,
+                    headers=HEADERS,
+                )
+                res = r.json()
+                availabilities = res.get("availabilities", [])
+                cityInfo = res.get("cityInfo", [])
+                get_price(availabilities, cityInfo, idpk)
+                self.message_user(request, "Подкачка успешна!")
+                return redirect(
+                    request.META.get("HTTP_REFERER") or reverse("admin:index")
+                )
+
+            self.message_user(request, "Сессия сдохла", level="error")
+        except Exception as e:
+            self.message_user(request, str(e), level="error")
+            return redirect(request.META.get("HTTP_REFERER") or reverse("admin:index"))
 
     def get_image(self, obj):
         return self.get_image_or_preview(obj, preview=False)
