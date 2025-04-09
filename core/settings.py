@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     "app_kaspi",  # приложение без регистрации в админке
     # "app_elastic",  # приложение без регистрации в админке
     "app_orders",
+    "app_external_products",
     # для работы с изображениями
     "easy_thumbnails",  # TODO no use
     "image_cropping",  # TODO no use

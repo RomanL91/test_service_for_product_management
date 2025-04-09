@@ -48,7 +48,7 @@ class Warehouse(JSONFieldsMixin, models.Model):
         verbose_name_plural = "Склады"
 
     def __str__(self):
-        return f"{self.name_warehouse} ({self.city.name_city})"
+        return f"{self.name_warehouse}"
 
 
 class Stock(models.Model):

@@ -15,6 +15,7 @@ from app_reviews.urls import urlpatterns_review_suff
 from app_descriptions.urls import urlpatterns_descrip_suff
 from app_brands.urls import urlpatterns_brands_suff
 from app_orders.urls import urlpatterns as url_orders_api
+from app_external_products.urls import urlpatterns_external_prod
 
 # api v2
 from app_products.urls_v2 import urlpatterns as urlpatterns_products_v2
@@ -25,7 +26,8 @@ urlpatterns = (
         path("api/v1/", include(router.urls)),
         path("api/v2/", include(urlpatterns_products_v2)),
         path("api/orders/", include(url_orders_api)),
-        path("search/", include("app_elastic.urls")),
+        path("api/offers/", include(urlpatterns_external_prod)),
+        # path("search/", include("app_elastic.urls")),
         path("silk/", include("silk.urls", namespace="silk")),
     ]
     + urlpatterns_category_suff
