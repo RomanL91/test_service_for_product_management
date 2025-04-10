@@ -1,5 +1,6 @@
 import os
 import re
+import pika
 import requests
 import datetime
 from decimal import Decimal
@@ -616,3 +617,32 @@ def get_price(availabilities, cityInfo, product_id):
                     stock.price = data["price"]
                     stock.save()
                 data = {}
+
+
+def send_message_rmq(
+    message: str = "Тестовое сообщение от producer.",
+    queue_name: str = "swap_info_kaspi",
+    host: str = "185.100.67.246",
+    port: int = 5672,
+    username: str = "guest",
+    password: str = "guest",
+):
+    """
+    Функция для отправки тестового сообщения в очередь 'swap_info_kaspi'.
+    """
+    # Устанавливаем соединение с RabbitMQ (замените 'localhost' на нужный адрес при необходимости)
+    credentials = pika.PlainCredentials(username, password)
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host=host, port=port, credentials=credentials)
+    )
+    channel = connection.channel()
+
+    # Объявляем очередь, если она еще не создана
+    channel.queue_declare(queue=queue_name)
+
+    # Отправляем сообщение в очередь
+    channel.basic_publish(exchange="", routing_key=queue_name, body=message)
+    print("Отправлено сообщение:", message)
+
+    # Закрываем соединение
+    connection.close()

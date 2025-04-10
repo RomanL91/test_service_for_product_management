@@ -1,3 +1,7 @@
+import json
+
+from time import sleep
+
 from django.db import models
 from django.contrib import admin
 from django.shortcuts import redirect
@@ -20,6 +24,7 @@ from app_external_products.utils import (
     get_medium_links,
     save_images_for_product,
     create_specifications_from_list,
+    send_message_rmq,
     global_session_storage,
 )
 
@@ -100,34 +105,40 @@ class ExtProductAdmin(admin.ModelAdmin):
 
     # 3) Наш метод, который будет вызываться при нажатии на кнопку
     def load_spec(self, request, object_id, idpk):
-        try:
-            session = global_session_storage.do_authorization()
-            url = (
-                f"https://mc.shop.kaspi.kz/bff/offer-view/details?m=BUGA&s={object_id}"
-            )
-            if session:
-                r = session.get(
-                    url,
-                    headers=HEADERS,
-                )
-                res = r.json()
-                master_product = res.get("masterProduct")
-                spec = master_product.get("specifications")
-                extract_spec = extract_features(spec)
-                create_specifications_from_list(extract_spec, idpk)
+        data_msg = {"object_id": object_id, "idpk": idpk, "base_prod": False}
+        msg = json.dumps(data_msg)
+        send_message_rmq(message=msg)
+        # try:
+        #     session = global_session_storage.do_authorization()
+        #     url = (
+        #         f"https://mc.shop.kaspi.kz/bff/offer-view/details?m=BUGA&s={object_id}"
+        #     )
+        #     if session:
+        #         r = session.get(
+        #             url,
+        #             headers=HEADERS,
+        #         )
+        #         res = r.json()
+        #         master_product = res.get("masterProduct")
+        #         spec = master_product.get("specifications")
+        #         extract_spec = extract_features(spec)
+        #         create_specifications_from_list(extract_spec, idpk)
 
-                self.message_user(request, "Подкачка успешна!")
-                # Возвращаем пользователя обратно на форму редактирования
-                # Используем META['HTTP_REFERER'], чтобы вернуться, или просто:
-                # return redirect("admin:appname_extproduct_change", object_id)
-                return redirect(
-                    request.META.get("HTTP_REFERER") or reverse("admin:index")
-                )
-            self.message_user(request, "Сессия сдохла", level="error")
+        #         self.message_user(request, "Подкачка успешна!")
+        #         # Возвращаем пользователя обратно на форму редактирования
+        #         # Используем META['HTTP_REFERER'], чтобы вернуться, или просто:
+        #         # return redirect("admin:appname_extproduct_change", object_id)
+        #         return redirect(
+        #             request.META.get("HTTP_REFERER") or reverse("admin:index")
+        #         )
+        #     self.message_user(request, "Сессия сдохла", level="error")
 
-        except Exception as e:
-            self.message_user(request, str(e), level="error")
-            return redirect(request.META.get("HTTP_REFERER") or reverse("admin:index"))
+        # except Exception as e:
+        #     self.message_user(request, str(e), level="error")
+        #     return redirect(request.META.get("HTTP_REFERER") or reverse("admin:index"))
+        sleep(5)
+        self.message_user(request, "Подкачка успешна!")
+        return redirect(request.META.get("HTTP_REFERER") or reverse("admin:index"))
 
     def load_img(self, request, object_id, idpk):
         try:
