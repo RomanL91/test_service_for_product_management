@@ -5,7 +5,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404
 
 from app_category.models import Category
@@ -142,27 +142,50 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
         """
         Возвращает товары определённой категории и её подкатегорий.
         """
-        # Получаем категорию по slug
+        # --------------------------------------------------------------------- #
+        # 1. Базовый набор товаров категории и её потомков
         category = get_object_or_404(Category, slug=category_slug)
-
-        # Получаем все категории: текущую и её подкатегории
-        category_ids = list(
-            category.get_descendants(include_self=True).values_list("id", flat=True)
+        category_ids = category.get_descendants(include_self=True).values_list(
+            "id", flat=True
         )
-
-        # Фильтруем товары по категориям
         queryset = ProductsQueryFactory.get_all_details().filter(
             category_id__in=category_ids
         )
 
-        # Фильтрация по городу
+        # --------------------------------------------------------------------- #
+        # 2. Фильтр по городу (ваша логика)
         city_name = request.query_params.get("city")
         queryset = self.filter_by_city_and_edges(queryset, city_name)
 
-        # Применяем сортировку
-        queryset = self.filter_queryset(queryset)
+        # --------------------------------------------------------------------- #
+        # 3. «Продвигаем» запрошенный бренд
+        brand_param = request.query_params.get("brand")
+        if brand_param:
+            queryset = queryset.annotate(
+                priority=Case(
+                    When(
+                        # Q(brand__id=brand_param) | Q(brand__slug=brand_param),
+                        Q(brand__id=int(brand_param)),
+                        then=Value(0),
+                    ),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
+            )
+            # мы добавим priority в начало сортировки чуть дальше
 
-        # Пагинация, если нужна
+        # --------------------------------------------------------------------- #
+        # 4. Прочие сортировки через DRF OrderingFilter
+        queryset = self.filter_queryset(queryset)  # может вернуть .order_by(…)
+
+        # --------------------------------------------------------------------- #
+        # 5. Если у нас есть поле priority — ставим его первым в order_by
+        if brand_param:
+            current_ordering = queryset.query.order_by
+            queryset = queryset.order_by("priority", *current_ordering)
+
+        # --------------------------------------------------------------------- #
+        # 6. Пагинация / сериализация
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
