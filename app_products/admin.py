@@ -20,11 +20,13 @@ from app_sales_points.admin import StockInline
 
 from autocompletefilter.admin import AutocompleteFilterMixin
 from autocompletefilter.filters import AutocompleteListFilter
+from adminsortable2.admin import SortableAdminBase
+from adminsortable2.admin import SortableStackedInline
 
 from app_external_products.utils import send_message_rmq
 
 
-class ProductImageInline(admin.StackedInline):
+class ProductImageInline(SortableStackedInline, admin.StackedInline):
     model = ProductImage
     max_num = 10
     extra = 0
@@ -65,7 +67,7 @@ HEADERS = {
 }
 
 
-class ProductAdmin(AutocompleteFilterMixin, admin.ModelAdmin):
+class ProductAdmin(AutocompleteFilterMixin, SortableAdminBase, admin.ModelAdmin):
     change_form_template = "admin/app_products/prod/change_form.html"
     form = JsonDocumentForm
     inlines = [
