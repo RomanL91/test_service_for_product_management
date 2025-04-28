@@ -16,7 +16,7 @@ from app_descriptions.serializers import ProductDescriptionSerializer
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = ["image"]  # Только поле изображения
+        fields = ["ind", "image"]  # Только поле изображения
 
 
 class DiscountShortSerializer(serializers.Serializer):
