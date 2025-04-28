@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "autocompletefilter",
     "silk",
     "django.contrib.postgres",
+    "adminsortable2",
     # приложения
     "app_products",
     "app_category",

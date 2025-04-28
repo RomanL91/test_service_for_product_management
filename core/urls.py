@@ -6,7 +6,6 @@ from django.conf import settings
 
 from .router import router
 
-from app_category.urls import urlpatterns_category_suff
 from app_products.urls import urlpatterns_products_suff
 from app_sales_points.urls import urlpatterns_stocks_suff
 from app_specifications.urls import urlpatterns_specif_suff
@@ -30,7 +29,6 @@ urlpatterns = (
         # path("search/", include("app_elastic.urls")),
         path("silk/", include("silk.urls", namespace="silk")),
     ]
-    + urlpatterns_category_suff
     + urlpatterns_products_suff
     + urlpatterns_stocks_suff
     + urlpatterns_specif_suff
