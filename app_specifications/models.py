@@ -26,10 +26,15 @@ class Specifications(models.Model):
         related_name="specifications",
         verbose_name="Продукт",
     )
+    ind = models.PositiveIntegerField(
+        verbose_name="Порядковый номер",
+        default=0,
+    )
 
     # measurement_system = models.ForeignKey(MeasurementSystem)
 
     class Meta:
+        ordering = ["ind"]
         verbose_name = "Характеристика"
         verbose_name_plural = "Характеристики"
         # TODO ограничение уникальности сочетания
