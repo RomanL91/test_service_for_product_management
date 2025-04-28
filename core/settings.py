@@ -280,3 +280,4 @@ API_URL_GET_ARCHIVE_ORDERS_MANAGER = "http://{basket_host}:{basket_port}/basket_
 API_URL_BASKET_ITEM_UPDATE = (
     "http://basket_service:8777/basket_api/v1/bascket/{uuid_id}/{prod_id}/"
 )
+# actions
