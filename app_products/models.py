@@ -101,8 +101,14 @@ class ProductImage(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Продукт",
     )
+    ind = models.PositiveIntegerField(
+        verbose_name="Порядковый номер",
+        help_text="1 - это обложка (пример)",
+        default=0,
+    )
 
     class Meta:
+        ordering = ["ind"]
         verbose_name = "Изображение"
         verbose_name_plural = "Изображения"
 
