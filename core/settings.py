@@ -266,7 +266,7 @@ ETL_SERVICE_GET_ARCHIVE_ORDERS_KASPI = os.getenv("ETL_SERVICE_GET_ARCHIVE_ORDERS
 
 DATABASE_ROUTERS = ["app_orders.FastAPIDatabaseRouter.FastAPIDatabaseRouter"]
 
-# это общение с сервисом корзины
+# это общение с сервисом корзины (проверить на актуальность)
 BASKET_HOST = os.getenv("BASKET_HOST")
 BASKET_PORT = os.getenv("BASKET_PORT")
 API_URL_GET_ORDERS = "http://{basket_host}:{basket_port}/basket_api/v1/order/all/?page={page}&size={size}"
