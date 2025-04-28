@@ -10,6 +10,10 @@ from app_products.views_v2 import (
     ProductsViewSet_v2,
 )
 
+from rest_framework.decorators import action
+from app_brands.models import Brands
+from app_brands.serializers import BrandSerializer
+
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -19,7 +23,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    lookup_field = "slug_cat"
+    lookup_field = "slug"
 
     def list(self, request, *args, **kwargs):
         """
@@ -75,8 +79,8 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(pruned_tree)
 
-    def retrieve(self, request, slug_cat=None, *args, **kwargs):
-        instance = self.get_object_by_slug(slug_cat)
+    def retrieve(self, request, slug=None, *args, **kwargs):
+        instance = self.get_object_by_slug(slug)
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -118,3 +122,46 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
         if node.get("visible_products_count", 0) == 0 and not node["children"]:
             return False
         return True
+
+    @action(
+        detail=True,  # ⇒ URL c ID категории
+        methods=["get"],
+        url_path="brands",
+        serializer_class=BrandSerializer,
+    )
+    def brands(self, request, *args, **kwargs):
+        """
+        GET /api/v1/categories/<slug>/brands/?city=Алматы
+        Вернуть бренды категории, у которых в указанном городе есть
+        хотя бы один товар с остатком > 0.
+        """
+        category = self.get_object()  # берём категорию из URL
+        city_name = request.query_params.get("city")  # ?city=Алматы
+
+        # --- базовый фильтр: связь brand ↔ product ↔ category
+        brands_qs = Brands.objects.filter(
+            products__category=category  # FK Product.category
+        )
+
+        # --- дополнительный фильтр по остаткам в городе (если город задан)
+        if city_name:
+            brands_qs = brands_qs.filter(
+                Q(products__stocks__warehouse__city__name_city=city_name)  # город
+                & Q(products__stocks__quantity__gt=0)  # > 0 шт.
+            )
+
+        # --- финальные оптимизации ------------------------------------------------
+        brands_qs = (
+            brands_qs.distinct().prefetch_related(  # иначе дубликаты из-за JOIN-ов
+                "logobrand_set"
+            )  # или ваш реальный related-name
+        )
+
+        # --- стандартная пагинация DRF -------------------------------------------
+        page = self.paginate_queryset(brands_qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(brands_qs, many=True)
+        return Response(serializer.data)
