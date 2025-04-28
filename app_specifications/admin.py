@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib import admin
 
 from flat_json_widget.widgets import FlatJsonWidget
+from adminsortable2.admin import SortableAdminBase
+from adminsortable2.admin import SortableStackedInline
+
 
 from core.mixins import JsonDocumentForm
 from app_specifications.models import (
@@ -11,16 +14,19 @@ from app_specifications.models import (
 )
 
 
-class SpecificationsInline(admin.StackedInline):
+class SpecificationsInline(SortableStackedInline, admin.StackedInline):
     model = Specifications
     max_num = 100
     extra = 0
-    autocomplete_fields = ["value_specification"]
+    autocomplete_fields = [
+        "name_specification",
+        "value_specification",
+    ]
     formfield_overrides = {models.JSONField: {"widget": FlatJsonWidget}}
 
 
 @admin.register(Specifications)
-class SpecificationAdmin(admin.ModelAdmin):
+class SpecificationAdmin(SortableAdminBase, admin.ModelAdmin):
     form = JsonDocumentForm
     list_display = [
         "name_specification",
