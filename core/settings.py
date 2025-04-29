@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # my adding apps
+    "django_filters",
     "rest_framework",
     "corsheaders",
     "mptt",
