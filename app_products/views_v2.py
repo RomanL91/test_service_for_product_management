@@ -13,7 +13,10 @@ from app_products.models import PopulatesProducts
 
 from app_products.serializers_v2 import ProductSerializer
 
+from app_products.ProductsFiltering import ProductsFilter
 from app_products.ProductsQueryFactory import ProductsQueryFactory
+
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class ProductsPagination(LimitOffsetPagination):
@@ -33,7 +36,9 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
     filter_backends = [
         OrderingFilter,
         SearchFilter,
+        DjangoFilterBackend,
     ]
+    filterset_class = ProductsFilter
     ordering_fields = [
         "avg_rating",
         "stocks__price",
