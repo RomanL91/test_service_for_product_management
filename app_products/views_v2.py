@@ -40,6 +40,12 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
     ]  # Поля для сортировки
     search_fields = [
         "name_product",
+        "vendor_code",
+        "category__name_category",
+        "brand__name_brand",
+        "additional_data",  # JSON
+        "category__additional_data",  # JSON
+        "brand__additional_data",  # JSON
     ]
 
     def filter_by_city_and_edges(self, queryset, city_name):

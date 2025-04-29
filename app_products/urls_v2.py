@@ -6,9 +6,9 @@ from app_products.views_v2 import ProductsViewSet_v2
 urlpatterns = [
     path(
         "products_v2/",
-        cache_page(60 * 15)(
-            ProductsViewSet_v2.as_view({"get": "list"}),
-        ),
+        # cache_page(60 * 15)(
+        ProductsViewSet_v2.as_view({"get": "list"}),
+        # ),
         name="products-list",
     ),
     path(
