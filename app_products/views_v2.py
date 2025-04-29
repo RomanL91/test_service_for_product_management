@@ -171,7 +171,7 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
         # --------------------------------------------------------------------- #
         # 3. «Продвигаем» запрошенный бренд
         brand_param = request.query_params.get("brand")
-        if brand_param:
+        if brand_param and brand_param.isdigit():
             queryset = queryset.annotate(
                 priority=Case(
                     When(
