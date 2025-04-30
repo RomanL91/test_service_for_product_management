@@ -238,17 +238,35 @@ def category_facets(request, pk: int | str):
     base_qs = Products.objects.filter(category_id__in=category_ids)
     base_qs = _apply_filters(base_qs, brand_ids, spec_filters)
 
+    # ---------- гидрация через фабрику qs -------------------
+    prod_qs = ProductsQueryFactory.enrich(base_qs)
+
+    # ---------- фильтрация по городу -------------------
+    city_name = request.GET.get("city")
+    if city_name:
+        # Фильтрация товаров по остаткам в указанном городе
+        stocks_filter = Q(stocks__warehouse__city__name_city=city_name)
+
+        # Фильтрация товаров по рёбрам, ведущим в указанный город
+        edges_filter = Q(
+            Q(category__edges__city_to__name_city=city_name)
+            | Q(brand__edges__city_to__name_city=city_name)
+        )
+
+        # Применяем фильтры и удаляем дубли
+        prod_qs = prod_qs.filter(stocks_filter | edges_filter)
+
     # ---------- counts для facets ------------------
 
     brands_block = [
         {"id": row["brand_id"], "name": row["brand__name_brand"], "count": row["cnt"]}
-        for row in base_qs.values("brand_id", "brand__name_brand")
+        for row in prod_qs.values("brand_id", "brand__name_brand")
         .annotate(cnt=Count("id"))
         .order_by("brand__name_brand")
         if row["brand_id"]
     ]
 
-    spec_rows = base_qs.values(
+    spec_rows = prod_qs.values(
         "specifications__name_specification_id",
         "specifications__name_specification__name_specification",
         "specifications__value_specification_id",
@@ -276,23 +294,22 @@ def category_facets(request, pk: int | str):
     # ---------- блок товаров -----------------------
     limit = int(request.GET.get("limit", 20))
     offset = int(request.GET.get("offset", 0))
-    # Фильтрация по городу, если указан
-    city_name = request.GET.get("city")
 
-    prod_qs = ProductsQueryFactory.enrich(base_qs)
-
-    if city_name:
-        # Фильтрация товаров по остаткам в указанном городе
-        stocks_filter = Q(stocks__warehouse__city__name_city=city_name)
-
-        # Фильтрация товаров по рёбрам, ведущим в указанный город
-        edges_filter = Q(
-            Q(category__edges__city_to__name_city=city_name)
-            | Q(brand__edges__city_to__name_city=city_name)
-        )
-
-        # Применяем фильтры и удаляем дубли
-        prod_qs = prod_qs.filter(stocks_filter | edges_filter)
+    # ---------- блок фильтрации по городу -----------------------
+    # TODO я немного запутался, но считаю, что перенос этого блока выше правильное решение
+    # # Фильтрация по городу, если указан
+    # city_name = request.GET.get("city")
+    # prod_qs = ProductsQueryFactory.enrich(base_qs)
+    # if city_name:
+    #     # Фильтрация товаров по остаткам в указанном городе
+    #     stocks_filter = Q(stocks__warehouse__city__name_city=city_name)
+    #     # Фильтрация товаров по рёбрам, ведущим в указанный город
+    #     edges_filter = Q(
+    #         Q(category__edges__city_to__name_city=city_name)
+    #         | Q(brand__edges__city_to__name_city=city_name)
+    #     )
+    #     # Применяем фильтры и удаляем дубли
+    #     prod_qs = prod_qs.filter(stocks_filter | edges_filter)
 
     page_qs = prod_qs[offset : offset + limit]
 
