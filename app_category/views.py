@@ -143,12 +143,17 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
             products__category=category  # FK Product.category
         )
 
-        # --- дополнительный фильтр по остаткам в городе (если город задан)
+        # --- дополнительный фильтр по остаткам в городе (если город задан) + наличие фото
+        photo_condition = Q(products__productimage__isnull=False)
         if city_name:
             brands_qs = brands_qs.filter(
+                photo_condition,  # фото
                 Q(products__stocks__warehouse__city__name_city=city_name)  # город
-                & Q(products__stocks__quantity__gt=0)  # > 0 шт.
+                & Q(products__stocks__quantity__gt=0),  # > 0 шт.
             )
+        else:
+            # если город не задан, просто убираем бренды без фото вообще
+            brands_qs = brands_qs.filter(photo_condition)
 
         # --- финальные оптимизации ------------------------------------------------
         brands_qs = (
