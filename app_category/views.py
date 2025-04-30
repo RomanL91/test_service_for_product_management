@@ -1,16 +1,20 @@
+from collections import defaultdict
+
 from django.db.models import Q, Count
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action, api_view
 
 from app_category.models import Category
 from app_category.serializers import CategorySerializer
-from app_products.ProductsQueryFactory import ProductsQueryFactory
-from app_products.views_v2 import (
-    ProductsViewSet_v2,
-)
 
-from rest_framework.decorators import action
+from app_products.models import Products
+from app_products.serializers_v2 import ProductSerializer
+from app_products.ProductsQueryFactory import ProductsQueryFactory
+from app_products.views_v2 import ProductsViewSet_v2
+
+
 from app_brands.models import Brands
 from app_brands.serializers import BrandSerializer
 
@@ -170,3 +174,146 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = self.get_serializer(brands_qs, many=True)
         return Response(serializer.data)
+
+
+# ------------ helpers -------------------------------------------------
+def _parse_int_list(raw: str | None) -> list[int]:
+    if not raw:
+        return []
+    return [int(v) for v in raw.split(",") if v.isdigit()]
+
+
+def _apply_filters(qs, brand_ids: list[int], spec_filters: dict[int, list[int]]):
+    """накладываем выбранные фильтры на qs"""
+    if brand_ids:
+        qs = qs.filter(brand_id__in=brand_ids)
+
+    for spec_id, value_ids in spec_filters.items():
+        qs = qs.filter(
+            specifications__name_specification_id=spec_id,
+            specifications__value_specification_id__in=value_ids,
+        )
+
+    return qs.distinct()
+
+
+# ------------ сам эндпоинт -------------------------------------------
+@api_view(["GET"])
+def category_facets(request, pk: int | str):
+    """
+    GET /api/v1/categories/<id категории>/facets/
+        - получим Бренды + Характеристики + Товары всей категории
+    GET /api/v1/categories/<id>/facets/?city=Караганда
+        - получим Бренды + Характеристики + Товары всей категории от города и логистических ребер!
+        - выходит нам всегда нужно помнить о фильтрации по городу!
+
+    Пример более полной фильтрации
+    GET /api/v1/categories/<id>/facets/
+       ?brand=1,2-----------фильтруем по брендам
+       &city=Актобе---------фильтруем по городу
+       &spec_12=5,6---------фильтруем по названию характеристики с ID 12 и значениями с ID 5 и 6 (&spec_<ЦВЕТ>=<БЕЛЫЙ>,<ЧЕРНЫЙ>)
+       &limit=20&offset=0---пагинация
+
+       самое важно для понимания это:
+       &spec_12=5,6
+       где
+       spec_12 - это ключ. spec_<ID ключа> - ключ формируется из приставки 'spec_' + ID название характеристики.
+       =5,6 - это ID значения характеристики.
+    """
+    category = Category.objects.get(pk=pk)
+    category_ids = category.get_descendants(include_self=True).values_list(
+        "id", flat=True
+    )
+
+    # ---------- выбранные фильтры ------------------
+    brand_ids = _parse_int_list(request.GET.get("brand"))
+
+    spec_filters: dict[int, list[int]] = {}
+    for key, val in request.GET.items():
+        if key.startswith("spec_"):
+            spec_id = int(key.split("_")[1])
+            spec_filters[spec_id] = _parse_int_list(val)
+
+    # ---------- базовый узкий qs -------------------
+    base_qs = Products.objects.filter(category_id__in=category_ids)
+    base_qs = _apply_filters(base_qs, brand_ids, spec_filters)
+
+    # ---------- counts для facets ------------------
+
+    brands_block = [
+        {"id": row["brand_id"], "name": row["brand__name_brand"], "count": row["cnt"]}
+        for row in base_qs.values("brand_id", "brand__name_brand")
+        .annotate(cnt=Count("id"))
+        .order_by("brand__name_brand")
+        if row["brand_id"]
+    ]
+
+    spec_rows = base_qs.values(
+        "specifications__name_specification_id",
+        "specifications__name_specification__name_specification",
+        "specifications__value_specification_id",
+        "specifications__value_specification__value_specification",
+    ).annotate(cnt=Count("id"))
+
+    spec_map: dict[int, dict] = defaultdict(
+        lambda: {"id": None, "name": "", "values": []}
+    )
+    for r in spec_rows:
+        sid = r["specifications__name_specification_id"]
+        spec_map[sid]["id"] = sid
+        spec_map[sid]["name"] = r[
+            "specifications__name_specification__name_specification"
+        ]
+        spec_map[sid]["values"].append(
+            {
+                "id": r["specifications__value_specification_id"],
+                "value": r["specifications__value_specification__value_specification"],
+                "count": r["cnt"],
+            }
+        )
+    specs_block = list(spec_map.values())
+
+    # ---------- блок товаров -----------------------
+    limit = int(request.GET.get("limit", 20))
+    offset = int(request.GET.get("offset", 0))
+    # Фильтрация по городу, если указан
+    city_name = request.GET.get("city")
+
+    prod_qs = ProductsQueryFactory.enrich(base_qs)
+
+    if city_name:
+        # Фильтрация товаров по остаткам в указанном городе
+        stocks_filter = Q(stocks__warehouse__city__name_city=city_name)
+
+        # Фильтрация товаров по рёбрам, ведущим в указанный город
+        edges_filter = Q(
+            Q(category__edges__city_to__name_city=city_name)
+            | Q(brand__edges__city_to__name_city=city_name)
+        )
+
+        # Применяем фильтры и удаляем дубли
+        prod_qs = prod_qs.filter(stocks_filter | edges_filter)
+
+    page_qs = prod_qs[offset : offset + limit]
+
+    serializer = ProductSerializer(page_qs, many=True)
+
+    products_total = prod_qs.count()
+
+    products_block = {
+        "count": products_total,
+        "limit": limit,
+        "offset": offset,
+        "items": serializer.data,
+    }
+
+    # ---------- ответ ------------------------------
+    return Response(
+        {
+            "total": products_total,
+            "brands": brands_block,
+            "specifications": specs_block,
+            "products": products_block,
+        },
+        status=status.HTTP_200_OK,
+    )
