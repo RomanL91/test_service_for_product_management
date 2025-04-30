@@ -244,16 +244,16 @@ CACHES = {
     },
 }
 
-ELASTICSEARCH_DSL = {
-    "default": {
-        "hosts": os.getenv("HOST"),
-        "timeout": 30,  # Увеличьте время ожидания, например, до 30 секунд
-        "retry_on_timeout": True,  # Включите повторную попытку при тайм-ауте
-        "max_retries": 3,  # Установите количество повторных попыток
-        # "http_auth": ("elastic", "YOUR_PASSWORD"),
-        # "ca_certs": "PATH_TO_http_ca.crt",
-    }
-}
+# ELASTICSEARCH_DSL = {
+#     "default": {
+#         "hosts": os.getenv("HOST"),
+#         "timeout": 30,  # Увеличьте время ожидания, например, до 30 секунд
+#         "retry_on_timeout": True,  # Включите повторную попытку при тайм-ауте
+#         "max_retries": 3,  # Установите количество повторных попыток
+#         # "http_auth": ("elastic", "YOUR_PASSWORD"),
+#         # "ca_certs": "PATH_TO_http_ca.crt",
+#     }
+# }
 
 
 BASE_URL_ETL_1C = os.getenv("BASE_URL_ETL_1C")
