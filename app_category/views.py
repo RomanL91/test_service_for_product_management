@@ -255,7 +255,24 @@ def category_facets(request, pk: int | str):
 
         # Применяем фильтры и удаляем дубли
         prod_qs = prod_qs.filter(stocks_filter | edges_filter)
-
+    # ---------- сортировка -----------------------------
+    ordering = request.GET.get("ordering")  # пример: ?ordering=price,-rating
+    if ordering:
+        # Разрешаем только перечисленные поля,
+        # поддерживаем знак «-» для обратного порядка
+        allowed = {
+            "price": "stocks__price",
+            "-price": "-stocks__price",
+            "rating": "avg_rating",
+            "-rating": "-avg_rating",
+            "reviews": "reviews_count",
+            "-reviews": "-reviews_count",
+            "brand": "brand__name_brand",
+            "-brand": "-brand__name_brand",
+        }
+        order_fields = [allowed[o] for o in ordering.split(",") if o in allowed]
+        if order_fields:
+            prod_qs = prod_qs.order_by(*order_fields)
     # ---------- counts для facets ------------------
     brands_block = [
         {"id": row["brand_id"], "name": row["brand__name_brand"], "count": row["cnt"]}
