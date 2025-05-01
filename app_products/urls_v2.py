@@ -46,4 +46,11 @@ urlpatterns = [
         ),
         name="filter-by-city",
     ),
+    path(
+        "products_v2/discounted/",
+        cache_page(60 * 15)(
+            ProductsViewSet_v2.as_view({"get": "discounted"}),
+        ),
+        name="discounted",
+    ),
 ]

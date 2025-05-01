@@ -23,6 +23,7 @@ django-celery-results==2.5.1 ; python_version >= "3.10" and python_version < "4.
 django-cors-headers==4.3.1 ; python_version >= "3.10" and python_version < "4.0"
 django-cropper-image==1.0.5 ; python_version >= "3.10" and python_version < "4.0"
 django-elasticsearch-dsl==8.0 ; python_version >= "3.10" and python_version < "4.0"
+django-filter==25.1 ; python_version >= "3.10" and python_version < "4.0"
 django-flat-json-widget==0.2 ; python_version >= "3.10" and python_version < "4.0"
 django-image-cropping==1.7 ; python_version >= "3.10" and python_version < "4.0"
 django-js-asset==2.2.0 ; python_version >= "3.10" and python_version < "4.0"

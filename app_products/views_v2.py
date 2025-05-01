@@ -5,6 +5,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 
+from django.utils import timezone
 from django.db.models import Q, Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404
 
@@ -13,7 +14,10 @@ from app_products.models import PopulatesProducts
 
 from app_products.serializers_v2 import ProductSerializer
 
+from app_products.ProductsFiltering import ProductsFilter
 from app_products.ProductsQueryFactory import ProductsQueryFactory
+
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class ProductsPagination(LimitOffsetPagination):
@@ -33,13 +37,21 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
     filter_backends = [
         OrderingFilter,
         SearchFilter,
+        DjangoFilterBackend,
     ]
+    filterset_class = ProductsFilter
     ordering_fields = [
         "avg_rating",
         "stocks__price",
     ]  # Поля для сортировки
     search_fields = [
         "name_product",
+        "vendor_code",
+        "category__name_category",
+        "brand__name_brand",
+        "additional_data",  # JSON
+        "category__additional_data",  # JSON
+        "brand__additional_data",  # JSON
     ]
 
     def filter_by_city_and_edges(self, queryset, city_name):
@@ -160,7 +172,7 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
         # --------------------------------------------------------------------- #
         # 3. «Продвигаем» запрошенный бренд
         brand_param = request.query_params.get("brand")
-        if brand_param:
+        if brand_param and brand_param.isdigit():
             queryset = queryset.annotate(
                 priority=Case(
                     When(
@@ -171,18 +183,22 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
                     default=Value(1),
                     output_field=IntegerField(),
                 )
+            ).order_by(
+                "priority",
             )
-            # мы добавим priority в начало сортировки чуть дальше
 
-        # --------------------------------------------------------------------- #
+        # # --------------------------------------------------------------------- #
         # 4. Прочие сортировки через DRF OrderingFilter
-        queryset = self.filter_queryset(queryset)  # может вернуть .order_by(…)
+        # queryset = self.filter_queryset(queryset)  # может вернуть .order_by(…)
+        # print(f"---queryset --- > {queryset}")
+        # print(f"--- self.ordering_fields --- > {self.ordering_fields}")
 
         # --------------------------------------------------------------------- #
+        # это не работает! 4 и 5 шаги конфликтны!
         # 5. Если у нас есть поле priority — ставим его первым в order_by
-        if brand_param:
-            current_ordering = queryset.query.order_by
-            queryset = queryset.order_by("priority", *current_ordering)
+        # if brand_param:
+        # current_ordering = queryset.query.order_by
+        # queryset = queryset.order_by("priority", *self.ordering_fields)
 
         # --------------------------------------------------------------------- #
         # 6. Пагинация / сериализация
@@ -212,4 +228,71 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="discounted")
+    def discounted(self, request, *args, **kwargs):
+        """
+        Возвращает все товары, у которых сейчас действует скидка
+        (product / category / brand) и которые «видны» в заданном городе.
+        Обязательный query-param: ?city=<имя_города>
+        """
+        city_name = request.query_params.get("city")
+        if not city_name:
+            return Response(
+                {"detail": "City parameter is required."},
+                status=400,
+            )
+
+        # 1. Базовый набор с аннотациями/префетчами из фабрики
+        qs = self.get_queryset()
+
+        # 2. Ограничиваем городом (склады + рёбра)
+        qs = self.filter_by_city_and_edges(qs, city_name)
+
+        # 3. Фильтр «есть активная скидка прямо сейчас»
+        now = timezone.now()
+
+        discount_filter = (
+            # Скидки на конкретные продукты
+            Q(product_discounts__active=True)
+            & (
+                Q(product_discounts__start_date__isnull=True)
+                | Q(product_discounts__start_date__lte=now)
+            )
+            & (
+                Q(product_discounts__end_date__isnull=True)
+                | Q(product_discounts__end_date__gte=now)
+            )
+            # Скидки на категории
+            | Q(category__category_discounts__active=True)
+            & (
+                Q(category__category_discounts__start_date__isnull=True)
+                | Q(category__category_discounts__start_date__lte=now)
+            )
+            & (
+                Q(category__category_discounts__end_date__isnull=True)
+                | Q(category__category_discounts__end_date__gte=now)
+            )
+            # Скидки на бренды
+            | Q(brand__brand_discounts__active=True)
+            & (
+                Q(brand__brand_discounts__start_date__isnull=True)
+                | Q(brand__brand_discounts__start_date__lte=now)
+            )
+            & (
+                Q(brand__brand_discounts__end_date__isnull=True)
+                | Q(brand__brand_discounts__end_date__gte=now)
+            )
+        )
+
+        qs = qs.filter(discount_filter).distinct()
+
+        # 4. Пагинация / сериализация
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)

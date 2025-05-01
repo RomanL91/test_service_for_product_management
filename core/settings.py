@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # my adding apps
+    "django_filters",
     "rest_framework",
     "corsheaders",
     "mptt",
@@ -243,16 +244,16 @@ CACHES = {
     },
 }
 
-ELASTICSEARCH_DSL = {
-    "default": {
-        "hosts": os.getenv("HOST"),
-        "timeout": 30,  # Увеличьте время ожидания, например, до 30 секунд
-        "retry_on_timeout": True,  # Включите повторную попытку при тайм-ауте
-        "max_retries": 3,  # Установите количество повторных попыток
-        # "http_auth": ("elastic", "YOUR_PASSWORD"),
-        # "ca_certs": "PATH_TO_http_ca.crt",
-    }
-}
+# ELASTICSEARCH_DSL = {
+#     "default": {
+#         "hosts": os.getenv("HOST"),
+#         "timeout": 30,  # Увеличьте время ожидания, например, до 30 секунд
+#         "retry_on_timeout": True,  # Включите повторную попытку при тайм-ауте
+#         "max_retries": 3,  # Установите количество повторных попыток
+#         # "http_auth": ("elastic", "YOUR_PASSWORD"),
+#         # "ca_certs": "PATH_TO_http_ca.crt",
+#     }
+# }
 
 
 BASE_URL_ETL_1C = os.getenv("BASE_URL_ETL_1C")
@@ -280,3 +281,4 @@ API_URL_GET_ARCHIVE_ORDERS_MANAGER = "http://{basket_host}:{basket_port}/basket_
 API_URL_BASKET_ITEM_UPDATE = (
     "http://basket_service:8777/basket_api/v1/bascket/{uuid_id}/{prod_id}/"
 )
+# actions

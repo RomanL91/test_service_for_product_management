@@ -159,21 +159,26 @@ class ProductsQueryFactory:
         )
 
     @staticmethod
-    def annotate_reviews(queryset):
+    def annotate_reviews(queryset, prefetch_related_reviews=True):
         """
         Добавляем аннотации рейтинга и количества отзывов, включая сами отзывы.
         """
-        return queryset.annotate(
+        qs = queryset.annotate(
             avg_rating=Avg("reviews__rating", filter=Q(reviews__moderation=True)),
             reviews_count=Count(
                 "reviews", filter=Q(reviews__moderation=True), distinct=True
             ),
-        ).prefetch_related(
-            Prefetch(
-                "reviews",
-                queryset=Review.objects.filter(moderation=True).order_by("-created_at"),
-            )
         )
+        if prefetch_related_reviews:
+            qs.prefetch_related(
+                Prefetch(
+                    "reviews",
+                    queryset=Review.objects.filter(moderation=True).order_by(
+                        "-created_at"
+                    ),
+                )
+            )
+        return qs
 
     # -------------------------------
     # Скидки
@@ -282,3 +287,22 @@ class ProductsQueryFactory:
         base = ProductsQueryFactory.annotate_reviews(base)
         # Опционально можно дополнить категориями или брендами, если нужно
         return base
+
+    @staticmethod
+    def enrich(qs):
+        """
+        Применяет все «тяжёлые» prefetch/annotate к уже отфильтрованному qs.
+        """
+        # qs = ProductsQueryFactory.with_tags(qs)
+        qs = ProductsQueryFactory.with_all_discounts(qs)
+        qs = ProductsQueryFactory.with_images(qs)
+        # qs = ProductsQueryFactory.with_specifications(qs)
+        qs = ProductsQueryFactory.with_stocks(qs)
+        qs = ProductsQueryFactory.with_category_edges(qs)
+        qs = ProductsQueryFactory.with_brand_edges(qs)
+        # qs = ProductsQueryFactory.with_related_products(qs)
+        # qs = ProductsQueryFactory.with_configuration(qs)
+        qs = ProductsQueryFactory.annotate_reviews(qs, prefetch_related_reviews=False)
+        qs = ProductsQueryFactory.only_in_stock(qs)
+        qs = ProductsQueryFactory.only_with_images(qs)
+        return qs
