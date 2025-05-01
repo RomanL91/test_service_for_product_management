@@ -257,11 +257,10 @@ def category_facets(request, pk: int | str):
         prod_qs = prod_qs.filter(stocks_filter | edges_filter)
 
     # ---------- counts для facets ------------------
-
     brands_block = [
         {"id": row["brand_id"], "name": row["brand__name_brand"], "count": row["cnt"]}
         for row in prod_qs.values("brand_id", "brand__name_brand")
-        .annotate(cnt=Count("id"))
+        .annotate(cnt=Count("id", distinct=True))
         .order_by("brand__name_brand")
         if row["brand_id"]
     ]
@@ -271,24 +270,27 @@ def category_facets(request, pk: int | str):
         "specifications__name_specification__name_specification",
         "specifications__value_specification_id",
         "specifications__value_specification__value_specification",
-    ).annotate(cnt=Count("id"))
+    ).annotate(cnt=Count("id", distinct=True))
 
     spec_map: dict[int, dict] = defaultdict(
         lambda: {"id": None, "name": "", "values": []}
     )
     for r in spec_rows:
         sid = r["specifications__name_specification_id"]
-        spec_map[sid]["id"] = sid
-        spec_map[sid]["name"] = r[
-            "specifications__name_specification__name_specification"
-        ]
-        spec_map[sid]["values"].append(
-            {
-                "id": r["specifications__value_specification_id"],
-                "value": r["specifications__value_specification__value_specification"],
-                "count": r["cnt"],
-            }
-        )
+        if sid:
+            spec_map[sid]["id"] = sid
+            spec_map[sid]["name"] = r[
+                "specifications__name_specification__name_specification"
+            ]
+            spec_map[sid]["values"].append(
+                {
+                    "id": r["specifications__value_specification_id"],
+                    "value": r[
+                        "specifications__value_specification__value_specification"
+                    ],
+                    "count": r["cnt"],
+                }
+            )
     specs_block = list(spec_map.values())
 
     # ---------- блок товаров -----------------------
