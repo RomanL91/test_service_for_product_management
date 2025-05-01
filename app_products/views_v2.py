@@ -182,18 +182,22 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
                     default=Value(1),
                     output_field=IntegerField(),
                 )
+            ).order_by(
+                "priority",
             )
-            # мы добавим priority в начало сортировки чуть дальше
 
-        # --------------------------------------------------------------------- #
+        # # --------------------------------------------------------------------- #
         # 4. Прочие сортировки через DRF OrderingFilter
-        queryset = self.filter_queryset(queryset)  # может вернуть .order_by(…)
+        # queryset = self.filter_queryset(queryset)  # может вернуть .order_by(…)
+        # print(f"---queryset --- > {queryset}")
+        # print(f"--- self.ordering_fields --- > {self.ordering_fields}")
 
         # --------------------------------------------------------------------- #
+        # это не работает! 4 и 5 шаги конфликтны!
         # 5. Если у нас есть поле priority — ставим его первым в order_by
-        if brand_param:
-            current_ordering = queryset.query.order_by
-            queryset = queryset.order_by("priority", *current_ordering)
+        # if brand_param:
+        # current_ordering = queryset.query.order_by
+        # queryset = queryset.order_by("priority", *self.ordering_fields)
 
         # --------------------------------------------------------------------- #
         # 6. Пагинация / сериализация
