@@ -5,6 +5,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_framework.pagination import LimitOffsetPagination
 
+from django.utils import timezone
 from django.db.models import Q, Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404
 
@@ -227,4 +228,71 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="discounted")
+    def discounted(self, request, *args, **kwargs):
+        """
+        Возвращает все товары, у которых сейчас действует скидка
+        (product / category / brand) и которые «видны» в заданном городе.
+        Обязательный query-param: ?city=<имя_города>
+        """
+        city_name = request.query_params.get("city")
+        if not city_name:
+            return Response(
+                {"detail": "City parameter is required."},
+                status=400,
+            )
+
+        # 1. Базовый набор с аннотациями/префетчами из фабрики
+        qs = self.get_queryset()
+
+        # 2. Ограничиваем городом (склады + рёбра)
+        qs = self.filter_by_city_and_edges(qs, city_name)
+
+        # 3. Фильтр «есть активная скидка прямо сейчас»
+        now = timezone.now()
+
+        discount_filter = (
+            # Скидки на конкретные продукты
+            Q(product_discounts__active=True)
+            & (
+                Q(product_discounts__start_date__isnull=True)
+                | Q(product_discounts__start_date__lte=now)
+            )
+            & (
+                Q(product_discounts__end_date__isnull=True)
+                | Q(product_discounts__end_date__gte=now)
+            )
+            # Скидки на категории
+            | Q(category__category_discounts__active=True)
+            & (
+                Q(category__category_discounts__start_date__isnull=True)
+                | Q(category__category_discounts__start_date__lte=now)
+            )
+            & (
+                Q(category__category_discounts__end_date__isnull=True)
+                | Q(category__category_discounts__end_date__gte=now)
+            )
+            # Скидки на бренды
+            | Q(brand__brand_discounts__active=True)
+            & (
+                Q(brand__brand_discounts__start_date__isnull=True)
+                | Q(brand__brand_discounts__start_date__lte=now)
+            )
+            & (
+                Q(brand__brand_discounts__end_date__isnull=True)
+                | Q(brand__brand_discounts__end_date__gte=now)
+            )
+        )
+
+        qs = qs.filter(discount_filter).distinct()
+
+        # 4. Пагинация / сериализация
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
