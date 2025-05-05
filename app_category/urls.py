@@ -9,9 +9,9 @@ from app_category.views import category_facets
 urlpatterns = [
     path(
         "categories/facets/",
-        # cache_page(60 * 15)(
-        category_facets,
-        # ),
+        cache_page(60 * 15)(
+            category_facets,
+        ),
         name="category-facets",
     )
 ]
