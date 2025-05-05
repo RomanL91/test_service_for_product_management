@@ -33,6 +33,10 @@ class Category(MPTTModel, JSONFieldsMixin, SlugModelMixin):
         unique_together = [["parent", "name_category"]]
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
+        indexes = [
+            models.Index(fields=["slug"]),
+            models.Index(fields=["name_category"]),
+        ]
 
     def __str__(self):
         return self.name_category

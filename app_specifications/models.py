@@ -37,6 +37,12 @@ class Specifications(models.Model):
         ordering = ["ind"]
         verbose_name = "Характеристика"
         verbose_name_plural = "Характеристики"
+        indexes = [
+            models.Index(fields=["name_specification"]),
+            models.Index(fields=["value_specification"]),
+            models.Index(fields=["product"]),
+            models.Index(fields=["name_specification", "value_specification"]),
+        ]
         # TODO ограничение уникальности сочетания
         # имени характеристики и продукта
 

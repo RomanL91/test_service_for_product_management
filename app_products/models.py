@@ -3,6 +3,7 @@ from slugify import slugify
 from django.urls import reverse
 
 from django.db import models, transaction
+from django.contrib.postgres.indexes import GinIndex
 
 from core.mixins import JSONFieldsMixin, SlugModelMixin
 
@@ -72,6 +73,24 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
     class Meta:
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
+        indexes = [
+            GinIndex(
+                fields=["name_product"],
+                name="trgm_idx_name_product",
+                opclasses=["gin_trgm_ops"],
+            ),
+            GinIndex(
+                fields=["vendor_code"],
+                name="trgm_idx_vendor_code",
+                opclasses=["gin_trgm_ops"],
+            ),
+            GinIndex(
+                fields=["additional_data"],
+            ),
+            models.Index(fields=["category"]),
+            models.Index(fields=["brand"]),
+            models.Index(fields=["slug"]),
+        ]
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name_product)

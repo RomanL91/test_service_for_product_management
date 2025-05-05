@@ -46,6 +46,9 @@ class Warehouse(JSONFieldsMixin, models.Model):
     class Meta:
         verbose_name = "Склад"
         verbose_name_plural = "Склады"
+        indexes = [
+            models.Index(fields=["city"]),
+        ]
 
     def __str__(self):
         return f"{self.name_warehouse}"
@@ -79,6 +82,12 @@ class Stock(models.Model):
     class Meta:
         verbose_name = "Остаток/Цена"
         verbose_name_plural = "Остатки/Цены"
+        indexes = [
+            models.Index(fields=["product"]),
+            models.Index(fields=["warehouse"]),
+            models.Index(fields=["price"]),
+            models.Index(fields=["warehouse", "price"]),
+        ]
 
     def __str__(self):
         # return f"{self.product.name_product} в {self.warehouse.name_warehouse} ({self.quantity} шт. по {self.price})"
@@ -143,6 +152,9 @@ class Edges(models.Model):
         verbose_name_plural = "Маршруты"
         indexes = [
             models.Index(fields=["content_type", "object_id"]),
+            models.Index(fields=["city_to"]),
+            models.Index(fields=["expiration_date"]),
+            models.Index(fields=["is_active"]),
         ]
         constraints = [
             models.UniqueConstraint(
