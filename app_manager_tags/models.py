@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.postgres.indexes import GinIndex
+
 from django.core.validators import RegexValidator
 
 from core.mixins import JSONFieldsMixin
@@ -27,6 +29,13 @@ class Tag(JSONFieldsMixin, models.Model):
     )
 
     class Meta:
+        indexes = [
+            GinIndex(
+                fields=["tag_text"],
+                name="trgm_idx_tag_text",
+                opclasses=["gin_trgm_ops"],
+            ),
+        ]
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
 

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.indexes import GinIndex
 
 from core.mixins import JSONFieldsMixin
 from app_products.models import Products
@@ -57,6 +58,13 @@ class NameSpecifications(JSONFieldsMixin, models.Model):
     )
 
     class Meta:
+        indexes = [
+            GinIndex(
+                fields=["name_specification"],
+                name="trgm_idx_name_spec",
+                opclasses=["gin_trgm_ops"],
+            ),
+        ]
         verbose_name = "Название характеристики"
         verbose_name_plural = "Название характеристик"
 
@@ -71,6 +79,13 @@ class ValueSpecifications(JSONFieldsMixin, models.Model):
     )
 
     class Meta:
+        indexes = [
+            GinIndex(
+                fields=["value_specification"],
+                name="trgm_idx_value_spec",
+                opclasses=["gin_trgm_ops"],
+            ),
+        ]
         verbose_name = "Значение характеристики"
         verbose_name_plural = "Значение характеристик"
 

@@ -7,9 +7,9 @@ from app_products.SmartGlobalSearch import SmartGlobalSearchView
 urlpatterns = [
     path(
         "globalsearch/",
-        # cache_page(60 * 15)(
-        SmartGlobalSearchView.as_view(),
-        # ),
+        cache_page(60 * 15)(
+            SmartGlobalSearchView.as_view(),
+        ),
         name="products-list",
     ),
     path(

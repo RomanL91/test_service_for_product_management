@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.indexes import GinIndex
 from django.contrib.contenttypes.fields import GenericRelation
 
 from mptt.models import MPTTModel, TreeForeignKey
@@ -34,6 +35,11 @@ class Category(MPTTModel, JSONFieldsMixin, SlugModelMixin):
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
         indexes = [
+            GinIndex(
+                fields=["name_category"],
+                name="trgm_idx_name_category",
+                opclasses=["gin_trgm_ops"],
+            ),
             models.Index(fields=["slug"]),
             models.Index(fields=["name_category"]),
         ]
