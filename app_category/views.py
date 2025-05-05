@@ -308,7 +308,7 @@ def category_facets(request):
             "specifications__value_specification_id",
             "specifications__value_specification__value_specification",
         )
-        .annotate(cnt=Count("id", distinct=True))
+        .annotate(cnt=Count("id", distinct=False))
         .order_by("-cnt")
     )
     print(f"--- spec_rows --- >>> {spec_rows}")
