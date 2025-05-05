@@ -199,17 +199,18 @@ def _apply_filters(qs, brand_ids: list[int], spec_filters: dict[int, list[int]])
 
 # ------------ сам эндпоинт -------------------------------------------
 @api_view(["GET"])
-def category_facets(request, pk: int | str):
+def category_facets(request):
     """
-    GET /api/v1/categories/<id категории>/facets/
+    GET /categories/facets/
         - получим Бренды + Характеристики + Товары всей категории
-    GET /api/v1/categories/<id>/facets/?city=Караганда
+    GET /categories/facets/?city=Караганда
         - получим Бренды + Характеристики + Товары всей категории от города и логистических ребер!
         - выходит нам всегда нужно помнить о фильтрации по городу!
 
     Пример более полной фильтрации
-    GET /api/v1/categories/<id>/facets/
-       ?brand=1,2-----------фильтруем по брендам
+    GET /categories/facets/
+       ?category=1,2--------фильтруем по категории
+       &brand=1,2-----------фильтруем по брендам
        &city=Актобе---------фильтруем по городу
        &spec_12=5,6---------фильтруем по названию характеристики с ID 12 и значениями с ID 5 и 6 (&spec_<ЦВЕТ>=<БЕЛЫЙ>,<ЧЕРНЫЙ>)
        &limit=20&offset=0---пагинация
@@ -225,10 +226,13 @@ def category_facets(request, pk: int | str):
        spec_12 - это ключ. spec_<ID ключа> - ключ формируется из приставки 'spec_' + ID название характеристики.
        =5,6 - это ID значения характеристики.
     """
-    category = Category.objects.get(pk=pk)
+    category_ids = _parse_int_list(request.GET.get("category"))
+    category = Category.objects.filter(pk__in=category_ids)
     category_ids = category.get_descendants(include_self=True).values_list(
         "id", flat=True
     )
+    if not category_ids:
+        category_ids = Category.objects.all().values_list("id", flat=True)
 
     # ---------- выбранные фильтры ------------------
     brand_ids = _parse_int_list(request.GET.get("brand"))
@@ -279,20 +283,34 @@ def category_facets(request, pk: int | str):
         if order_fields:
             prod_qs = prod_qs.order_by(*order_fields)
     # ---------- counts для facets ------------------
+    category_block = [
+        {
+            "id": cat_row["category_id"],
+            "name": cat_row["category__name_category"],
+            "count": cat_row["cnt"],
+        }
+        for cat_row in prod_qs.values("category_id", "category__name_category")
+        .annotate(cnt=Count("id", distinct=True))
+        .order_by("-cnt")
+    ]
     brands_block = [
         {"id": row["brand_id"], "name": row["brand__name_brand"], "count": row["cnt"]}
         for row in prod_qs.values("brand_id", "brand__name_brand")
         .annotate(cnt=Count("id", distinct=True))
-        .order_by("brand__name_brand")
+        .order_by("-cnt")
         if row["brand_id"]
     ]
 
-    spec_rows = prod_qs.values(
-        "specifications__name_specification_id",
-        "specifications__name_specification__name_specification",
-        "specifications__value_specification_id",
-        "specifications__value_specification__value_specification",
-    ).annotate(cnt=Count("id", distinct=True))
+    spec_rows = (
+        prod_qs.values(
+            "specifications__name_specification_id",
+            "specifications__name_specification__name_specification",
+            "specifications__value_specification_id",
+            "specifications__value_specification__value_specification",
+        )
+        .annotate(cnt=Count("id", distinct=True))
+        .order_by("-cnt")
+    )
 
     spec_map: dict[int, dict] = defaultdict(
         lambda: {"id": None, "name": "", "values": []}
@@ -352,6 +370,7 @@ def category_facets(request, pk: int | str):
     return Response(
         {
             "total": products_total,
+            "categorys": category_block,
             "brands": brands_block,
             "specifications": specs_block,
             "products": products_block,
