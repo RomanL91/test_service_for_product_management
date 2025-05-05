@@ -317,20 +317,18 @@ def category_facets(request):
     )
     for r in spec_rows:
         sid = r["specifications__name_specification_id"]
-        if sid:
-            spec_map[sid]["id"] = sid
-            spec_map[sid]["name"] = r[
-                "specifications__name_specification__name_specification"
-            ]
-            spec_map[sid]["values"].append(
-                {
-                    "id": r["specifications__value_specification_id"],
-                    "value": r[
-                        "specifications__value_specification__value_specification"
-                    ],
-                    "count": r["cnt"],
-                }
-            )
+        # if sid:
+        spec_map[sid]["id"] = sid
+        spec_map[sid]["name"] = r[
+            "specifications__name_specification__name_specification"
+        ]
+        spec_map[sid]["values"].append(
+            {
+                "id": r["specifications__value_specification_id"],
+                "value": r["specifications__value_specification__value_specification"],
+                "count": r["cnt"],
+            }
+        )
     specs_block = list(spec_map.values())
 
     # ---------- блок товаров -----------------------
