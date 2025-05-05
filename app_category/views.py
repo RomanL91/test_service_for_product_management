@@ -18,6 +18,8 @@ from app_products.views_v2 import ProductsViewSet_v2
 from app_brands.models import Brands
 from app_brands.serializers import BrandSerializer
 
+from app_specifications.models import Specifications
+
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -301,34 +303,40 @@ def category_facets(request):
         if row["brand_id"]
     ]
 
+    # spec_rows = (
+    #     prod_qs.values(
+    #         "specifications__name_specification_id",
+    #         "specifications__name_specification__name_specification",
+    #         "specifications__value_specification_id",
+    #         "specifications__value_specification__value_specification",
+    #     )
+    #     .annotate(cnt=Count("id", distinct=False))
+    #     .order_by("-cnt")
+    # )
     spec_rows = (
-        prod_qs.values(
-            "specifications__name_specification_id",
-            "specifications__name_specification__name_specification",
-            "specifications__value_specification_id",
-            "specifications__value_specification__value_specification",
+        Specifications.objects.filter(product__in=prod_qs)
+        .values(
+            "name_specification_id",
+            "name_specification__name_specification",
+            "value_specification_id",
+            "value_specification__value_specification",
         )
         .annotate(cnt=Count("id", distinct=False))
         .order_by("-cnt")
     )
-    print(f"--- spec_rows --- >>> {spec_rows}")
 
     spec_map: dict[int, dict] = defaultdict(
         lambda: {"id": None, "name": "", "values": []}
     )
     for r in spec_rows:
-        sid = r["specifications__name_specification_id"]
+        sid = r["name_specification_id"]
         if sid:
             spec_map[sid]["id"] = sid
-            spec_map[sid]["name"] = r[
-                "specifications__name_specification__name_specification"
-            ]
+            spec_map[sid]["name"] = r["name_specification__name_specification"]
             spec_map[sid]["values"].append(
                 {
-                    "id": r["specifications__value_specification_id"],
-                    "value": r[
-                        "specifications__value_specification__value_specification"
-                    ],
+                    "id": r["value_specification_id"],
+                    "value": r["value_specification__value_specification"],
                     "count": r["cnt"],
                 }
             )
