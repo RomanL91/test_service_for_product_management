@@ -750,6 +750,16 @@ gprof2dot = ">=2017.09.19"
 sqlparse = "*"
 
 [[package]]
+name = "django-sortedm2m"
+version = "4.0.0"
+description = "Drop-in replacement for Django's many to many field with sorted relations."
+optional = false
+python-versions = "*"
+files = [
+    {file = "django_sortedm2m-4.0.0-py2.py3-none-any.whl", hash = "sha256:7e76f3f3ea3184b4ca1d4043ec75316c606d00f5534fc71e69981d8b2198ff33"},
+]
+
+[[package]]
 name = "django-timezone-field"
 version = "7.0"
 description = "A Django app providing DB, form, and REST framework fields for zoneinfo and pytz timezone objects."
@@ -1599,4 +1609,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "e02994ffc0b8c4fa2790f99b095f2af9d4b1898ef479d47f4cd412b88baf4b76"
+content-hash = "6ffc0665eda71b6a38b735c67a0fd99f8d860ecd02ef4f379192a2bd0bc3ecf2"

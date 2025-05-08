@@ -139,6 +139,18 @@ class ProductImage(models.Model):
         return self.product.name_product
 
 
+class ProductSetProduct(models.Model):
+    populatesproducts = models.ForeignKey("PopulatesProducts", on_delete=models.CASCADE)
+    products = models.ForeignKey("Products", on_delete=models.CASCADE)
+    sort_value = models.IntegerField()
+
+    # Добавляем атрибут `_sort_field_name`
+    _sort_field_name = "sort_value"
+
+    class Meta:
+        ordering = ["sort_value"]
+
+
 class PopulatesProducts(models.Model):
     name_set = models.CharField(
         max_length=150,
@@ -150,6 +162,7 @@ class PopulatesProducts(models.Model):
     )
     products = models.ManyToManyField(
         Products,
+        through=ProductSetProduct,
         blank=True,
         verbose_name="Список популярных продуктов",
     )

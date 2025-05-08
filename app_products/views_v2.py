@@ -131,7 +131,11 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
         product_ids = populate_set.products.values_list("id", flat=True)
 
         # Используем фабрику для аннотирования товаров
-        queryset = ProductsQueryFactory.get_all_details().filter(id__in=product_ids)
+        queryset = (
+            ProductsQueryFactory.get_all_details()
+            .filter(id__in=product_ids)
+            .order_by("productsetproduct__sort_value")
+        )
 
         # Фильтрация по городу
         city_name = request.query_params.get("city")
