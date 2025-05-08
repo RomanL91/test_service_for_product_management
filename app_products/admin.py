@@ -76,11 +76,13 @@ class ProductAdmin(AutocompleteFilterMixin, SortableAdminBase, admin.ModelAdmin)
         StockInline,
     ]
     list_display = [
-        "name_product",
-        "category",
-        # "price",
-        # "remaining_goods",
         "get_image",
+        "name_product",
+        "vendor_code",
+        "category",
+        "brand",
+        # "remaining_goods",
+        "show_it",
     ]
     list_filter = [
         # "category",
@@ -112,7 +114,7 @@ class ProductAdmin(AutocompleteFilterMixin, SortableAdminBase, admin.ModelAdmin)
     fieldsets = (
         (
             "О продукте",
-            {"fields": ("vendor_code", "name_product", "slug")},
+            {"fields": ("show_it", "vendor_code", "name_product", "slug")},
         ),
         (
             "Переводы на языки",

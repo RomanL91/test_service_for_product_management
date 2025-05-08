@@ -19,7 +19,7 @@ class ProductsQueryFactory:
         """
         Базовый QuerySet без сложных prefetch/annotate, но с select_related
         """
-        return Products.objects.select_related(
+        return Products.objects.filter(show_it=True).select_related(
             "category__parent", "brand", "description"
         )
 

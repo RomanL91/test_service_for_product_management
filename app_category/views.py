@@ -246,7 +246,7 @@ def category_facets(request):
             spec_filters[spec_id] = _parse_int_list(val)
 
     # ---------- базовый узкий qs -------------------
-    base_qs = Products.objects.filter(category_id__in=category_ids)
+    base_qs = Products.objects.filter(show_it=True, category_id__in=category_ids)
     base_qs = _apply_filters(base_qs, brand_ids, spec_filters)
 
     # ---------- гидрация через фабрику qs -------------------

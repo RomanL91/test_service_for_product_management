@@ -14,6 +14,10 @@ from app_descriptions.models import ProductDescription
 
 
 class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
+    show_it = models.BooleanField(
+        default=True,
+        verbose_name="Показывать этот товар?",
+    )
     vendor_code = models.CharField(
         unique=True,
         max_length=30,
