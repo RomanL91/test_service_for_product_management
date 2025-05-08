@@ -314,6 +314,7 @@ class ProductSetProductInline(SortableInlineAdminMixin, admin.TabularInline):
     fields = ("products", "product_image", "sort_value")
     readonly_fields = ("product_image",)
     ordering = ("sort_value",)
+    autocomplete_fields = ("products",)
 
     def product_image(self, obj):
         """
@@ -340,6 +341,7 @@ class PopulatesProductsAdmin(SortableAdminBase, admin.ModelAdmin):
         "name_set",
         "activ_set",
     ]
+    autocomplete_fields = ("products",)
 
 
 class ExternalProductAdmin(admin.ModelAdmin):
