@@ -290,14 +290,22 @@ def category_facets(request):
             "id": cat_row["category_id"],
             "name": cat_row["category__name_category"],
             "count": cat_row["cnt"],
+            "additional_data": cat_row["additional_data"],
         }
-        for cat_row in prod_qs.values("category_id", "category__name_category")
+        for cat_row in prod_qs.values(
+            "category_id", "category__name_category", "additional_data"
+        )
         .annotate(cnt=Count("id", distinct=True))
         .order_by("-cnt")
     ]
     brands_block = [
-        {"id": row["brand_id"], "name": row["brand__name_brand"], "count": row["cnt"]}
-        for row in prod_qs.values("brand_id", "brand__name_brand")
+        {
+            "id": row["brand_id"],
+            "name": row["brand__name_brand"],
+            "count": row["cnt"],
+            "additional_data": row["additional_data"],
+        }
+        for row in prod_qs.values("brand_id", "brand__name_brand", "additional_data")
         .annotate(cnt=Count("id", distinct=True))
         .order_by("-cnt")
         if row["brand_id"]
@@ -318,25 +326,29 @@ def category_facets(request):
         .values(
             "name_specification_id",
             "name_specification__name_specification",
+            "name_specification__additional_data",
             "value_specification_id",
             "value_specification__value_specification",
+            "value_specification__additional_data",
         )
         .annotate(cnt=Count("id", distinct=False))
         .order_by("-cnt")
     )
 
     spec_map: dict[int, dict] = defaultdict(
-        lambda: {"id": None, "name": "", "values": []}
+        lambda: {"id": None, "name": "", "additional_data": {}, "values": []}
     )
     for r in spec_rows:
         sid = r["name_specification_id"]
         if sid:
             spec_map[sid]["id"] = sid
             spec_map[sid]["name"] = r["name_specification__name_specification"]
+            spec_map[sid]["additional_data"] = r["name_specification__additional_data"]
             spec_map[sid]["values"].append(
                 {
                     "id": r["value_specification_id"],
                     "value": r["value_specification__value_specification"],
+                    "additional_data": r["value_specification__additional_data"],
                     "count": r["cnt"],
                 }
             )
