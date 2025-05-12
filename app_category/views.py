@@ -290,10 +290,10 @@ def category_facets(request):
             "id": cat_row["category_id"],
             "name": cat_row["category__name_category"],
             "count": cat_row["cnt"],
-            "additional_data": cat_row["additional_data"],
+            "additional_data": cat_row["category__additional_data"],
         }
         for cat_row in prod_qs.values(
-            "category_id", "category__name_category", "additional_data"
+            "category_id", "category__name_category", "category__additional_data"
         )
         .annotate(cnt=Count("id", distinct=True))
         .order_by("-cnt")
@@ -303,9 +303,11 @@ def category_facets(request):
             "id": row["brand_id"],
             "name": row["brand__name_brand"],
             "count": row["cnt"],
-            "additional_data": row["additional_data"],
+            "additional_data": row["brand__additional_data"],
         }
-        for row in prod_qs.values("brand_id", "brand__name_brand", "additional_data")
+        for row in prod_qs.values(
+            "brand_id", "brand__name_brand", "brand__additional_data"
+        )
         .annotate(cnt=Count("id", distinct=True))
         .order_by("-cnt")
         if row["brand_id"]
