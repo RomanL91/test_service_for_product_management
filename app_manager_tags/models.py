@@ -5,6 +5,8 @@ from django.core.validators import RegexValidator
 
 from core.mixins import JSONFieldsMixin
 
+from core.TranslationDecorator import register_for_translation
+
 
 class ColorField(models.CharField):
     """Поле для хранения HTML-кода цвета."""
@@ -15,6 +17,7 @@ class ColorField(models.CharField):
         self.validators.append(RegexValidator(r"#[a-f\d]{6}"))
 
 
+@register_for_translation("tag_text", "additional_data")
 class Tag(JSONFieldsMixin, models.Model):
     tag_text = models.CharField(max_length=10, verbose_name="Текст тега")
     font_color = ColorField(

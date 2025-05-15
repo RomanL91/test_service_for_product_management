@@ -4,6 +4,8 @@ from django.contrib.postgres.indexes import GinIndex
 from core.mixins import JSONFieldsMixin
 from app_products.models import Products
 
+from core.TranslationDecorator import register_for_translation
+
 
 class Specifications(models.Model):
     name_specification = models.ForeignKey(
@@ -51,6 +53,7 @@ class Specifications(models.Model):
         return str(self.name_specification)
 
 
+@register_for_translation("name_specification", "additional_data")
 class NameSpecifications(JSONFieldsMixin, models.Model):
     name_specification = models.CharField(
         max_length=150,
@@ -72,6 +75,7 @@ class NameSpecifications(JSONFieldsMixin, models.Model):
         return self.name_specification
 
 
+@register_for_translation("value_specification", "additional_data")
 class ValueSpecifications(JSONFieldsMixin, models.Model):
     value_specification = models.CharField(
         max_length=150,

@@ -3,8 +3,10 @@ from django.contrib.postgres.indexes import GinIndex
 from django.contrib.contenttypes.fields import GenericRelation
 
 from core.mixins import JSONFieldsMixin
+from core.TranslationDecorator import register_for_translation
 
 
+@register_for_translation("name_brand", "additional_data")
 class Brands(JSONFieldsMixin, models.Model):
     name_brand = models.CharField(
         max_length=150,

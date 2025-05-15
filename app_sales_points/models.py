@@ -6,7 +6,10 @@ from core.mixins import JSONFieldsMixin
 
 from app_products.models import Products
 
+from core.TranslationDecorator import register_for_translation
 
+
+@register_for_translation("name_city", "additional_data")
 class City(JSONFieldsMixin, models.Model):
     name_city = models.CharField(
         max_length=100,
@@ -23,6 +26,7 @@ class City(JSONFieldsMixin, models.Model):
         return self.name_city
 
 
+@register_for_translation("name_warehouse", "additional_data")
 class Warehouse(JSONFieldsMixin, models.Model):
     external_id = models.CharField(
         max_length=255,

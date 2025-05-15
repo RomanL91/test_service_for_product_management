@@ -12,7 +12,10 @@ from app_category.models import Category
 from app_manager_tags.models import Tag
 from app_descriptions.models import ProductDescription
 
+from core.TranslationDecorator import register_for_translation
 
+
+@register_for_translation("name_product", "additional_data")
 class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
     show_it = models.BooleanField(
         default=True,

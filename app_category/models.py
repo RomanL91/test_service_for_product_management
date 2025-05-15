@@ -6,7 +6,10 @@ from mptt.models import MPTTModel, TreeForeignKey
 
 from core.mixins import JSONFieldsMixin, SlugModelMixin
 
+from core.TranslationDecorator import register_for_translation
 
+
+@register_for_translation("name_category", "additional_data")
 class Category(MPTTModel, JSONFieldsMixin, SlugModelMixin):
     name_category = models.CharField(
         max_length=100,
