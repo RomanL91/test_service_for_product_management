@@ -2,7 +2,10 @@ from django.db import models
 
 from core.mixins import JSONFieldsMixin, JSONFieldsDescMixin
 
+from core.TranslationDecorator import register_for_translation
 
+
+@register_for_translation("title_description", "additional_data")
 class BaseDescription(JSONFieldsMixin, models.Model):
     title_description = models.CharField(
         max_length=150, verbose_name="Заголовок описания"
@@ -16,6 +19,7 @@ class BaseDescription(JSONFieldsMixin, models.Model):
         return self.title_description
 
 
+@register_for_translation("body_description", "additional_data_to_desc")
 class ProductDescription(BaseDescription, JSONFieldsDescMixin):
     body_description = models.TextField(
         verbose_name="Описание",
