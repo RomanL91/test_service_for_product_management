@@ -8,7 +8,10 @@ python -m celery -A core beat -l info &
 python -m celery -A core flower --port=8001 --basic_auth=admin:admin &
 
 # запуск скрипта для потребление очереди, где хранится результат парсинга
-python manage.py consumer_spec --host=185.100.67.246 --queue=returned_spec &
+# python manage.py consumer_spec --host=185.100.67.246 --queue=returned_spec &
+
+# запуск потрибителя для готовых переводов
+python manage.py start_consumer &
 
 # python manage.py search_index --rebuild -f
 

@@ -19,8 +19,8 @@ class DefaultAdditionalDataMixin:
     def default_additional_data():
         return {
             # "RU": "",
-            "EN": "",
-            "KZ": "",
+            "en": "",
+            "kk": "",
         }
 
 

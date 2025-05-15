@@ -281,4 +281,13 @@ API_URL_GET_ARCHIVE_ORDERS_MANAGER = "http://{basket_host}:{basket_port}/basket_
 API_URL_BASKET_ITEM_UPDATE = (
     "http://basket_service:8777/basket_api/v1/bascket/{uuid_id}/{prod_id}/"
 )
-# actions
+
+# rabbitmq
+RABBITMQ_LOGIN = os.getenv("RABBITMQ_LOGIN")
+RABBITMQ_PASSW = os.getenv("RABBITMQ_PASSW")
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
+RABBITMQ_PORT = os.getenv("RABBITMQ_PORT")
+
+RABBITMQ = "amqp://{login}:{passw}@{host}:{port}/".format(
+    login=RABBITMQ_LOGIN, passw=RABBITMQ_PASSW, host=RABBITMQ_HOST, port=RABBITMQ_PORT
+)

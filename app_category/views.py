@@ -18,6 +18,8 @@ from app_products.views_v2 import ProductsViewSet_v2
 from app_brands.models import Brands
 from app_brands.serializers import BrandSerializer
 
+from app_specifications.models import Specifications
+
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -199,20 +201,26 @@ def _apply_filters(qs, brand_ids: list[int], spec_filters: dict[int, list[int]])
 
 # ------------ сам эндпоинт -------------------------------------------
 @api_view(["GET"])
-def category_facets(request, pk: int | str):
+def category_facets(request):
     """
-    GET /api/v1/categories/<id категории>/facets/
+    GET /categories/facets/
         - получим Бренды + Характеристики + Товары всей категории
-    GET /api/v1/categories/<id>/facets/?city=Караганда
+    GET /categories/facets/?city=Караганда
         - получим Бренды + Характеристики + Товары всей категории от города и логистических ребер!
         - выходит нам всегда нужно помнить о фильтрации по городу!
 
     Пример более полной фильтрации
-    GET /api/v1/categories/<id>/facets/
-       ?brand=1,2-----------фильтруем по брендам
+    GET /categories/facets/
+       ?category=1,2--------фильтруем по категории
+       &brand=1,2-----------фильтруем по брендам
        &city=Актобе---------фильтруем по городу
        &spec_12=5,6---------фильтруем по названию характеристики с ID 12 и значениями с ID 5 и 6 (&spec_<ЦВЕТ>=<БЕЛЫЙ>,<ЧЕРНЫЙ>)
        &limit=20&offset=0---пагинация
+       +++ сортировка +++
+       по цене, по сред рейтингу, по кол отзывов, по бренду (алфавит).
+       &ordering=price(-price) - дешевый сначала
+       &ordering=-reviews,-price - популярные (количество отзывов), дорогие внизу
+       &ordering=brand,-rating - бренды по алфавиту, потом по рейтингу
 
        самое важно для понимания это:
        &spec_12=5,6
@@ -220,10 +228,13 @@ def category_facets(request, pk: int | str):
        spec_12 - это ключ. spec_<ID ключа> - ключ формируется из приставки 'spec_' + ID название характеристики.
        =5,6 - это ID значения характеристики.
     """
-    category = Category.objects.get(pk=pk)
+    category_ids = _parse_int_list(request.GET.get("category"))
+    category = Category.objects.filter(pk__in=category_ids)
     category_ids = category.get_descendants(include_self=True).values_list(
         "id", flat=True
     )
+    if not category_ids:
+        category_ids = Category.objects.all().values_list("id", flat=True)
 
     # ---------- выбранные фильтры ------------------
     brand_ids = _parse_int_list(request.GET.get("brand"))
@@ -235,7 +246,7 @@ def category_facets(request, pk: int | str):
             spec_filters[spec_id] = _parse_int_list(val)
 
     # ---------- базовый узкий qs -------------------
-    base_qs = Products.objects.filter(category_id__in=category_ids)
+    base_qs = Products.objects.filter(show_it=True, category_id__in=category_ids)
     base_qs = _apply_filters(base_qs, brand_ids, spec_filters)
 
     # ---------- гидрация через фабрику qs -------------------
@@ -255,40 +266,94 @@ def category_facets(request, pk: int | str):
 
         # Применяем фильтры и удаляем дубли
         prod_qs = prod_qs.filter(stocks_filter | edges_filter)
-
+    # ---------- сортировка -----------------------------
+    ordering = request.GET.get("ordering")  # пример: ?ordering=price,-rating
+    if ordering:
+        # Разрешаем только перечисленные поля,
+        # поддерживаем знак «-» для обратного порядка
+        allowed = {
+            "price": "stocks__price",
+            "-price": "-stocks__price",
+            "rating": "avg_rating",
+            "-rating": "-avg_rating",
+            "reviews": "reviews_count",
+            "-reviews": "-reviews_count",
+            "brand": "brand__name_brand",
+            "-brand": "-brand__name_brand",
+        }
+        order_fields = [allowed[o] for o in ordering.split(",") if o in allowed]
+        if order_fields:
+            prod_qs = prod_qs.order_by(*order_fields)
     # ---------- counts для facets ------------------
-
+    category_block = [
+        {
+            "id": cat_row["category_id"],
+            "name": cat_row["category__name_category"],
+            "count": cat_row["cnt"],
+            "additional_data": cat_row["category__additional_data"],
+        }
+        for cat_row in prod_qs.values(
+            "category_id", "category__name_category", "category__additional_data"
+        )
+        .annotate(cnt=Count("id", distinct=True))
+        .order_by("-cnt")
+    ]
     brands_block = [
-        {"id": row["brand_id"], "name": row["brand__name_brand"], "count": row["cnt"]}
-        for row in prod_qs.values("brand_id", "brand__name_brand")
-        .annotate(cnt=Count("id"))
-        .order_by("brand__name_brand")
+        {
+            "id": row["brand_id"],
+            "name": row["brand__name_brand"],
+            "count": row["cnt"],
+            "additional_data": row["brand__additional_data"],
+        }
+        for row in prod_qs.values(
+            "brand_id", "brand__name_brand", "brand__additional_data"
+        )
+        .annotate(cnt=Count("id", distinct=True))
+        .order_by("-cnt")
         if row["brand_id"]
     ]
 
-    spec_rows = prod_qs.values(
-        "specifications__name_specification_id",
-        "specifications__name_specification__name_specification",
-        "specifications__value_specification_id",
-        "specifications__value_specification__value_specification",
-    ).annotate(cnt=Count("id"))
+    # spec_rows = (
+    #     prod_qs.values(
+    #         "specifications__name_specification_id",
+    #         "specifications__name_specification__name_specification",
+    #         "specifications__value_specification_id",
+    #         "specifications__value_specification__value_specification",
+    #     )
+    #     .annotate(cnt=Count("id", distinct=False))
+    #     .order_by("-cnt")
+    # )
+    spec_rows = (
+        Specifications.objects.filter(product__in=prod_qs)
+        .values(
+            "name_specification_id",
+            "name_specification__name_specification",
+            "name_specification__additional_data",
+            "value_specification_id",
+            "value_specification__value_specification",
+            "value_specification__additional_data",
+        )
+        .annotate(cnt=Count("id", distinct=False))
+        .order_by("-cnt")
+    )
 
     spec_map: dict[int, dict] = defaultdict(
-        lambda: {"id": None, "name": "", "values": []}
+        lambda: {"id": None, "name": "", "additional_data": {}, "values": []}
     )
     for r in spec_rows:
-        sid = r["specifications__name_specification_id"]
-        spec_map[sid]["id"] = sid
-        spec_map[sid]["name"] = r[
-            "specifications__name_specification__name_specification"
-        ]
-        spec_map[sid]["values"].append(
-            {
-                "id": r["specifications__value_specification_id"],
-                "value": r["specifications__value_specification__value_specification"],
-                "count": r["cnt"],
-            }
-        )
+        sid = r["name_specification_id"]
+        if sid:
+            spec_map[sid]["id"] = sid
+            spec_map[sid]["name"] = r["name_specification__name_specification"]
+            spec_map[sid]["additional_data"] = r["name_specification__additional_data"]
+            spec_map[sid]["values"].append(
+                {
+                    "id": r["value_specification_id"],
+                    "value": r["value_specification__value_specification"],
+                    "additional_data": r["value_specification__additional_data"],
+                    "count": r["cnt"],
+                }
+            )
     specs_block = list(spec_map.values())
 
     # ---------- блок товаров -----------------------
@@ -328,6 +393,7 @@ def category_facets(request, pk: int | str):
     return Response(
         {
             "total": products_total,
+            "categorys": category_block,
             "brands": brands_block,
             "specifications": specs_block,
             "products": products_block,

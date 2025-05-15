@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib import admin
 
 from django.utils.html import mark_safe
+from django.utils.html import format_html
 
 from core.mixins import JsonDocumentForm, CustomAdminFileWidget
 from app_products.models import (
@@ -14,6 +15,7 @@ from app_products.models import (
     PopulatesProducts,
     ExternalProduct,
     ExternalProductImage,
+    ProductSetProduct,
 )
 from app_specifications.admin import SpecificationsInline
 from app_sales_points.admin import StockInline
@@ -22,6 +24,7 @@ from autocompletefilter.admin import AutocompleteFilterMixin
 from autocompletefilter.filters import AutocompleteListFilter
 from adminsortable2.admin import SortableAdminBase
 from adminsortable2.admin import SortableStackedInline
+from adminsortable2.admin import SortableInlineAdminMixin
 
 from app_external_products.utils import send_message_rmq
 
@@ -76,11 +79,13 @@ class ProductAdmin(AutocompleteFilterMixin, SortableAdminBase, admin.ModelAdmin)
         StockInline,
     ]
     list_display = [
-        "name_product",
-        "category",
-        # "price",
-        # "remaining_goods",
         "get_image",
+        "name_product",
+        "vendor_code",
+        "category",
+        "brand",
+        # "remaining_goods",
+        "show_it",
     ]
     list_filter = [
         # "category",
@@ -112,7 +117,7 @@ class ProductAdmin(AutocompleteFilterMixin, SortableAdminBase, admin.ModelAdmin)
     fieldsets = (
         (
             "О продукте",
-            {"fields": ("vendor_code", "name_product", "slug")},
+            {"fields": ("show_it", "vendor_code", "name_product", "slug")},
         ),
         (
             "Переводы на языки",
@@ -303,14 +308,40 @@ class ProductImageAdmin(admin.ModelAdmin):
     get_image.short_description = "ФОТО"
 
 
-class PopulatesProductsAdmin(admin.ModelAdmin):
+class ProductSetProductInline(SortableInlineAdminMixin, admin.TabularInline):
+    model = ProductSetProduct
+    extra = 1
+    fields = ("products", "product_image", "sort_value")
+    readonly_fields = ("product_image",)
+    ordering = ("sort_value",)
+    autocomplete_fields = ("products",)
+
+    def product_image(self, obj):
+        """
+        Отображение изображения из ProductImage.
+        """
+        product = obj.products
+
+        # Получаем обложку (индекс 0) или первое изображение
+        image = ProductImage.objects.filter(product=product).order_by("ind").first()
+
+        if image:
+            return format_html(
+                '<img src="{}" style="width: 90px; height: 120px; object-fit: cover;" />',
+                image.image.url,
+            )
+        return "Нет изображения"
+
+    product_image.short_description = "Изображение товара"
+
+
+class PopulatesProductsAdmin(SortableAdminBase, admin.ModelAdmin):
+    inlines = [ProductSetProductInline]
     list_display = [
         "name_set",
         "activ_set",
     ]
-    filter_horizontal = [
-        "products",
-    ]
+    autocomplete_fields = ("products",)
 
 
 class ExternalProductAdmin(admin.ModelAdmin):

@@ -1,9 +1,17 @@
 from django.urls import path
 from django.views.decorators.cache import cache_page
 from app_products.views_v2 import ProductsViewSet_v2
+from app_products.SmartGlobalSearch import SmartGlobalSearchView
 
 
 urlpatterns = [
+    path(
+        "globalsearch/",
+        cache_page(60 * 15)(
+            SmartGlobalSearchView.as_view(),
+        ),
+        name="products-list",
+    ),
     path(
         "products_v2/",
         cache_page(60 * 15)(

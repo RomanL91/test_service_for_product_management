@@ -8,7 +8,7 @@ from app_category.views import category_facets
 
 urlpatterns = [
     path(
-        "categories/<int:pk>/facets/",
+        "categories/facets/",
         cache_page(60 * 15)(
             category_facets,
         ),

@@ -1,9 +1,12 @@
 from django.db import models
+from django.contrib.postgres.indexes import GinIndex
 from django.contrib.contenttypes.fields import GenericRelation
 
 from core.mixins import JSONFieldsMixin
+from core.TranslationDecorator import register_for_translation
 
 
+@register_for_translation("name_brand", "additional_data")
 class Brands(JSONFieldsMixin, models.Model):
     name_brand = models.CharField(
         max_length=150,
@@ -16,6 +19,14 @@ class Brands(JSONFieldsMixin, models.Model):
     )
 
     class Meta:
+        indexes = [
+            models.Index(fields=["name_brand"]),
+            GinIndex(
+                fields=["name_brand"],
+                name="trgm_idx_name_brand",
+                opclasses=["gin_trgm_ops"],
+            ),
+        ]
         verbose_name = "Бренд"
         verbose_name_plural = "Бренды"
 

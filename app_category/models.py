@@ -1,11 +1,15 @@
 from django.db import models
+from django.contrib.postgres.indexes import GinIndex
 from django.contrib.contenttypes.fields import GenericRelation
 
 from mptt.models import MPTTModel, TreeForeignKey
 
 from core.mixins import JSONFieldsMixin, SlugModelMixin
 
+from core.TranslationDecorator import register_for_translation
 
+
+@register_for_translation("name_category", "additional_data")
 class Category(MPTTModel, JSONFieldsMixin, SlugModelMixin):
     name_category = models.CharField(
         max_length=100,
@@ -33,6 +37,15 @@ class Category(MPTTModel, JSONFieldsMixin, SlugModelMixin):
         unique_together = [["parent", "name_category"]]
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
+        indexes = [
+            GinIndex(
+                fields=["name_category"],
+                name="trgm_idx_name_category",
+                opclasses=["gin_trgm_ops"],
+            ),
+            models.Index(fields=["slug"]),
+            models.Index(fields=["name_category"]),
+        ]
 
     def __str__(self):
         return self.name_category

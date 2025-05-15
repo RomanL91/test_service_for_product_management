@@ -131,7 +131,11 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
         product_ids = populate_set.products.values_list("id", flat=True)
 
         # Используем фабрику для аннотирования товаров
-        queryset = ProductsQueryFactory.get_all_details().filter(id__in=product_ids)
+        queryset = (
+            ProductsQueryFactory.get_all_details()
+            .filter(id__in=product_ids)
+            .order_by("productsetproduct__sort_value")
+        )
 
         # Фильтрация по городу
         city_name = request.query_params.get("city")
@@ -287,12 +291,35 @@ class ProductsViewSet_v2(ReadOnlyModelViewSet):
         )
 
         qs = qs.filter(discount_filter).distinct()
+        qs = self.filter_queryset(qs)
+
+        brands_to_filter = qs.values(
+            "brand__id", "brand__name_brand", "brand__logobrand__image"
+        )
+        cat_to_filter = qs.values(
+            "category__id",
+            "category__name_category",
+            "category__slug",
+            "category__categoryimage__image",
+        ).distinct()
+        spec_to_filter = qs.values(
+            "specifications__name_specification__name_specification",
+            "specifications__value_specification__value_specification",
+        ).distinct()
+        response_data: dict = {
+            "brands_to_filter": brands_to_filter,
+            "cat_to_filter": cat_to_filter,
+            "spec_to_filter": spec_to_filter,
+        }
 
         # 4. Пагинация / сериализация
         page = self.paginate_queryset(qs)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            response_data.setdefault("prod", serializer.data)
+            return self.get_paginated_response(response_data)
 
         serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data)
+        response_data.setdefault("prod", serializer.data)
+
+        return Response(response_data)

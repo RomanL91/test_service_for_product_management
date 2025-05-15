@@ -1,7 +1,10 @@
 from django.db import models
+from django.contrib.postgres.indexes import GinIndex
 
 from core.mixins import JSONFieldsMixin
 from app_products.models import Products
+
+from core.TranslationDecorator import register_for_translation
 
 
 class Specifications(models.Model):
@@ -37,6 +40,12 @@ class Specifications(models.Model):
         ordering = ["ind"]
         verbose_name = "Характеристика"
         verbose_name_plural = "Характеристики"
+        indexes = [
+            models.Index(fields=["name_specification"]),
+            models.Index(fields=["value_specification"]),
+            models.Index(fields=["product"]),
+            models.Index(fields=["name_specification", "value_specification"]),
+        ]
         # TODO ограничение уникальности сочетания
         # имени характеристики и продукта
 
@@ -44,6 +53,7 @@ class Specifications(models.Model):
         return str(self.name_specification)
 
 
+@register_for_translation("name_specification", "additional_data")
 class NameSpecifications(JSONFieldsMixin, models.Model):
     name_specification = models.CharField(
         max_length=150,
@@ -51,6 +61,13 @@ class NameSpecifications(JSONFieldsMixin, models.Model):
     )
 
     class Meta:
+        indexes = [
+            GinIndex(
+                fields=["name_specification"],
+                name="trgm_idx_name_spec",
+                opclasses=["gin_trgm_ops"],
+            ),
+        ]
         verbose_name = "Название характеристики"
         verbose_name_plural = "Название характеристик"
 
@@ -58,6 +75,7 @@ class NameSpecifications(JSONFieldsMixin, models.Model):
         return self.name_specification
 
 
+@register_for_translation("value_specification", "additional_data")
 class ValueSpecifications(JSONFieldsMixin, models.Model):
     value_specification = models.CharField(
         max_length=150,
@@ -65,6 +83,13 @@ class ValueSpecifications(JSONFieldsMixin, models.Model):
     )
 
     class Meta:
+        indexes = [
+            GinIndex(
+                fields=["value_specification"],
+                name="trgm_idx_value_spec",
+                opclasses=["gin_trgm_ops"],
+            ),
+        ]
         verbose_name = "Значение характеристики"
         verbose_name_plural = "Значение характеристик"
 

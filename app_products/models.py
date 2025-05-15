@@ -3,6 +3,7 @@ from slugify import slugify
 from django.urls import reverse
 
 from django.db import models, transaction
+from django.contrib.postgres.indexes import GinIndex
 
 from core.mixins import JSONFieldsMixin, SlugModelMixin
 
@@ -11,8 +12,15 @@ from app_category.models import Category
 from app_manager_tags.models import Tag
 from app_descriptions.models import ProductDescription
 
+from core.TranslationDecorator import register_for_translation
 
+
+@register_for_translation("name_product", "additional_data")
 class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
+    show_it = models.BooleanField(
+        default=True,
+        verbose_name="Показывать этот товар?",
+    )
     vendor_code = models.CharField(
         unique=True,
         max_length=30,
@@ -72,6 +80,24 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
     class Meta:
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
+        indexes = [
+            GinIndex(
+                fields=["name_product"],
+                name="trgm_idx_name_product",
+                opclasses=["gin_trgm_ops"],
+            ),
+            GinIndex(
+                fields=["vendor_code"],
+                name="trgm_idx_vendor_code",
+                opclasses=["gin_trgm_ops"],
+            ),
+            GinIndex(
+                fields=["additional_data"],
+            ),
+            models.Index(fields=["category"]),
+            models.Index(fields=["brand"]),
+            models.Index(fields=["slug"]),
+        ]
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name_product)
@@ -116,6 +142,18 @@ class ProductImage(models.Model):
         return self.product.name_product
 
 
+class ProductSetProduct(models.Model):
+    populatesproducts = models.ForeignKey("PopulatesProducts", on_delete=models.CASCADE)
+    products = models.ForeignKey("Products", on_delete=models.CASCADE)
+    sort_value = models.IntegerField()
+
+    # Добавляем атрибут `_sort_field_name`
+    _sort_field_name = "sort_value"
+
+    class Meta:
+        ordering = ["sort_value"]
+
+
 class PopulatesProducts(models.Model):
     name_set = models.CharField(
         max_length=150,
@@ -127,6 +165,7 @@ class PopulatesProducts(models.Model):
     )
     products = models.ManyToManyField(
         Products,
+        through=ProductSetProduct,
         blank=True,
         verbose_name="Список популярных продуктов",
     )

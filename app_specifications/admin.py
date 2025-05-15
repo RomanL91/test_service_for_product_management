@@ -30,6 +30,7 @@ class SpecificationAdmin(SortableAdminBase, admin.ModelAdmin):
     form = JsonDocumentForm
     list_display = [
         "name_specification",
+        "value_specification",
     ]
     search_fields = [
         "name_specification",

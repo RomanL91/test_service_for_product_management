@@ -6,7 +6,10 @@ from app_brands.models import Brands
 from app_category.models import Category
 from app_products.models import Products
 
+from core.TranslationDecorator import register_for_translation
 
+
+@register_for_translation("name", "additional_data")
 class BaseDiscount(JSONFieldsMixin, models.Model):
     # Основные атрибуты скидки
     name = models.CharField(
