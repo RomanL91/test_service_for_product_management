@@ -47,11 +47,11 @@ class SmartGlobalSearchView(APIView):
 
         # === Продукты ===
         product_vector = (
-            SearchVector("name_product", weight="A")
-            + SearchVector("additional_data", weight="B")
-            + SearchVector("vendor_code", weight="C")
+            SearchVector("name_product", weight="A", config="russian")
+            + SearchVector("additional_data", weight="B", config="russian")
+            + SearchVector("vendor_code", weight="C", config="russian")
         )
-        product_query = SearchQuery(query)
+        product_query = SearchQuery(query, config="russian")
 
         qs = ProductsQueryFactory.get_base_query()
         qs = ProductsQueryFactory.enrich(qs)
