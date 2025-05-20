@@ -68,7 +68,7 @@ class SmartGlobalSearchView(APIView):
             .filter(Q(search_vector=product_query) | Q(similarity_name__gt=0.2))
             .annotate(score=F("rank") + F("similarity_name"))
             .order_by("-score")
-            .distinct()[:8]
+            .distinct()
         )
 
         paginator = ProductSearchPagination()
