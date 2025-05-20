@@ -17,6 +17,13 @@ from app_manager_tags.models import Tag
 from app_products.serializers_v2 import ProductSerializer
 from app_products.ProductsQueryFactory import ProductsQueryFactory
 
+from rest_framework.pagination import LimitOffsetPagination
+
+
+class ProductSearchPagination(LimitOffsetPagination):
+    default_limit = 20
+    max_limit = 100
+
 
 class SmartGlobalSearchView(APIView):
     """
@@ -64,8 +71,11 @@ class SmartGlobalSearchView(APIView):
             .distinct()[:8]
         )
 
+        paginator = ProductSearchPagination()
+        paginated_qs = paginator.paginate_queryset(products, request, view=self)
+
         serialized_products = ProductSerializer(
-            products, many=True, context={"request": request}
+            paginated_qs, many=True, context={"request": request}
         ).data
 
         # === Категории ===
