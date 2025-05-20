@@ -65,7 +65,7 @@ class SmartGlobalSearchView(APIView):
                 rank=SearchRank(F("search_vector"), product_query),
                 similarity_name=TrigramSimilarity("name_product", casted_query),
             )
-            .filter(Q(search_vector=product_query) | Q(similarity_name__gt=0.2))
+            .filter(Q(search_vector=product_query) | Q(similarity_name__gt=0.1))
             .annotate(score=F("rank") + F("similarity_name"))
             .order_by("-score")
             .distinct()
