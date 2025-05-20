@@ -1,6 +1,5 @@
 from django.db.models.functions import Cast
 from django.db.models import Q, F, Value, TextField
-from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.postgres.search import (
     SearchVector,
     SearchQuery,
@@ -45,62 +44,22 @@ class SmartGlobalSearchView(APIView):
             )
 
         casted_query = Cast(Value(query), output_field=TextField())
-
-        # === Продукты ===
-        product_vector = (
-            SearchVector("name_product", weight="A", config="russian")
-            + SearchVector("additional_data", weight="B", config="russian")
-            + SearchVector("vendor_code", weight="C", config="russian")
-        )
         product_query = SearchQuery(query, config="russian")
 
+        # === Продукты ===
         qs = ProductsQueryFactory.get_base_query()
         qs = ProductsQueryFactory.enrich(qs)
 
         if city_name:
             qs = qs.filter(stocks__warehouse__city__name_city=city_name)
 
-        qs = qs.annotate(
-            all_spec_name=StringAgg(
-                "specifications__name_specification__name_specification",
-                delimiter=" ",
-                distinct=True,
-            ),
-            all_spec_values=StringAgg(
-                "specifications__value_specification__value_specification",
-                delimiter=" ",
-                distinct=True,
-            ),
-        ).annotate(
-            rank=SearchRank(product_vector, product_query),
-            similarity_name=TrigramSimilarity("name_product", casted_query),
-            similarity_spec_name=TrigramSimilarity(
-                "all_spec_name",
-                casted_query,
-                # "specifications__name_specification__name_specification", casted_query
-            ),
-            similarity_spec_value=TrigramSimilarity(
-                "all_spec_values",
-                casted_query,
-                # "specifications__value_specification__value_specification", casted_query
-            ),
-            search=product_vector,
-        )
-
-        # Фильтрация по основному вектору + характеристикам
         products = (
-            qs.filter(
-                Q(search=product_query)
-                | Q(similarity_name__gt=0.2)
-                | Q(similarity_spec_name__gt=0.2)
-                | Q(similarity_spec_value__gt=0.2)
+            qs.annotate(
+                rank=SearchRank(F("search_vector"), product_query),
+                similarity_name=TrigramSimilarity("name_product", casted_query),
             )
-            .annotate(
-                score=F("rank")
-                + F("similarity_name")
-                + F("similarity_spec_name")
-                + F("similarity_spec_value")
-            )
+            .filter(Q(search_vector=product_query) | Q(similarity_name__gt=0.2))
+            .annotate(score=F("rank") + F("similarity_name"))
             .order_by("-score")
             .distinct()[:8]
         )
