@@ -124,7 +124,7 @@ class SmartGlobalSearchView(APIView):
             .filter(Q(search=category_query) | Q(similarity__gt=0.2))
             .annotate(score=F("rank") + F("similarity"))
             .order_by("-score")
-            .values("id", "name_category", "slug")[:5]
+            .values("id", "name_category", "slug", "additional_data")[:5]
         )
 
         # === Бренды ===
@@ -142,7 +142,7 @@ class SmartGlobalSearchView(APIView):
             .filter(Q(search=brand_query) | Q(similarity__gt=0.2))
             .annotate(score=F("rank") + F("similarity"))
             .order_by("-score")
-            .values("id", "name_brand")[:5]
+            .values("id", "name_brand", "additional_data")[:5]
         )
 
         # === Теги ===
@@ -150,7 +150,7 @@ class SmartGlobalSearchView(APIView):
             Tag.objects.annotate(similarity=TrigramSimilarity("tag_text", casted_query))
             .filter(similarity__gt=0.2)
             .order_by("-similarity")
-            .values("id", "tag_text")[:5]
+            .values("id", "tag_text", "additional_data")[:5]
         )
 
         return Response(
