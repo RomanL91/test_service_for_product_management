@@ -1,5 +1,6 @@
 from django.db.models.functions import Cast
 from django.db.models import Q, F, Value, TextField
+from django.contrib.postgres.aggregates import StringAgg
 from django.contrib.postgres.search import (
     SearchVector,
     SearchQuery,
@@ -60,13 +61,28 @@ class SmartGlobalSearchView(APIView):
             qs = qs.filter(stocks__warehouse__city__name_city=city_name)
 
         qs = qs.annotate(
+            all_spec_name=StringAgg(
+                "specifications__name_specification__name_specification",
+                delimiter=" ",
+                distinct=True,
+            ),
+            all_spec_values=StringAgg(
+                "specifications__value_specification__value_specification",
+                delimiter=" ",
+                distinct=True,
+            ),
+        ).annotate(
             rank=SearchRank(product_vector, product_query),
             similarity_name=TrigramSimilarity("name_product", casted_query),
             similarity_spec_name=TrigramSimilarity(
-                "specifications__name_specification__name_specification", casted_query
+                "all_spec_name",
+                casted_query,
+                # "specifications__name_specification__name_specification", casted_query
             ),
             similarity_spec_value=TrigramSimilarity(
-                "specifications__value_specification__value_specification", casted_query
+                "all_spec_values",
+                casted_query,
+                # "specifications__value_specification__value_specification", casted_query
             ),
             search=product_vector,
         )
@@ -85,7 +101,8 @@ class SmartGlobalSearchView(APIView):
                 + F("similarity_spec_name")
                 + F("similarity_spec_value")
             )
-            .order_by("-score")[:8]
+            .order_by("-score")
+            .distinct()[:8]
         )
 
         serialized_products = ProductSerializer(
