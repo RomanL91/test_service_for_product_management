@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from django.db import models, transaction
 from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 
 from core.mixins import JSONFieldsMixin, SlugModelMixin
 
@@ -76,6 +77,7 @@ class Products(JSONFieldsMixin, SlugModelMixin, models.Model):
         blank=True,
         verbose_name="Услуги к продукту",
     )
+    search_vector = SearchVectorField(null=True, editable=False)
 
     class Meta:
         verbose_name = "Продукт"
