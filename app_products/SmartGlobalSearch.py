@@ -122,7 +122,7 @@ class SmartGlobalSearchView(APIView):
             .values("id", "tag_text", "additional_data")[:5]
         )
 
-        return Response(
+        return paginator.get_paginated_response(
             {
                 "products": serialized_products,
                 "categories": list(categories),
